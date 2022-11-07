@@ -11,5 +11,8 @@
     "url": "git@gitlab.lrz.de:mirellabaerligea/vvm-logical.git"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "typescript": "^4.8.4"
+  }
 }
