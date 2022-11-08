@@ -6,7 +6,7 @@ import {GarbageCollector} from "./GarbageCollector";
  * Encapsulates the entire state of the virtual machine.
  */
 export class State {
-    heap: Heap = new Heap();
+    heap: Heap = Heap.empty();
     stack: Stack = new Stack();
     garbageCollector: GarbageCollector = new GarbageCollector();
 

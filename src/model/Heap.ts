@@ -1,26 +1,51 @@
+import {Cell} from "./Cell";
+import Immutable from "immutable";
+
+type Address = number;
+
+/**
+ * Immutable data structure that represents a logical virtual machine's heap.
+ *
+ * Invariants:
+ * - Cells that point to another cell always point to cells with a smaller or equal address as itself.
+ */
 export class Heap {
 
-
-    data: Map<number, Value>;
-
-    constructor() {
-        this.data = new Map<number, Value>();
+    private constructor(
+        private readonly data: Immutable.Map<Address, Cell>,
+        private readonly nextAllocAddress: Address,
+    ) {
     }
 
-    set(address: number, value: Value ) {
-        this.data.set(address, value);
+    static empty(): Heap {
+        return new Heap(Immutable.Map(), 100);
     }
 
-    // alloc(count: number): number {
-    //     let address = this.nextAllocAddress;
-    //
-    //     this.data.set(address, []);
-    //     this.nextAllocAddress += count;
-    //
-    //     return address;
-    // }
+    get(address: Address): Cell {
+        return this.data.get(address)!;
+    }
 
+    set(address: Address, value: Cell): Heap {
+        return new Heap(this.data.set(address, value), this.nextAllocAddress);
+    }
 
+    /**
+     * Allocates the given cells contiguously on the heap.
+     *
+     * @return Tuple of updated Heap and address of first cell.
+     */
+    alloc(cells: Cell[]): [Heap, Address] {
+        const addr = this.nextAllocAddress;
+
+        // Populate heap starting at address
+        let newData = this.data;
+        for (let i = 0; i < cells.length; ++i) {
+            newData = newData.set(addr + i, cells[i]);
+        }
+
+        return [
+            new Heap(newData, this.nextAllocAddress + cells.length),
+            addr
+        ];
+    }
 }
-
-type Value = string | number

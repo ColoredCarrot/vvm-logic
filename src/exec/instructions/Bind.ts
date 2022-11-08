@@ -10,11 +10,11 @@ export class Bind extends Instruction {
     step(state: State): State {
 
         //newState : State
-        state.heap.data.set(state.heap.data.get(state.stackPointer-1)+1, state.heap.data.get(state.stackPointer));
+        //state.heap.data.set(state.heap.data.get(state.stackPointer-1)+1, state.heap.data.get(state.stackPointer));
         state.stack.pop();
         state.stack.pop();
 
-        state.garbageCollector.run(state);
+        state = state.garbageCollector.run(state);
 
         return state;
     }

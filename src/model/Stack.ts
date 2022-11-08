@@ -1,24 +1,26 @@
+import {Cell} from "./Cell";
+
 export class Stack {
 
-    values: number[] = [];
+    private values: Cell[] = [];
 
-    push = (value: number) => {
+    push(value: Cell): void {
         this.values.push(value);
-    };
-
-    pop() {
-        this.values.pop();
     }
 
-    get(index: number) {
-        if (index < 0 || index >= this.values.length){
-            return this.values[index];
-        }
-        // sonst: ERROR!
+    pop(): Cell {
+        return this.values.pop()!;
     }
 
-    set(index: number, value: number) {
+    get(index: number): Cell {
+        return this.values[index]!;
+    }
+
+    set(index: number, value: Cell): void {
         this.values[index] = value;
     }
 
+    get size(): number {
+        return this.values.length;
+    }
 }
