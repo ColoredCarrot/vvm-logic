@@ -19,7 +19,7 @@ export function LeftColumn({state, setState}: LeftColumnProps) {
 
     const actionBtn = endOfProgram
         ? <a className="btn" onClick={() => {
-            setState({output: "", programCounter: -1});
+            setState(new State());
         }
         }>Restart</a>
         : <a className="btn" onClick={() => {
