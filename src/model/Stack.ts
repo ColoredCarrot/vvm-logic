@@ -11,7 +11,10 @@ export class Stack {
     }
 
     get(index: number) {
-        return this.values[index];
+        if (index < 0 || index >= this.values.length){
+            return this.values[index];
+        }
+        // sonst: ERROR!
     }
 
     set(index: number, value: number) {

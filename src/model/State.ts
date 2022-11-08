@@ -10,9 +10,9 @@ export class State {
     stack: Stack = new Stack();
     garbageCollector: GarbageCollector = new GarbageCollector();
 
-    stackPointer: number = 0
     framePointer: number = 0
     backtrackPointer: number = 0
     trailPointer: number = 0
     programCounter: number = 0
+    // stackPointer = stack.length
 }
