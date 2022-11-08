@@ -1,5 +1,3 @@
-export interface Cell {
-
-    value: number | string
+export abstract class Cell {
 
 }
