@@ -3,4 +3,5 @@
  */
 export interface State {
     output: string;
+    programCounter: number;
 }
