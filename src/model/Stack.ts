@@ -21,4 +21,7 @@ export class Stack {
         this.values[index] = value;
     }
 
+    getSP() {
+        return this.values.length - 1;
+    }
 }
