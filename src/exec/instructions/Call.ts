@@ -9,7 +9,7 @@ export class Call extends Instruction {
 
     constructor( dest: number ) {
         super("CALL "+ dest.toString());
-        this.dest = dest
+        this.dest = dest;
     }
 
     step(state: State): State {
