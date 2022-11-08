@@ -12,15 +12,12 @@ export class Putatom extends Instruction {
 
     step(state: State): State {
 
-        // lege Typ A, mit Wert atom auf den Heap an neu allokierte Adresse
-        // increase the HeapPointer um 2
-        //  HP(HP()+2); // increase HP
+        // lege Typ Atom mit Wert atom an neu allokierte Adresse im Heap
+        // increase the HeapPointer um 1
 
-        //state.stack.push(Adresse von Heap, ist Pointer zu Heap)
+        //state.stack.push(Adresse von Heap, wo atom liegt (ist Pointer zu Heap) )
 
         return state;
     }
-
-
 
 }
