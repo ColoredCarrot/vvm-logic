@@ -5,7 +5,7 @@ import {Visualization} from "./Visualization";
 import {State} from "../model/State";
 
 function App() {
-    const [state, setState] = useState<State>({output: ""});
+    const [state, setState] = useState<State>({output: "", programCounter: -1});
 
     return (
         <div className="container">
