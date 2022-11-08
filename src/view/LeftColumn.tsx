@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import {State} from "../model/State";
 import {step} from "../exec/step";
 
@@ -8,10 +8,17 @@ interface LeftColumnProps {
 }
 
 export function LeftColumn({state, setState}: LeftColumnProps) {
+    const [programCode, setProgramCode] = useState("");
+
     return <>
         <div className="row">
             <div className="input-field col s12">
-                <textarea id="program-text" className="materialize-textarea" rows={80}></textarea>
+                <textarea
+                    id="program-text"
+                    className="materialize-textarea"
+                    value={programCode}
+                    //onChange={setProgramCode}
+                    rows={80} />
                 <label htmlFor="program-text">Program Text</label>
             </div>
         </div>
