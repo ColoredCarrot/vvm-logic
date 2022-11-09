@@ -1,6 +1,7 @@
 import {Cell} from "./Cell";
 import Immutable from "immutable";
 
+
 type Address = number;
 
 /**
