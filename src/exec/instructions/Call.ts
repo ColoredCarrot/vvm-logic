@@ -5,23 +5,21 @@ export class Call extends Instruction {
 
     private size: number;
     private dest: number;
-
-    constructor(dest: number) {
-        //FIXME
-        super("CALL " + dest.toString());
-        this.dest = dest;
-        this.size = 1;
+    
+    constructor( dest: number ) {
+        super("CALL "+ dest.toString());
+        this.dest = dest
     }
 
     step(state: State): State {
 
-        //state.heap = state.heap.set(state.heap.get(state.stack.size - 2) + 1, state.heap.get(state.stack.size - 1))
-
+        state.heap.data.set(state.heap.data.get(state.stackPointer-1)+1,state.heap.data.get(state.stackPointer));
         state.stack.pop();
         state.stack.pop();
 
-        state = state.garbageCollector.run(state);
+        state.garbageCollector.run(state);
 
         return state;
     }
 }
+
