@@ -9,5 +9,4 @@ export class Struct extends Cell {
         this.size = size;
         this.label = label;
     }
-
 }
