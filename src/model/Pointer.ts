@@ -1,7 +1,6 @@
 import {Cell} from "./Cell";
-import {StackCell} from "./StackCell";
 
-export class Pointer extends Cell implements StackCell {
+export class Pointer extends Cell {
     value : number;
 
     //value can be
@@ -10,4 +9,3 @@ export class Pointer extends Cell implements StackCell {
         this.value = value;
     }
 }
-
