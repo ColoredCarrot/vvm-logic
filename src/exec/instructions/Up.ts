@@ -14,7 +14,7 @@ export class Up extends Instruction {
     step(state: State): State {
 
         state.stack.pop();
-        state.programCounter = this.numberB;
+        state.getProgramCounter() = this.numberB;
 
         return state.garbageCollector.run(state);
 
