@@ -1,19 +1,17 @@
 import {Instruction} from "./Instruction";
 import {State} from "../../model/State";
 
-export class Bind extends Instruction {
+export class Popenv extends Instruction {
+
+    //backtrackpointer?!
 
     constructor() {
-        super("BIND");
+        super("POPENV");
     }
 
     step(state: State): State {
 
-        state.stack.pop();
-        state.stack.pop();
-
-        state = state.garbageCollector.run(state);
-
         return state;
     }
+
 }

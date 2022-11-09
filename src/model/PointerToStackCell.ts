@@ -1,10 +1,8 @@
 import {Cell} from "./Cell";
-import {StackCell} from "./StackCell";
 
-export class Pointer extends Cell implements StackCell {
+export class PointerToStackCell extends Cell{
     value : number;
 
-    //value can be
     constructor(value: number) {
         super();
         this.value = value;

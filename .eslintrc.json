@@ -9,6 +9,12 @@
     "plugin:@typescript-eslint/recommended"
   ],
   "overrides": [
+    {
+      "files": ["*.tsx"],
+      "rules": {
+        "@typescript-eslint/explicit-function-return-type": "off"
+      }
+    }
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -31,7 +37,31 @@
     "semi": [
       "error",
       "always"
-    ]
+    ],
+    "eol-last": [
+      "error",
+      "always"
+    ],
+    "no-multiple-empty-lines": [
+      "error",
+      {
+        "max": 2,
+        "maxEOF": 1
+      }
+    ],
+    "no-implicit-coercion": [
+      "error",
+      {
+        "string": false
+      }
+    ],
+    "@typescript-eslint/explicit-function-return-type": [
+      "error",
+      {
+        "allowExpressions": false
+      }
+    ],
+    "@typescript-eslint/no-non-null-assertion": "off"
   },
   "settings": {
     "react": {

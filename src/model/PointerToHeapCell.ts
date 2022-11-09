@@ -1,13 +1,11 @@
 import {Cell} from "./Cell";
 
-export class Variable extends Cell {
-    readonly tag : string;
+export class PointerToHeapCell extends Cell {
     value : number;
 
-
+    //value can be
     constructor(value: number) {
         super();
         this.value = value;
-        this.tag = "R";
     }
 }
