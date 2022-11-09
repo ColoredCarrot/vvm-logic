@@ -19,11 +19,12 @@ export class InstructionParser {
     }
 
     private static parseInstructions(input: string[], labels: Label[]): Instruction[] {
-        for (const value of input) {
+        for (let value of input) {
             //Remove leading/trailing spaces
-            value.trim();
+            value = value.trim();
             //Replace multiple spaces with single space
-            value.replace("/  +/g", " ");
+            value = value.replace("/  +/g", " ");
+            value = value.toLowerCase();
         }
 
         let instructions: Instruction[] = [];
