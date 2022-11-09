@@ -20,7 +20,7 @@ test('example with only label check for instructionparser', () => {
             ]
 
 
-        let result = InstructionParser.parseInstructions(inputLines);
+        let result = InstructionParser.parseInput(inputLines);
         let instructions = result.at(0)!;
         let labels = result.at(1)!;
 
