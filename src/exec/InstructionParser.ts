@@ -97,8 +97,19 @@ export class InstructionParser {
             if (lblSplit.length > 2) {
                 //TODO: Error?
             } else if (lblSplit.length > 1) {
+                let lblString = lblSplit.at(0)!
                 //Line has a label
-                labels.push(new Label(i, lblSplit.at(0)!));
+                let l : Label;
+                if(this.isValidSignLabel(lblString)) {
+                    l = new SignLabel(i, lblString)
+                } else if(this.isValidLabel(lblString)) {
+                    l = new Label(i, lblString)
+                } else {
+                    //TODO: Error
+                    l = new Label(-1, "ERROR")
+                }
+
+                labels.push(l);
                 inputLines[i] = lblSplit.at(1)!;
             } else {
                 //Line has no label
