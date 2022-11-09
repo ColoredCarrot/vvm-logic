@@ -1,6 +1,6 @@
 import {Cell} from "./Cell";
 
-export class Struct extends Cell {
+export class StructCell extends Cell {
     size : number;
     label : string; //TODO: the f of f/2 BAD Name for Attribute
 

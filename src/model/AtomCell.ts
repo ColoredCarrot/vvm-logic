@@ -1,8 +1,7 @@
 import {Cell} from "./Cell";
 
-export class Atom extends Cell {
+export class AtomCell extends Cell {
     value : string;
-
 
     constructor(value: string) {
         super();

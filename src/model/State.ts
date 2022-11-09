@@ -8,6 +8,7 @@ import {GarbageCollector} from "./GarbageCollector";
 export class State {
     heap: Heap = Heap.empty();
     stack: Stack = new Stack();
+    trail : Stack = new Stack();
     garbageCollector: GarbageCollector = new GarbageCollector();
 
     framePointer = 0;
