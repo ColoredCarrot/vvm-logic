@@ -4,7 +4,7 @@ export class Label {
 
     constructor(line: number, text: string) {
         this._line = line;
-        this._text = text;
+        this._text = text.toLowerCase();
     }
 
 

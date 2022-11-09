@@ -19,16 +19,14 @@ export class InstructionParser {
     }
 
     private static parseInstructions(input: string[], labels: Label[]): Instruction[] {
-        for (let value of input) {
-            //Remove leading/trailing spaces
-            value = value.trim();
-            //Replace multiple spaces with single space
-            value = value.replace("/  +/g", " ");
-            value = value.toLowerCase();
-        }
+        let instrStrings : string[] = input.map(value => {
+            return value.trim()
+                .replace("/  +/g", " ")
+                .toLowerCase();
+        })
 
         let instructions: Instruction[] = [];
-        for (const value of input) {
+        for (const value of instrStrings) {
             instructions.push(this.parseInstruction(value, labels));
         }
 
@@ -238,20 +236,23 @@ export class InstructionParser {
     //<editor-fold> Validation Methods
     //TODO: Actually Implement with regex??
     private static isValidLabel(label: string): boolean {
-        return true;
+        let regex : RegExp = new RegExp(".");
+        return regex.test(label);
     }
 
     private static isValidAtomName(label: string): boolean {
-        return true;
+        let regex : RegExp = new RegExp(".+");
+        return regex.test(label);
     }
 
     private static isValidSignLabel(label: string): boolean {
-        //Actually Implement
-        return true;
+        let regex : RegExp = new RegExp(".+/[0-9]+");
+        return regex.test(label);
     }
 
     private static isValidNumber(arg : string) : boolean {
-        return true;
+        let regex : RegExp = new RegExp("[0-9]+");
+        return regex.test(arg);
     }
 
     //</editor-fold>
