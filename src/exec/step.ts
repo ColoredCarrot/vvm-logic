@@ -5,4 +5,5 @@ import {State} from "../model/State";
  */
 export function step(state: State, instruction: string): State {
     return state;
+
 }

@@ -8,7 +8,25 @@ interface LeftColumnProps {
 }
 
 export function LeftColumn({state, setState}: LeftColumnProps) {
-    const [programCode, setProgramCode] = useState("");
+    const [programText, setProgramText] = useState("");
+
+    const programTextLines = programText.split("\n")
+        .map(line => line.trim())
+        .filter(line => line.length > 0);
+    const nextInstrIdx = state.programCounter + 1;
+
+    const endOfProgram = nextInstrIdx >= programTextLines.length;
+
+    const actionBtn = endOfProgram
+        ? <a className="btn" onClick={() => {
+            setState(new State());
+        }
+        }>Restart</a>
+        : <a className="btn" onClick={() => {
+            const instrText = programTextLines[nextInstrIdx];
+            setState(step(state, instrText));
+        }
+        }>Step</a>;
 
     return <>
         <div className="row">
@@ -16,16 +34,14 @@ export function LeftColumn({state, setState}: LeftColumnProps) {
                 <textarea
                     id="program-text"
                     className="materialize-textarea"
-                    value={programCode}
-                    //onChange={setProgramCode}
-                    rows={80} />
+                    rows={80}
+                    value={programText}
+                    onChange={(elem) => setProgramText(elem.target.value)}></textarea>
                 <label htmlFor="program-text">Program Text</label>
             </div>
         </div>
         <div className="row">
-            <a className="btn" onClick={() => setState(step(state, "IADD 1 2"))}>
-                Step
-            </a>
+            {actionBtn}
         </div>
     </>;
 }

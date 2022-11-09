@@ -9,6 +9,6 @@ export function Visualization({state}: VisualizationProps) {
     return <div>
         <h3>Visualization</h3>
 
-        <p>Output: {state.output}</p>
+        <p>State: {JSON.stringify(state)}</p>
     </div>;
 }

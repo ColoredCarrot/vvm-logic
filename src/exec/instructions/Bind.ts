@@ -16,6 +16,7 @@ export class Bind extends Instruction {
 
         state.garbageCollector.run(state);
 
+
         return state;
     }
 }

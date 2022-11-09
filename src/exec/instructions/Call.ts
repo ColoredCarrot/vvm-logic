@@ -5,8 +5,7 @@ export class Call extends Instruction {
 
     private size: number;
     private dest: number;
-
-
+    
     constructor( dest: number ) {
         super("CALL "+ dest.toString());
         this.dest = dest
@@ -23,3 +22,4 @@ export class Call extends Instruction {
         return state;
     }
 }
+

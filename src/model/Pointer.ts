@@ -10,3 +10,4 @@ export class Pointer extends Cell implements StackCell {
         this.value = value;
     }
 }
+

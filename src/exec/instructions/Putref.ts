@@ -17,5 +17,4 @@ export class Putref extends Instruction {
 
         return state;
     }
-
 }
