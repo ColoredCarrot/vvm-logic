@@ -3,19 +3,21 @@ import {State} from "../../model/State";
 import {Stack} from "../../model/Stack";
 import {dia} from "jointjs";
 import Cell = dia.Cell;
-import {UninitializedCell} from "../../model/UninitializedCell";
-import {Pointer} from "../../model/Pointer";
+import {PointerToHeapCell} from "../../model/PointerToHeapCell";
 
 export class Mark extends Instruction {
 
     //Kellerahmen anlegen
 
     private adressB: number;
-    private cell: UninitializedCell = new UninitializedCell();
+    private cell : number; //TODO: FIX UninitializedCell = new UninitializedCell();
 
     constructor(adress: number) {
         super("MARK");
         this.adressB = adress;
+
+        //TODO: Fix
+        this.cell = 0
     }
 
     // S[SP + 5] ← FP; S[SP + 6] ← B; SP ← SP + 6;
@@ -26,8 +28,8 @@ export class Mark extends Instruction {
        }
 
        //todo backtrackpointer?? 
-       let framePointerCell : Pointer = new Pointer(state.framePointer);
-       let adressBPointerCell : Pointer = new Pointer(this.adressB);
+       let framePointerCell : PointerToHeapCell = new PointerToHeapCell(state.framePointer);
+       let adressBPointerCell : PointerToHeapCell = new PointerToHeapCell(this.adressB);
        state.stack.push(framePointerCell);  //push cell Frame Pointer
        state.stack.push(adressBPointerCell); // push cell mit value address
 

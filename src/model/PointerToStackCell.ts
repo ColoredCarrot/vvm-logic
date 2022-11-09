@@ -1,13 +1,10 @@
 import {Cell} from "./Cell";
 
-export class Variable extends Cell {
-    readonly tag : string;
+export class PointerToStackCell extends Cell{
     value : number;
-
 
     constructor(value: number) {
         super();
         this.value = value;
-        this.tag = "R";
     }
 }

@@ -1,6 +1,6 @@
 import {Cell} from "./Cell";
 
-export class Pointer extends Cell {
+export class PointerToHeapCell extends Cell {
     value : number;
 
     //value can be
