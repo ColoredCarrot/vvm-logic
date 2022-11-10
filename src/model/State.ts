@@ -11,10 +11,11 @@ export class State {
     trail : Stack = new Stack();
     garbageCollector: GarbageCollector = new GarbageCollector();
 
-    framePointer = 0;
-    backtrackPointer = 0;
-    trailPointer = 0;
+    framePointer = -1;
+    backtrackPointer = -1;
+    trailPointer = -1;
     programCounter = 0;
+    heapPointer = 0;
     // stackPointer = stack.length
 
     getFramePointer(): number {
