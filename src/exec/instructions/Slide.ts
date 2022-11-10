@@ -28,8 +28,6 @@ export class Slide extends Instruction {
                     s = s.push(cell);
                 }
                 return s;
-
-
             });
     }
 }
