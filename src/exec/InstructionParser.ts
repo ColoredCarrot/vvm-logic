@@ -23,6 +23,7 @@ import {Fail} from "./instructions/Fail";
 import {Lastmark} from "./instructions/Lastmark";
 import {Ustruct} from "./instructions/Ustruct";
 import {Uref} from "./instructions/Uref";
+import {Unify} from "./instructions/Unify";
 
 export class ParseError extends Error {
 }
@@ -274,7 +275,7 @@ export class InstructionParser {
         case "setcut":
             return new InvalidInstruction(input); //TODO: Replace once implemented
         case "unify":
-            return new InvalidInstruction(input); //TODO: Replace once implemented
+            return new Unify();
         default:
             return new InvalidInstruction(input);
         }
