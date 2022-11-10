@@ -17,11 +17,12 @@ export class Pushenv extends Instruction {
 
     step(state: State): State {
 
-        let n: number = state.stack.getStackPointer()- state.getFramePointer();
-        let allocVar: number = n - this.mVar;
+        const number = state.stack.getStackPointer() - state.getFramePointer();
+        const allocVar = number - this.mVar;
 
-        for (let i = 0; i < allocVar - 1 ; i++) {
+        for (let i = 0; i < allocVar - 1; i++) {
             state.stack.push(this.cell);
+
         }
 
         return state;

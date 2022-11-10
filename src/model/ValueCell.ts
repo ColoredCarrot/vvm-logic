@@ -8,8 +8,9 @@ export class ValueCell extends Cell {
         this.value = value;
     }
 
-    getValue(): number{
-      return this.value;
+    getValue(): number {
+        return this.value;
     }
+
 }
 
