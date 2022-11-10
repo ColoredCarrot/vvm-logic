@@ -14,18 +14,22 @@ export class Slide extends Instruction {
 
     step(state: State): State {
         const refs: Cell[] = [];
+
+        //Copy Refs off the stack
         for (let i = 0; i < this.h; i++) {
-            refs.push(state.stack.pop());
+            //refs = [1, 2, 3, 4]
+            refs.push(state.stack.get(state.stack.stackPointer - this.h + i));
         }
 
-        for (let i = 0; i < this.m; i++) {
-            state.stack.pop();
-        }
+        //Remove h+m from stack and push refs again
+        return state.modifyStack(s => s.pop(this.m + this.h))
+            .modifyStack(s => {
+                for (const cell in refs) {
+                    s = s.push(cell);
+                }
+                return s;
 
-        for (let i = 0; i < this.h; i++) {
-            state.stack.push(refs.pop()!);
-        }
 
-        return state;
+            });
     }
 }
