@@ -15,7 +15,7 @@ export class State {
     backtrackPointer = -1;
     trailPointer = -1;
     programCounter = 0;
-    heapPointer = 0;
+    // heapPointer = heap.newAllocAddress
     // stackPointer = stack.length
 
     getFramePointer(): number {
@@ -40,14 +40,6 @@ export class State {
 
     setTrailPointer(trailPointer: number): void{
         this.trailPointer = trailPointer;
-    }
-
-    getHeapPointer(): number{
-        return this.heapPointer;
-    }
-
-    setHeapPointer(heapPointer: number): void{
-        this.heapPointer = heapPointer;
     }
 
     getProgramCounter(): number{
