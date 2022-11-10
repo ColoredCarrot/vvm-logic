@@ -1,11 +1,11 @@
 import {Label} from "./Label";
 
-export class SignLabel extends Label{
-    private _size : number;
+export class SignLabel extends Label {
+    private _size: number;
 
     constructor(line: number, text: string) {
         super(line, text);
-        this._size = +text.split("/").at(1)!
+        this._size = Number(text.split("/").at(1)!);
     }
 
 

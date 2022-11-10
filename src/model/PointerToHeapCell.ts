@@ -1,7 +1,7 @@
 import {Cell} from "./Cell";
 
 export class PointerToHeapCell extends Cell {
-    value : number;
+    value: number;
 
     //value can be
     constructor(value: number) {

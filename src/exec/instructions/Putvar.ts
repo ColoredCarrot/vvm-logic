@@ -3,10 +3,10 @@ import {State} from "../../model/State";
 
 export class Putvar extends Instruction {
 
-    variable : number;
+    variable: number;
 
     constructor(variable: number) {
-        super("PUTVAR "+variable.toString());
+        super("PUTVAR " + variable.toString());
         this.variable = variable;
     }
 
