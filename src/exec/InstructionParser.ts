@@ -20,6 +20,7 @@ import {Slide} from "./instructions/Slide";
 import {Uvar} from "./instructions/Uvar";
 import {Check} from "./instructions/Check";
 import {Fail} from "./instructions/Fail";
+import {Lastmark} from "./instructions/Lastmark";
 
 export class ParseError extends Error {
 }
@@ -257,7 +258,7 @@ export class InstructionParser {
         case "getnode":
             return new InvalidInstruction(input); //TODO: Replace once implemented
         case "lastmark":
-            return new InvalidInstruction(input); //TODO: Replace once implemented
+            return new Lastmark();
         case "pop":
             return new Pop();
         case "popenv":
