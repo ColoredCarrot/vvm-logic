@@ -18,7 +18,7 @@ export class Heap {
     ) {
     }
 
-    get heapPointer(): Address {
+    getHeapPointer(): Address {
         return this._heapPointer;
     }
 
