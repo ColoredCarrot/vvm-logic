@@ -2,6 +2,7 @@ import {Heap} from "./Heap";
 import {Stack} from "./Stack";
 import {GarbageCollector} from "./GarbageCollector";
 import {Trail} from "./Trail";
+import {Cell} from "./Cell";
 
 interface StateVars {
     readonly heap: Heap;
@@ -40,6 +41,10 @@ export class State implements StateVars {
         return new State({...this.vars, heap: heap});
     }
 
+    modifyHeap(f: (_: Heap)=> Heap): State {
+        return this.setHeap(f(this.heap));
+    }
+
     get stack(): Stack {
         return this.vars.stack;
     }
@@ -48,12 +53,43 @@ export class State implements StateVars {
         return new State({...this.vars, stack: stack});
     }
 
+    setStackAt(index: number, value: Cell): State {
+        return this.setStack(this.stack.set(index, value));
+    }
+
+    pushStack(cell: Cell): State {
+        const newStack: Stack = this.stack.push(cell);
+        return this.setStack(newStack);
+    }
+
+    /**
+     * Enables this class to be used in a fluent interface (see example below).
+     *
+     * @example
+     * // Correct usage
+     * return state
+     *     .modifyStack(s => s.push(x))
+     *     .modifyStack(s => s.push(y))
+     *
+     * // Incorrect usage
+     * return state
+     *     .setStack(state.stack.push(x))
+     *     .setStack(state.stack.push(y))
+     */
+    modifyStack(f: (_: Stack)=> Stack): State {
+        return this.setStack(f(this.stack));
+    }
+
     get trail(): Trail {
         return this.vars.trail;
     }
 
     setTrail(trail: Trail): State {
         return new State({...this.vars, trail: trail});
+    }
+
+    modifyTrail(f: (_: Trail)=> Trail): State {
+        return this.setTrail(f(this.trail));
     }
 
     get garbageCollector(): GarbageCollector {
@@ -82,5 +118,9 @@ export class State implements StateVars {
 
     setProgramCounter(pc: number): State {
         return new State({...this.vars, programCounter: pc});
+    }
+
+    modify(f: (_: State)=> State): State {
+        return f(this);
     }
 }
