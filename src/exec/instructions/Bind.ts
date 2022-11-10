@@ -10,16 +10,11 @@ export class Bind extends Instruction {
 
     step(state: State): State {
 
-        let secondCell : PointerToHeapCell = state.stack.get(state.stack.size - 1) as PointerToHeapCell
+        const secondCell = state.stack.get(state.stack.stackPointer) as PointerToHeapCell;
 
-        state.heap.set(secondCell.value, state.stack.get(state.stack.size))
-        state = Instruction.trail(state, secondCell.value)
-
-        state.stack.pop();
-        state.stack.pop();
-
-        return state;
+        return state
+            .setHeap(state.heap.set(secondCell.value, state.stack.get(state.stack.stackPointer)))
+            .modify(s => Instruction.trail(s, secondCell.value))
+            .modifyStack(stack => stack.pop(2));
     }
-
-
 }
