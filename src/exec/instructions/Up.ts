@@ -1,20 +1,21 @@
 import {Instruction} from "./Instruction";
 import {State} from "../../model/State";
+import {Label} from "../Label";
 
 export class Up extends Instruction {
 
     //Unifikationsstruktur
-    private numberB;
+    private label: Label;
 
-    constructor(numberB: number) {
+    constructor(label: Label) {
         super("POP");
-        this.numberB = numberB;
+        this.label = label;
     }
 
     step(state: State): State {
 
         state.stack.pop();
-        state.setProgramCounter(this.numberB);
+        state.setProgramCounter(this.label.line);
 
         return state.garbageCollector.run(state);
 

@@ -1,37 +1,32 @@
 import {Instruction} from "./Instruction";
 import {State} from "../../model/State";
 import {PointerToStackCell} from "../../model/PointerToStackCell";
-import {UninitializedCell} from "../../model/UninitializedCell";
-import {Cell} from "../../model/Cell";
-import {ValueCell} from "../../model/ValueCell";
 import {Label} from "../Label";
+import {UninitializedCell} from "../../model/UninitializedCell";
+import {ValueCell} from "../../model/ValueCell";
 
 export class Mark extends Instruction {
 
-    //Kellerahmen anlegen
-
-    private param: Label;
-    private cell: Cell = new UninitializedCell();
+    private readonly param: Label;
 
     constructor(param: Label) {
         super("MARK");
         this.param = param;
-        this.cell = 0;
     }
 
     // S[SP + 5] ← FP; S[SP + 6] ← B; SP ← SP + 6;
 
     step(state: State): State {
+        //4 uninitialized cell
+        let stack = state.stack;
         for (let i = 0; i < 4; i++) {
-            state.stack.push(this.cell); // 4 uninitialized cells
+            stack = stack.push(new UninitializedCell());
         }
 
-        const framePointerCell = new PointerToStackCell(state.getFramePointer());
-        const paramCell = new ValueCell(this.param.line);
-        state.stack.push(framePointerCell);  //push cell Frame Pointer
-        state.stack.push(paramCell);  // push cell mit value address
+        stack = stack
+            .push(new ValueCell(state.framePointer))
+            .push(new PointerToStackCell(this.param.line));
 
-        return state;
+        return state.setStack(stack);
     }
-
 }

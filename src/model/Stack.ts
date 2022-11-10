@@ -1,30 +1,50 @@
 import {Cell} from "./Cell";
+import Immutable from "immutable";
+import {IllegalOperationError} from "../exec/ExecutionError";
 
 export class Stack {
 
-    private values: Cell[] = [];
-
-    push(value: Cell): void {
-        this.values.push(value);
+    private constructor(
+        private readonly values: Immutable.List<Cell>,
+    ) {
     }
 
-    pop(): Cell {
-        return this.values.pop()!;
+    static empty(): Stack {
+        return new Stack(Immutable.List());
+    }
+
+    push(value: Cell): Stack {
+        return new Stack(this.values.push(value));
+    }
+
+    pop(n = 1): Stack {
+        if (n < 0) {
+            throw new IllegalOperationError("Attempting to pop negative amount from stack");
+        }
+        if (this.values.size < n) {
+            throw new IllegalOperationError("Attempting to pop insufficiently large Stack");
+        }
+
+        return new Stack(this.values.slice(0, -n));
     }
 
     get(index: number): Cell {
-        return this.values[index]!;
+        return this.values.get(index)!;
     }
 
-    set(index: number, value: Cell): void {
-        this.values[index] = value;
+    set(index: number, value: Cell): Stack {
+        if (index < 0 || index >= this.values.size) {
+            throw new IllegalOperationError("Attempting to set Stack value at illegal index " + index + " to " + value);
+        }
+
+        return new Stack(this.values.set(index, value));
     }
 
-    size(): number {
-        return this.values.length;
+    get size(): number {
+        return this.values.size;
     }
 
-    getStackPointer(): number {
-        return this.values.length - 1;
+    get stackPointer(): number {
+        return this.size - 1;
     }
 }

@@ -6,5 +6,5 @@ import {State} from "../model/State";
 export function step(state: State, instruction: string): State {
     console.log("Step " + instruction);
 
-    return state.setProgramCounter(state.getProgramCounter() + 1);
+    return state.setProgramCounter(state.programCounter + 1);
 }

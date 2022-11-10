@@ -6,9 +6,8 @@ import {Cell} from "../../model/Cell";
 export class Pushenv extends Instruction {
 
     //reserviert Speicherplatz für lokale Variabeln
-
     private mVar: number;
-    cell: Cell = new UninitializedCell();
+    private cell: Cell = new UninitializedCell();
 
     constructor(mVar: number) {
         super("PUSHENV");
@@ -17,12 +16,12 @@ export class Pushenv extends Instruction {
 
     step(state: State): State {
 
-        const number = state.stack.getStackPointer() - state.getFramePointer();
-        const allocVar = number - this.mVar;
+        const n: number = state.stack.size - state.framePointer;
+        const allocVar: number = n - this.mVar;
 
         for (let i = 0; i < allocVar - 1; i++) {
-            state.stack.push(this.cell);
 
+            state.stack.push(this.cell);
         }
 
         return state;
