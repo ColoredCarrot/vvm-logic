@@ -5,7 +5,7 @@ import {UninitializedCell} from "../../model/UninitializedCell";
 
 export class Init extends Instruction {
 
-    private addr: number;
+    private readonly addr: number;
 
     constructor(addr: number) {
         super("INIT");
@@ -13,8 +13,8 @@ export class Init extends Instruction {
     }
 
     step(state: State): State {
-        state.setFramePointer(5);
-        state.setBacktrackPointer(5);
+        state = state.setFramePointer(5);
+        state = state.setBacktrackPointer(5);
 
         state.stack.push(new ValueCell(this.addr));
         state.stack.push(new ValueCell(-1));

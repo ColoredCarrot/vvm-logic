@@ -9,8 +9,7 @@ export class Setcut extends Instruction {
 
     step(state: State): State {
 
-        state.stack.set(state.getFramePointer() - 4, state.getBacktrackPointer());
-
+        state = state.setBacktrackPointer(state.framePointer - 4);
         return state;
     }
 
