@@ -1,4 +1,6 @@
 import {State} from "../../model/State";
+import {Cell} from "../../model/Cell";
+import {VariableCell} from "../../model/VariableCell";
 
 export abstract class Instruction {
     protected constructor(public instruction: string) {}
@@ -26,6 +28,12 @@ export abstract class Instruction {
     }
 
     public static deref(state : State, v : number) : number {
-        return 0;
+        let other : Cell = state.heap.get(v)!
+
+        if(other instanceof VariableCell && other.value != v) {
+            return this.deref(state, other.value)
+        } else {
+            return v
+        }
     }
 }
