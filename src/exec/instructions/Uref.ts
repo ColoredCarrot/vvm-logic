@@ -15,8 +15,8 @@ export class Uref extends Instruction {
         const topOfStack: number = (<PointerToHeapCell>state.stack.get(state.stack.stackPointer)).value;
         const fpi: number = (<PointerToHeapCell>state.stack.get(state.framePointer + this.i)).value;
 
-        Instruction.unify(state, topOfStack, fpi);
+        let temp: [State, boolean] = Instruction.unify(state, topOfStack, fpi);
 
-        return state.modifyStack(s => s.pop());
+        return temp[0].modifyStack(s => s.pop());
     }
 }
