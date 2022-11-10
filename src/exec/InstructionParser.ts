@@ -5,6 +5,12 @@ import {Bind} from "./instructions/Bind";
 import {InvalidInstruction} from "./instructions/InvalidInstruction";
 import {Call} from "./instructions/Call";
 import {SignLabel} from "./SignLabel";
+import {Popenv} from "./instructions/Popenv";
+import {Putatom} from "./instructions/Putatom";
+import {Putref} from "./instructions/Putref";
+import {Putvar} from "./instructions/Putvar";
+import {Up} from "./instructions/Up";
+import {Pushenv} from "./instructions/Pushenv";
 
 export class InstructionParser {
 
@@ -45,14 +51,20 @@ export class InstructionParser {
             const param: string = params.pop()!;
 
             if (this.isValidSignLabel(param)) {
-                const signLabel = labels.find(v => { return v.text === param; });
+                const signLabel = labels.find(v => {
+                    return v.text === param;
+                });
                 if (!signLabel) {
                     //ERROR
                     throw new DOMException("Label not found!");
                 }
                 return this.parseSignParamInstruction(instr, <SignLabel>signLabel);
-            }  else  if (this.isValidLabel(param) && labels.find(v => { return v.text === param; })) {
-                const l1: Label = labels.find(v => { return v.text === param; })!;
+            } else if (this.isValidLabel(param) && labels.find(v => {
+                return v.text === param;
+            })) {
+                const l1: Label = labels.find(v => {
+                    return v.text === param;
+                })!;
                 return this.parseLabelParamInstruction(instr, l1);
             } else if (this.isValidAtomName(param)) {
                 return this.parseStringParamInstructor(instr, param);
@@ -64,15 +76,21 @@ export class InstructionParser {
             const p0 = params.pop()!;
 
             if (this.isValidSignLabel(p0) && this.isValidLabel(p1)) {
-                const l0 = <SignLabel> labels.find(v => { return v.text === p0 && v instanceof SignLabel; });
-                const l1 = labels.find(v => { return v.text === p0; });
+                const l0 = <SignLabel>labels.find(v => {
+                    return v.text === p0 && v instanceof SignLabel;
+                });
+                const l1 = labels.find(v => {
+                    return v.text === p0;
+                });
                 if (!l0 || !l1) {
                     //ERROR
                     throw new DOMException("Label not found!");
                 }
                 return this.parseSignAndLabelParamInstruction(instr, l0!, l1!);
             } else if (this.isValidSignLabel(p0) && this.isValidNumber(p1)) {
-                const l0 = <SignLabel> labels.find(v => { return v.text === p0 && v instanceof SignLabel; });
+                const l0 = <SignLabel>labels.find(v => {
+                    return v.text === p0 && v instanceof SignLabel;
+                });
                 if (!l0) {
                     throw new DOMException("Label not found!");
                 }
@@ -138,7 +156,7 @@ export class InstructionParser {
         case "try":
             return new InvalidInstruction(instr + " " + param.text); //TODO: Replace with actual implementation
         case "up":
-            return new InvalidInstruction(instr + " " + param.text); //TODO: Replace with actual implementation
+            return new Up(param);
         default:
             return new InvalidInstruction(instr + " " + param.text);
         }
@@ -149,7 +167,7 @@ export class InstructionParser {
         case "halt":
             return new InvalidInstruction(instr + " " + param); //TODO: Replace with actual Implementation
         case "putatom":
-            return new InvalidInstruction(instr + " " + param); //TODO: Replace with actual Implementation
+            return new Putatom(param);
         case "uatom":
             return new InvalidInstruction(instr + " " + param); //TODO: Replace with actual Implementation
         default:
@@ -162,11 +180,11 @@ export class InstructionParser {
         case "check":
             return new InvalidInstruction(instr + param); //TODO: Replace with actual Implementation
         case "pushenv":
-            return new InvalidInstruction(instr + param); //TODO: Replace with actual Implementation
+            return new Pushenv(param);
         case "putref":
-            return new InvalidInstruction(instr + param); //TODO: Replace with actual Implementation
+            return new Putref(param);
         case "putvar":
-            return new InvalidInstruction(instr + param); //TODO: Replace with actual Implementation
+            return new Putvar(param);
         case "son":
             return new InvalidInstruction(instr + param); //TODO: Replace with actual Implementation
         case "trim":
@@ -227,7 +245,7 @@ export class InstructionParser {
         case "pop":
             return new Pop();
         case "popenv":
-            return new InvalidInstruction(input); //TODO: Replace once implemented
+            return new Popenv();
         case "prune":
             return new InvalidInstruction(input); //TODO: Replace once implemented
         case "putanon":
@@ -242,27 +260,28 @@ export class InstructionParser {
             return new InvalidInstruction(input);
         }
     }
+
     //</editor-fold>
 
     //<editor-fold> Validation Methods
     //TODO: Actually Implement with regex??
     private static isValidLabel(label: string): boolean {
-        const regex  = new RegExp(".");
+        const regex = new RegExp(".");
         return regex.test(label);
     }
 
     private static isValidAtomName(label: string): boolean {
-        const regex  = new RegExp(".+");
+        const regex = new RegExp(".+");
         return regex.test(label);
     }
 
     private static isValidSignLabel(label: string): boolean {
-        const regex  = new RegExp(".+/[0-9]+");
+        const regex = new RegExp(".+/[0-9]+");
         return regex.test(label);
     }
 
     private static isValidNumber(arg: string): boolean {
-        const regex  = new RegExp("[0-9]+");
+        const regex = new RegExp("[0-9]+");
         return regex.test(arg);
     }
 
