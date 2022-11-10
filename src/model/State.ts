@@ -48,6 +48,10 @@ export class State implements StateVars {
         return new State({...this.vars, stack: stack});
     }
 
+    modifyStack(f: (_: Stack) => Stack) {
+        return this.setStack(f(this.stack));
+    }
+
     get trail(): Trail {
         return this.vars.trail;
     }
@@ -82,5 +86,9 @@ export class State implements StateVars {
 
     setProgramCounter(pc: number): State {
         return new State({...this.vars, programCounter: pc});
+    }
+
+    modify(f: (_: State) => State): State {
+        return f(this);
     }
 }

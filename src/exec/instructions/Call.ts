@@ -23,11 +23,8 @@ export class Call extends Instruction {
 
         //state.heap = state.heap.set(state.heap.get(state.stack.size - 2) + 1, state.heap.get(state.stack.size - 1))
 
-        state.stack.pop();
-        state.stack.pop();
-
-        state = state.garbageCollector.run(state);
-
-        return state;
+        return state
+            .modifyStack(stack => stack.pop(2))
+            .modify(s => s.garbageCollector.run(s))
     }
 }
