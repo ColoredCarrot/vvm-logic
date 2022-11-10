@@ -21,6 +21,7 @@ import {Uvar} from "./instructions/Uvar";
 import {Check} from "./instructions/Check";
 import {Fail} from "./instructions/Fail";
 import {Lastmark} from "./instructions/Lastmark";
+import {Ustruct} from "./instructions/Ustruct";
 
 export class ParseError extends Error {
 }
@@ -217,7 +218,7 @@ export class InstructionParser {
     private static parseSignAndLabelParamInstruction(instr: string, sign: SignLabel, label: Label): Instruction {
         switch (instr) {
         case "ustruct":
-            return new Pop(); //TODO: Replace with actual Constructor
+            return new Ustruct(sign, label);
         default:
             return new InvalidInstruction(instr + " " + sign + " " + label);
         }
