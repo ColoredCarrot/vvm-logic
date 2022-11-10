@@ -1,17 +1,17 @@
 import {Instruction} from "./Instruction";
 import {State} from "../../model/State";
+import {Label} from "../Label";
 
 export class Init extends Instruction {
 
-    private addr: number;
+    private label: Label;
 
-    constructor(addr: number) {
-        super("INIT");
-        this.addr = addr;
+    constructor(label: Label) {
+        super("INIT " + label.text);
+        this.label = label;
     }
 
     step(state: State): State {
-
         return state;
     }
 }
