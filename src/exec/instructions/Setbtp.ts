@@ -1,7 +1,5 @@
 import {Instruction} from "./Instruction";
 import {State} from "../../model/State";
-import {UninitializedCell} from "../../model/UninitializedCell";
-import {VariableCell} from "../../model/VariableCell";
 import {ValueCell} from "../../model/ValueCell";
 
 export class Setbtp extends Instruction {
