@@ -161,16 +161,18 @@ export class InstructionParser {
 
     private static parseLabelParamInstruction(instr: string, param: Label): Instruction {
         switch (instr) {
-        case "init":
-            return new Init(param);
-        case "mark":
-            return new InvalidInstruction(instr + " " + param.text); //TODO: Replace with actual implementation
-        case "try":
-            return new InvalidInstruction(instr + " " + param.text); //TODO: Replace with actual implementation
-        case "up":
-            return new Up(param);
-        default:
-            return new InvalidInstruction(instr + " " + param.text);
+            case "init":
+                return new Init(param);
+            case "mark":
+                return new InvalidInstruction(instr + " " + param.text); //TODO: Replace with actual implementation
+            case "try":
+                return new InvalidInstruction(instr + " " + param.text); //TODO: Replace with actual implementation
+            case "up":
+                return new Up(param);
+            case "jump":
+                return new Jump(param);
+            default:
+                return new InvalidInstruction(instr + " " + param.text);
         }
     }
 
