@@ -11,9 +11,52 @@ export class State {
     trail : Stack = new Stack();
     garbageCollector: GarbageCollector = new GarbageCollector();
 
-    framePointer = 0;
-    backtrackPointer = 0;
-    trailPointer = 0;
+    framePointer = -1;
+    backtrackPointer = -1;
+    trailPointer = -1;
     programCounter = 0;
+    heapPointer = 0;
     // stackPointer = stack.length
+
+    getFramePointer(): number {
+        return this.framePointer;
+    }
+
+    setFramePointer(framePointer: number){
+        this.framePointer = framePointer;
+    }
+
+    getBacktrackPointer(): number{
+        return this.backtrackPointer;
+    }
+
+    setBacktrackPointer(backtrackPointer: number): void{
+        this.backtrackPointer = backtrackPointer;
+    }
+
+    getTrailPointer(): number{
+        return this.trailPointer;
+    }
+
+    setTrailPointer(trailPointer: number): void{
+        this.trailPointer = trailPointer;
+    }
+
+    getHeapPointer(): number{
+        return this.heapPointer;
+    }
+
+    setHeapPointer(heapPointer: number): void{
+        this.heapPointer = heapPointer;
+    }
+
+    getProgramCounter(): number{
+        return this.programCounter;
+    }
+
+    setProgramCounter(programCounter: number){
+        this.programCounter = programCounter;
+    }
+
+
 }

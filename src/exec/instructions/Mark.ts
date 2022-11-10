@@ -4,6 +4,7 @@ import {Stack} from "../../model/Stack";
 import {dia} from "jointjs";
 import Cell = dia.Cell;
 import {PointerToHeapCell} from "../../model/PointerToHeapCell";
+import {PointerToStackCell} from "../../model/PointerToStackCell";
 
 export class Mark extends Instruction {
 
@@ -28,9 +29,9 @@ export class Mark extends Instruction {
        }
 
        //todo backtrackpointer?? 
-       let framePointerCell : PointerToHeapCell = new PointerToHeapCell(state.framePointer);
-       let adressBPointerCell : PointerToHeapCell = new PointerToHeapCell(this.adressB);
-       state.stack.push(framePointerCell);  //push cell Frame Pointer
+       let framePointerCell : PointerToStackCell = new PointerToStackCell(state.getFramePointer());
+       let adressBPointerCell : PointerToStackCell = new PointerToStackCell(this.adressB);
+       state.stack.push(state.getFramePointer());  //push cell Frame Pointer
        state.stack.push(adressBPointerCell); // push cell mit value address
 
        return state;
