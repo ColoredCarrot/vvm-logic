@@ -5,6 +5,7 @@ import {StructCell} from "../../model/StructCell";
 import {PointerToHeapCell} from "../../model/PointerToHeapCell";
 import {ValueCell} from "../../model/ValueCell";
 import {PointerToStackCell} from "../../model/PointerToStackCell";
+import {AtomCell} from "../../model/AtomCell";
 
 export abstract class Instruction {
     protected constructor(public instruction: string) {}
@@ -12,6 +13,61 @@ export abstract class Instruction {
     abstract step(state: State): State;
 
     public static unify(state : State, u : number, v : number) : boolean {
+        if(u === v) {
+            return true;
+        }
+        let heapAtU: Cell = state.heap.get(u);
+        let heapAtV : Cell = state.heap.get(v);
+        if(heapAtU instanceof VariableCell) {
+          if(heapAtV instanceof VariableCell) {
+              if(u > v) {
+                  state.heap.set(u, new VariableCell(v));
+                  this.trail(state, u);
+                  return true;
+              } else {
+                  state.heap.set(v, new VariableCell(u));
+                  this.trail(state, v);
+                  return true;
+              }
+          } else if(this.check(state, u, v)) {
+              state.heap.set(v, new VariableCell(u));
+              this.trail(state, u);
+              return true;
+          } else {
+              this.backtrack(state);
+              return false;
+          }
+        }
+        if(heapAtV instanceof VariableCell) {
+            if(this.check(state, v, u)) {
+                state.heap.set(v, new VariableCell(u));
+                this.trail(state, v);
+                return true;
+            } else {
+                this.backtrack(state);
+                return false;
+            }
+        }
+        if(heapAtV instanceof AtomCell && heapAtU instanceof AtomCell
+            && heapAtU.value === heapAtV.value) {
+            return true;
+        }
+        if(heapAtU instanceof StructCell && heapAtV instanceof StructCell
+            && heapAtV.label===heapAtU.label) {
+            let n = heapAtU.size;
+            for (let i = 1; i <= n ; i++) {
+                let heapAtUpI = (<PointerToHeapCell>state.heap.get(u + i)).value;
+                let heapAtVpI = (<PointerToHeapCell>state.heap.get(v + i)).value;
+
+                if(!this.unify(state,
+                        this.deref(state, heapAtUpI),
+                        this.deref(state, heapAtVpI))) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        this.backtrack(state);
         return false;
     }
 
