@@ -59,7 +59,13 @@
       }
     ],
     "array-bracket-spacing": "error",
-    "arrow-spacing": "error",
+    "arrow-spacing": [
+      "error",
+      {
+        "before": true,
+        "after": true
+      }
+    ],
     "block-spacing": "error",
     "comma-spacing": "error",
     "computed-property-spacing": "error",

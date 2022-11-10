@@ -25,6 +25,6 @@ export class Call extends Instruction {
 
         return state
             .modifyStack(stack => stack.pop(2))
-            .modify(s => s.garbageCollector.run(s))
+            .modify(s => s.garbageCollector.run(s));
     }
 }
