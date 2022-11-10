@@ -12,9 +12,7 @@ export class Putref extends Instruction {
 
     step(state: State): State {
 
-        // stackPointer increased!
         state.stack.push(state.stack.get(state.framePointer + this.reference));
-
         return state;
     }
 
