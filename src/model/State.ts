@@ -6,10 +6,11 @@ import {GarbageCollector} from "./GarbageCollector";
  * Encapsulates the entire state of the virtual machine.
  */
 export class State {
+
     constructor(
         public heap: Heap = Heap.empty(),
         public stack: Stack = new Stack(),
-        public trail: Stack = new Stack(),
+        public trail: number[] = [],
         public garbageCollector: GarbageCollector = new GarbageCollector(),
         public framePointer = -1,
         public backtrackPointer = -1,
@@ -50,15 +51,24 @@ export class State {
     }
 
     getTrailPointer(): number {
-        return this.trailPointer;
+        return this.trail.length - 1;
     }
 
     setTrailPointer(trailPointer: number): void {
-        this.trailPointer = trailPointer;
+        while (trailPointer > this.getTrailPointer()) {
+            this.trail.pop();
+        }
     }
 
     getProgramCounter(): number {
         return this.programCounter;
     }
 
+    setHeapPointer(hp: number): void {
+        this.heap.setHeapPointer(hp);
+    }
+
+    getHeapPointer(): number {
+        return this.heap.getHeapPointer();
+    }
 }
