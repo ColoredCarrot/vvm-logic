@@ -18,6 +18,7 @@ import {Putanon} from "./instructions/Putanon";
 import {Putstruct} from "./instructions/Putstruct";
 import {Slide} from "./instructions/Slide";
 import {Uvar} from "./instructions/Uvar";
+import {Check} from "./instructions/Check";
 
 export class ParseError extends Error {
 }
@@ -192,7 +193,7 @@ export class InstructionParser {
     private static parseNumberParamInstruction(instr: string, param: number): Instruction {
         switch (instr) {
         case "check":
-            return new InvalidInstruction(instr + param); //TODO: Replace with actual Implementation
+            return new Check(param);
         case "pushenv":
             return new Pushenv(param);
         case "putref":
