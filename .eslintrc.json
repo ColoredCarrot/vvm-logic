@@ -10,7 +10,9 @@
   ],
   "overrides": [
     {
-      "files": ["*.tsx"],
+      "files": [
+        "*.tsx"
+      ],
       "rules": {
         "@typescript-eslint/explicit-function-return-type": "off"
       }
@@ -23,6 +25,7 @@
   },
   "plugins": [
     "react",
+    "flowtype",
     "@typescript-eslint"
   ],
   "rules": {
@@ -55,13 +58,53 @@
         "string": false
       }
     ],
+    "array-bracket-spacing": "error",
+    "arrow-spacing": "error",
+    "block-spacing": "error",
+    "comma-spacing": "error",
+    "computed-property-spacing": "error",
+    "func-call-spacing": "error",
+    "generator-star-spacing": "error",
+    "key-spacing": "error",
+    "keyword-spacing": "error",
+    "no-tabs": "error",
+    "no-whitespace-before-property": "error",
+    "object-curly-spacing": "error",
+    "semi-spacing": "error",
+    "space-before-blocks": "error",
+    "space-before-function-paren": [
+      "error",
+      "never"
+    ],
+    "space-in-parens": "error",
+    "space-infix-ops": "error",
+    "space-unary-ops": "error",
+    "flowtype/space-after-type-colon": "error",
+    "flowtype/space-before-type-colon": "error",
+    "@typescript-eslint/type-annotation-spacing": [
+      "error",
+      {
+        "before": false,
+        "after": true
+      }
+    ],
+
+    "comma-dangle": [
+      "error",
+      {
+        "arrays": "always-multiline",
+        "functions": "only-multiline"
+      }
+    ],
+
     "@typescript-eslint/explicit-function-return-type": [
       "error",
       {
         "allowExpressions": false
       }
     ],
-    "@typescript-eslint/no-non-null-assertion": "off"
+    "@typescript-eslint/no-non-null-assertion": "off",
+    "@typescript-eslint/no-unused-vars": "off"
   },
   "settings": {
     "react": {

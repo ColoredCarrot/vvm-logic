@@ -6,30 +6,47 @@ import {GarbageCollector} from "./GarbageCollector";
  * Encapsulates the entire state of the virtual machine.
  */
 export class State {
-    heap: Heap = Heap.empty();
-    stack: Stack = new Stack();
-    trail : number[] = [];
-    garbageCollector: GarbageCollector = new GarbageCollector();
 
-    framePointer = -1;
-    backtrackPointer = -1;
-    programCounter = 0;
-    heapPointer = 0;
-    // stackPointer = stack.length
+  constructor(
+        public heap: Heap = Heap.empty(),
+        public stack: Stack = new Stack(),
+        public trail: number[] = [],
+        public garbageCollector: GarbageCollector = new GarbageCollector(),
+        public framePointer = -1,
+        public backtrackPointer = -1,
+        public trailPointer = -1,
+        public programCounter = 0,
+        // heapPointer = heap.newAllocAddress
+        // stackPointer = stack.length
+    ) {
+    }
+
+    setProgramCounter(pc: number): State {
+        return new State(
+            this.heap,
+            this.stack,
+            this.trail,
+            this.garbageCollector,
+            this.framePointer,
+            this.backtrackPointer,
+            this.trailPointer,
+            pc,
+        );
+    }
 
     getFramePointer(): number {
         return this.framePointer;
     }
 
-    setFramePointer(framePointer: number){
+    setFramePointer(framePointer: number): void {
         this.framePointer = framePointer;
     }
 
-    getBacktrackPointer(): number{
+    getBacktrackPointer(): number {
         return this.backtrackPointer;
     }
 
-    setBacktrackPointer(backtrackPointer: number): void{
+    setBacktrackPointer(backtrackPointer: number): void {
         this.backtrackPointer = backtrackPointer;
     }
 
@@ -43,21 +60,8 @@ export class State {
         }
     }
 
-    getHeapPointer(): number{
-        return this.heapPointer;
-    }
-
-    setHeapPointer(heapPointer: number): void{
-        this.heapPointer = heapPointer;
-    }
-
-    getProgramCounter(): number{
+    getProgramCounter(): number {
         return this.programCounter;
     }
-
-    setProgramCounter(programCounter: number){
-        this.programCounter = programCounter;
-    }
-
 
 }

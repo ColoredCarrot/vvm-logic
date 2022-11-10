@@ -1,7 +1,7 @@
 import {Cell} from "./Cell";
 
 export class AtomCell extends Cell {
-    value : string;
+    value: string;
 
     constructor(value: string) {
         super();

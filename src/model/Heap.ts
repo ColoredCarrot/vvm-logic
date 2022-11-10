@@ -14,8 +14,16 @@ export class Heap {
 
     private constructor(
         private readonly data: Immutable.Map<Address, Cell>,
-        private readonly nextAllocAddress: Address,
+        private readonly _heapPointer: Address,
     ) {
+    }
+
+    get heapPointer(): Address {
+        return this._heapPointer;
+    }
+
+    setHeapPointer(newHeapPointer: Address): Heap {
+        return new Heap(this.data, newHeapPointer);
     }
 
     static empty(): Heap {
@@ -27,7 +35,7 @@ export class Heap {
     }
 
     set(address: Address, value: Cell): Heap {
-        return new Heap(this.data.set(address, value), this.nextAllocAddress);
+        return new Heap(this.data.set(address, value), this._heapPointer);
     }
 
     /**
@@ -36,7 +44,7 @@ export class Heap {
      * @return Tuple of updated Heap and address of first cell.
      */
     alloc(cells: Cell[]): [Heap, Address] {
-        const addr = this.nextAllocAddress;
+        const addr = this._heapPointer;
 
         // Populate heap starting at address
         let newData = this.data;
@@ -45,8 +53,8 @@ export class Heap {
         }
 
         return [
-            new Heap(newData, this.nextAllocAddress + cells.length),
-            addr
+            new Heap(newData, this._heapPointer + cells.length),
+            addr,
         ];
     }
 }

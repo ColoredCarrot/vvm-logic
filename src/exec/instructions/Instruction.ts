@@ -12,6 +12,7 @@ export abstract class Instruction {
 
     abstract step(state: State): State;
 
+
     public static unify(state : State, u : number, v : number) : boolean {
         if(u === v) {
             return true;
