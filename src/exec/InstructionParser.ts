@@ -19,6 +19,7 @@ import {Putstruct} from "./instructions/Putstruct";
 import {Slide} from "./instructions/Slide";
 import {Uvar} from "./instructions/Uvar";
 import {Check} from "./instructions/Check";
+import {Fail} from "./instructions/Fail";
 
 export class ParseError extends Error {
 }
@@ -252,7 +253,7 @@ export class InstructionParser {
         case "delbtp":
             return new InvalidInstruction(input); //TODO: Replace once implemented
         case "fail":
-            return new InvalidInstruction(input); //TODO: Replace once implemented
+            return new Fail();
         case "getnode":
             return new InvalidInstruction(input); //TODO: Replace once implemented
         case "lastmark":
