@@ -16,7 +16,7 @@ export class Pushenv extends Instruction {
 
     step(state: State): State {
 
-        const n: number = state.stack.size - state.getFramePointer();
+        const n: number = state.stack.size - state.framePointer;
         const allocVar: number = n - this.mVar;
 
         for (let i = 0; i < allocVar - 1; i++) {

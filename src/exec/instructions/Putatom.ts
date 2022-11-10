@@ -14,10 +14,9 @@ export class Putatom extends Instruction {
     }
 
     step(state: State): State {
-
-        let [newHeap, address] = state.heap.alloc([new UninitializedCell()])
-        state.heap = newHeap.set(address, new AtomCell(this.atom))
-        state.stack.push(new PointerToHeapCell(address))
+        const [newHeap, address] = state.heap.alloc([new UninitializedCell()]);
+        state = state.setHeap(newHeap.set(address, new AtomCell(this.atom)));
+        state = state.setStack(state.stack.push(new PointerToHeapCell(address)));
 
         return state;
     }

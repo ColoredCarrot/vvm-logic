@@ -12,8 +12,8 @@ export class Uvar extends Instruction {
 
     step(state: State): State {
 
-        state.stack.set(state.framePointer + this.variable, state.stack.get(state.stack.size))
-        state.stack.pop()
+        state.stack.set(state.framePointer + this.variable, state.stack.get(state.stack.size));
+        state.stack.pop();
 
         return state;
     }

@@ -14,13 +14,14 @@ export class Putvar extends Instruction {
     }
 
     step(state: State): State {
+        const [newHeap, address] = state.heap.alloc([new UninitializedCell()]);
 
-        let [newHeap, address] = state.heap.alloc([new UninitializedCell()])
-        state.heap = newHeap.set(address, new VariableCell(address))
-        state.stack.push(new PointerToHeapCell(address))
-        state.stack.set(state.framePointer + this.variable, new PointerToHeapCell(address))
-
-        return state;
+        return state
+            .setHeap(newHeap.set(address, new VariableCell(address)))
+            .setStack(
+                state.stack
+                    .push(new PointerToHeapCell(address))
+                    .set(state.framePointer + this.variable, new PointerToHeapCell(address))
+            );
     }
-
 }
