@@ -17,7 +17,6 @@ export class Popenv extends Instruction {
         const fPCell = state.stack.get(currentFP) as ValueCell;
         const paramPC = fPCell.getValue();
         const savedCell = state.stack.get(state.stack.size() - 1);
-
         const newFPCell = state.stack.get(state.getFramePointer() - 1) as ValueCell;
         const valueFP = newFPCell.getValue();
 
