@@ -4,9 +4,9 @@ import {SignLabel} from "../SignLabel";
 
 export class Call extends Instruction {
 
-    private sign: string;
-    private size: number;
-    private labelLine: number;
+    readonly sign: string;
+    readonly size: number;
+    readonly labelLine: number;
 
     /**
      *
