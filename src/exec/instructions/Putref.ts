@@ -3,10 +3,10 @@ import {State} from "../../model/State";
 
 export class Putref extends Instruction {
 
-    reference : number;
+    reference: number;
 
     constructor(reference: number) {
-        super("PUTREF "+reference.toString());
+        super("PUTREF " + reference.toString());
         this.reference = reference;
     }
 

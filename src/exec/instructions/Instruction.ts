@@ -5,27 +5,27 @@ export abstract class Instruction {
 
     abstract step(state: State): State;
 
-    public static unify(state : State, u : number, v : number) : boolean {
+    public static unify(state: State, u: number, v: number): boolean {
         return false;
     }
 
-    public static trail (state : State, u : number) {
-
+    public static trail(state: State, u: number): void {
+        //TODO
     }
 
-    public static backtrack(state : State) {
-
+    public static backtrack(state: State): void {
+        //TODO
     }
 
-    public static reset(state : State, x : number, y : number) {
-
+    public static reset(state: State, x: number, y: number): void {
+        //TODO
     }
 
-    public static check(state : State, u : number, v : number) : boolean {
+    public static check(state: State, u: number, v: number): boolean {
         return false;
     }
 
-    public static deref(state : State, v : number) : number {
+    public static deref(state: State, v: number): number {
         return 0;
     }
 }

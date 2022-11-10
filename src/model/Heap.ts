@@ -22,7 +22,7 @@ export class Heap {
         return this._heapPointer;
     }
 
-    setHeapPointer(newHeapPointer:Address) : Heap {
+    setHeapPointer(newHeapPointer: Address): Heap {
         return new Heap(this.data, newHeapPointer);
     }
 
@@ -54,7 +54,7 @@ export class Heap {
 
         return [
             new Heap(newData, this._heapPointer + cells.length),
-            addr
+            addr,
         ];
     }
 }
