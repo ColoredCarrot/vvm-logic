@@ -8,12 +8,11 @@ import {GarbageCollector} from "./GarbageCollector";
 export class State {
     heap: Heap = Heap.empty();
     stack: Stack = new Stack();
-    trail : Stack = new Stack();
+    trail : number[] = [];
     garbageCollector: GarbageCollector = new GarbageCollector();
 
     framePointer = -1;
     backtrackPointer = -1;
-    trailPointer = -1;
     programCounter = 0;
     heapPointer = 0;
     // stackPointer = stack.length
@@ -35,11 +34,13 @@ export class State {
     }
 
     getTrailPointer(): number{
-        return this.trailPointer;
+        return this.trail.length - 1;
     }
 
     setTrailPointer(trailPointer: number): void{
-        this.trailPointer = trailPointer;
+        while (trailPointer > this.getTrailPointer()) {
+            this.trail.pop();
+        }
     }
 
     getHeapPointer(): number{
