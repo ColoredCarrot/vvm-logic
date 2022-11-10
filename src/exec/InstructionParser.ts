@@ -25,6 +25,7 @@ import {Ustruct} from "./instructions/Ustruct";
 import {Uref} from "./instructions/Uref";
 import {Unify} from "./instructions/Unify";
 import {Son} from "./instructions/Son";
+import {Uatom} from "./instructions/Uatom";
 
 export class ParseError extends Error {
 }
@@ -190,7 +191,7 @@ export class InstructionParser {
         case "putatom":
             return new Putatom(param);
         case "uatom":
-            return new InvalidInstruction(instr + " " + param); //TODO: Replace with actual Implementation
+            return new Uatom(param);
         default:
             return new InvalidInstruction(instr + " " + param);
         }
