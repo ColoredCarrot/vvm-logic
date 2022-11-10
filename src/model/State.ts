@@ -7,7 +7,7 @@ import {GarbageCollector} from "./GarbageCollector";
  */
 export class State {
 
-  constructor(
+    constructor(
         public heap: Heap = Heap.empty(),
         public stack: Stack = new Stack(),
         public trail: number[] = [],
@@ -50,11 +50,11 @@ export class State {
         this.backtrackPointer = backtrackPointer;
     }
 
-    getTrailPointer(): number{
+    getTrailPointer(): number {
         return this.trail.length - 1;
     }
 
-    setTrailPointer(trailPointer: number): void{
+    setTrailPointer(trailPointer: number): void {
         while (trailPointer > this.getTrailPointer()) {
             this.trail.pop();
         }
