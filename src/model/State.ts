@@ -57,6 +57,11 @@ export class State implements StateVars {
         return this.setStack(this.stack.set(index, value));
     }
 
+    pushStack(cell : Cell): State {
+        let newStack : Stack = this.stack.push(cell);
+        return this.setStack(newStack);
+    }
+
     /**
      * Enables this class to be used in a fluent interface (see example below).
      *
