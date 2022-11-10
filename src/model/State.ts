@@ -64,4 +64,11 @@ export class State {
         return this.programCounter;
     }
 
+    setHeapPointer(hp: number): void {
+        this.heap.setHeapPointer(hp);
+    }
+
+    getHeapPointer(): number {
+        return this.heap.getHeapPointer();
+    }
 }
