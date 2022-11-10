@@ -12,6 +12,9 @@ export class Putref extends Instruction {
 
     step(state: State): State {
 
+        //TODO: deref!!
+
+        //deref S[FP + i];
         state.stack.push(state.stack.get(state.framePointer + this.reference));
         return state;
     }
