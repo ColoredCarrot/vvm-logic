@@ -1,7 +1,6 @@
 import {Instruction} from "./Instruction";
 import {State} from "../../model/State";
 import {SignLabel} from "../SignLabel";
-import {Sign} from "crypto";
 import {Call} from "./Call";
 import {Slide} from "./Slide";
 import {Jump} from "./Jump";
@@ -17,10 +16,10 @@ export class Lastcall extends Instruction {
     }
 
     step(state: State): State {
-        if (state.getFramePointer() <= state.getBacktrackPointer()) {
+        if (state.framePointer <= state.backtrackPointer) {
             return new Call(this.label).step(state);
         } else {
-            const mid: State = new Slide(this.m, this.label.size).step(state);
+            state = new Slide(this.m, this.label.size).step(state);
             return new Jump(this.label).step(state);
         }
     }

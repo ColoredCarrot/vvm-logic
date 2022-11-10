@@ -17,11 +17,10 @@ export class Putanon extends Instruction {
 
         const [newHeap, address] = state.heap.alloc([new UninitializedCell()]);
 
-        state.heap = newHeap.set(address, new VariableCell(address));
+        return state
+            .setHeap(newHeap.set(address, new VariableCell(address)));
 
         //state.stack.push(Adresse von Heap, ist Pointer zu Heap)
-
-        return state;
     }
 
 }
