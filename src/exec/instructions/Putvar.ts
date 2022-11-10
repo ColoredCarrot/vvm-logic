@@ -1,5 +1,8 @@
 import {Instruction} from "./Instruction";
 import {State} from "../../model/State";
+import {UninitializedCell} from "../../model/UninitializedCell";
+import {VariableCell} from "../../model/VariableCell";
+import {PointerToHeapCell} from "../../model/PointerToHeapCell";
 
 export class Putvar extends Instruction {
 
@@ -12,13 +15,10 @@ export class Putvar extends Instruction {
 
     step(state: State): State {
 
-        // allokiere Platz für eine Zelle auf Heap
-        // lege Cell mit Typ Variable auf den Heap mit Wert der Adresse von Heap (= Selbstreferenz)
-        // increase the HeapPointer um 1 (macht Heap!)
-
-        //state.stack.push(Adresse von Heap, ist Pointer zu Heap)
-
-        //state.stack.set(framePointer + variable, Adresse von Heap)
+        let [newHeap, address] = state.heap.alloc([new UninitializedCell()])
+        state.heap = newHeap.set(address, new VariableCell(address))
+        state.stack.push(new PointerToHeapCell(address))
+        state.stack.set(state.framePointer + this.variable, new PointerToHeapCell(address))
 
         return state;
     }
