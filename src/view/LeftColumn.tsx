@@ -19,7 +19,7 @@ export function LeftColumn({state, setState}: LeftColumnProps) {
 
     const actionBtn = endOfProgram
         ? <a className="btn" onClick={() => {
-            setState(new State());
+            setState(State.new());
         }
         }>Restart</a>
         : <a className="btn" onClick={() => {

@@ -6,6 +6,7 @@ import {PointerToHeapCell} from "../../model/PointerToHeapCell";
 import {ValueCell} from "../../model/ValueCell";
 import {PointerToStackCell} from "../../model/PointerToStackCell";
 import {AtomCell} from "../../model/AtomCell";
+import {IllegalOperationError} from "../ExecutionError";
 
 export abstract class Instruction {
     protected constructor(public instruction: string) {}
@@ -13,45 +14,45 @@ export abstract class Instruction {
     abstract step(state: State): State;
 
 
-    public static unify(state: State, u: number, v: number): boolean {
+    public static unify(state: State, u: number, v: number): [State, boolean] {
         if (u === v) {
-            return true;
+            return [state, true];
         }
         const heapAtU: Cell = state.heap.get(u);
         const heapAtV: Cell = state.heap.get(v);
         if (heapAtU instanceof VariableCell) {
             if (heapAtV instanceof VariableCell) {
                 if (u > v) {
-                    state.heap.set(u, new VariableCell(v));
-                    this.trail(state, u);
-                    return true;
+                    state = state.setHeap(state.heap.set(u, new VariableCell(v)));
+                    state = this.trail(state, u);
+                    return [state, true];
                 } else {
-                    state.heap.set(v, new VariableCell(u));
-                    this.trail(state, v);
-                    return true;
+                    state = state.setHeap(state.heap.set(v, new VariableCell(u)));
+                    state = this.trail(state, v);
+                    return [state, true];
                 }
             } else if (this.check(state, u, v)) {
-                state.heap.set(v, new VariableCell(u));
-                this.trail(state, u);
-                return true;
+                state = state.setHeap(state.heap.set(v, new VariableCell(u)));
+                state = this.trail(state, u);
+                return [state, true];
             } else {
-                this.backtrack(state);
-                return false;
+                state = this.backtrack(state);
+                return [state, false];
             }
         }
         if (heapAtV instanceof VariableCell) {
             if (this.check(state, v, u)) {
-                state.heap.set(v, new VariableCell(u));
-                this.trail(state, v);
-                return true;
+                state = state.setHeap(state.heap.set(v, new VariableCell(u)));
+                state = this.trail(state, v);
+                return [state, true];
             } else {
-                this.backtrack(state);
-                return false;
+                state = this.backtrack(state);
+                return [state, false];
             }
         }
         if (heapAtV instanceof AtomCell && heapAtU instanceof AtomCell
             && heapAtU.value === heapAtV.value) {
-            return true;
+            return [state, true];
         }
         if (heapAtU instanceof StructCell && heapAtV instanceof StructCell
             && heapAtV.label === heapAtU.label) {
@@ -60,43 +61,50 @@ export abstract class Instruction {
                 const heapAtUpI = (<PointerToHeapCell>state.heap.get(u + i)).value;
                 const heapAtVpI = (<PointerToHeapCell>state.heap.get(v + i)).value;
 
-                if (!this.unify(state,
-                    this.deref(state, heapAtUpI),
-                    this.deref(state, heapAtVpI))) {
-                    return false;
+                const [newState, result] = this.unify(state, this.deref(state, heapAtUpI), this.deref(state, heapAtVpI));
+                state = newState;
+                if (!result) {
+                    return [state, false];
                 }
             }
-            return true;
+            return [state, true];
         }
-        this.backtrack(state);
-        return false;
+
+        state = this.backtrack(state);
+
+        return [state, false];
     }
 
-    public static backtrack(state: State): void {
+    public static backtrack(state: State): State {
         //Reset Frame Pointer
-        state.setFramePointer(state.getBacktrackPointer());
+        state = state.setFramePointer(state.backtrackPointer);
 
         //Reset Heap Pointer
-        const oldHeapPointer: ValueCell = <ValueCell>state.stack.get(state.getFramePointer() - 2);
-        state.setHeapPointer(oldHeapPointer.value);
+        const oldHeapPointer = state.stack.get(state.framePointer - 2);
+        if (!(oldHeapPointer instanceof ValueCell)) {
+            throw new IllegalOperationError("Expected ValueCell");
+        }
+        state = state.setHeap(state.heap.setHeapPointer(oldHeapPointer.value));
 
         //Reset Trail Pointer and reset()
-        const oldTrailPointer: ValueCell = <ValueCell> state.stack.get(state.getFramePointer() - 3);
-        this.reset(state, oldTrailPointer.value, state.getTrailPointer());
-        state.setTrailPointer(oldTrailPointer.value);
+        const oldTrailPointer = <ValueCell> state.stack.get(state.framePointer - 3);
+        state = this.reset(state, oldTrailPointer.value, state.trail.trailPointer);
+
+        state = state.setTrail(state.trail.setTrailPointer(oldTrailPointer.value));
 
         //Set PC to negative Continuation address
-        const negativeCont: PointerToStackCell = <PointerToStackCell> state.stack.get(state.getFramePointer() - 5);
-        state.setProgramCounter(negativeCont.value);
+        const negativeCont = <PointerToStackCell>state.stack.get(state.framePointer - 5);
+        state = state.setProgramCounter(negativeCont.value);
 
+        return state;
     }
 
-    public static trail(state: State, u: number): void {
-        const onStack: Cell = state.stack.get(state.backtrackPointer - 2);
+    public static trail(state: State, u: number): State {
+        const onStack = state.stack.get(state.backtrackPointer - 2);
         if (!(onStack instanceof ValueCell)) {
-            throw new Error("Expected Heap Pointer on Stack to be Type ValueCell!");
+            throw new IllegalOperationError("Expected Heap Pointer on Stack to be Type ValueCell!");
         } else {
-            state.trail.push(u);
+            return state.setTrail(state.trail.push(u));
         }
     }
 
@@ -106,13 +114,15 @@ export abstract class Instruction {
      * @param x - reset variables on heap addresses [y:x]
      * @param y -
      */
-    public static reset(state: State, x: number, y: number): void {
+    public static reset(state: State, x: number, y: number): State {
+        let heap = state.heap;
         for (let u = y; x < u; u--) {
-            const resetCell: number = state.trail.at(u)!;
+            const resetCell: number = state.trail.get(u)!;
             const resetTo: Cell = new VariableCell(resetCell);
 
-            state.heap.set(resetCell, resetTo);
+            heap = heap.set(resetCell, resetTo);
         }
+        return state.setHeap(heap);
     }
 
     public static check(state: State, u: number, v: number): boolean {

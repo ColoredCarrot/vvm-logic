@@ -13,7 +13,7 @@ export class Putref extends Instruction {
 
     step(state: State): State {
 
-        let address: number = Instruction.deref(state,state.framePointer + this.reference);
+        const address: number = Instruction.deref(state, state.framePointer + this.reference);
         state.stack.push(new PointerToHeapCell(address));
         return state;
     }

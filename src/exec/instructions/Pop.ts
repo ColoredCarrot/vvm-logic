@@ -8,10 +8,6 @@ export class Pop extends Instruction {
     }
 
     step(state: State): State {
-
-        state.stack.pop();
-
-        return state;
-
+        return state.setStack(state.stack.pop());
     }
 }
