@@ -22,6 +22,7 @@ import {Check} from "./instructions/Check";
 import {Fail} from "./instructions/Fail";
 import {Lastmark} from "./instructions/Lastmark";
 import {Ustruct} from "./instructions/Ustruct";
+import {Uref} from "./instructions/Uref";
 
 export class ParseError extends Error {
 }
@@ -208,7 +209,7 @@ export class InstructionParser {
         case "trim":
             return new InvalidInstruction(instr + param); //TODO: Replace with actual Implementation
         case "uref":
-            return new InvalidInstruction(instr + param); //TODO: Replace with actual Implementation
+            return new Uref(param);
         case "uvar":
             return new Uvar(param);
         }
