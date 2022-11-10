@@ -20,7 +20,11 @@ export class Stack {
         this.values[index] = value;
     }
 
-    get size(): number {
+    size(): number {
         return this.values.length;
+    }
+
+    getStackPointer(): number {
+        return this.values.length - 1;
     }
 }
