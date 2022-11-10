@@ -12,6 +12,9 @@ import {Putvar} from "./instructions/Putvar";
 import {Up} from "./instructions/Up";
 import {Pushenv} from "./instructions/Pushenv";
 
+export class ParseError extends Error {
+}
+
 export class InstructionParser {
 
     static parseInput(inputLines: string[]): [Instruction[], Label[]] {
@@ -39,7 +42,9 @@ export class InstructionParser {
         return instructions;
     }
 
-    private static parseInstruction(input: string, labels: Label[]): Instruction {
+    static parseInstruction(input: string, labels: Label[]): Instruction {
+        input = input.toLowerCase();
+
         const inputSplit: string[] = input.split(" ");
         const instr: string = inputSplit.at(0)!;
 
@@ -56,7 +61,7 @@ export class InstructionParser {
                 });
                 if (!signLabel) {
                     //ERROR
-                    throw new DOMException("Label not found!");
+                    throw new ParseError("Label not found: " + signLabel);
                 }
                 return this.parseSignParamInstruction(instr, <SignLabel>signLabel);
             } else if (this.isValidLabel(param) && labels.find(v => {
@@ -84,7 +89,7 @@ export class InstructionParser {
                 });
                 if (!l0 || !l1) {
                     //ERROR
-                    throw new DOMException("Label not found!");
+                    throw new ParseError("Label not found: " + p0);
                 }
                 return this.parseSignAndLabelParamInstruction(instr, l0!, l1!);
             } else if (this.isValidSignLabel(p0) && this.isValidNumber(p1)) {
@@ -92,7 +97,7 @@ export class InstructionParser {
                     return v.text === p0 && v instanceof SignLabel;
                 });
                 if (!l0) {
-                    throw new DOMException("Label not found!");
+                    throw new ParseError("Label not found!");
                 }
                 return this.parseSignAndNumberParamInstruction(instr, l0, Number(p1));
             } else if (this.isValidNumber(p0) && this.isValidNumber(p1)) {
