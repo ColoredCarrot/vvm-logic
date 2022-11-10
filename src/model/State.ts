@@ -8,7 +8,7 @@ import {GarbageCollector} from "./GarbageCollector";
 export class State {
     heap: Heap = Heap.empty();
     stack: Stack = new Stack();
-    trail : Stack = new Stack();
+    trail: Stack = new Stack();
     garbageCollector: GarbageCollector = new GarbageCollector();
 
     framePointer = -1;
@@ -22,31 +22,31 @@ export class State {
         return this.framePointer;
     }
 
-    setFramePointer(framePointer: number){
+    setFramePointer(framePointer: number): void {
         this.framePointer = framePointer;
     }
 
-    getBacktrackPointer(): number{
+    getBacktrackPointer(): number {
         return this.backtrackPointer;
     }
 
-    setBacktrackPointer(backtrackPointer: number): void{
+    setBacktrackPointer(backtrackPointer: number): void {
         this.backtrackPointer = backtrackPointer;
     }
 
-    getTrailPointer(): number{
+    getTrailPointer(): number {
         return this.trailPointer;
     }
 
-    setTrailPointer(trailPointer: number): void{
+    setTrailPointer(trailPointer: number): void {
         this.trailPointer = trailPointer;
     }
 
-    getProgramCounter(): number{
+    getProgramCounter(): number {
         return this.programCounter;
     }
 
-    setProgramCounter(programCounter: number){
+    setProgramCounter(programCounter: number): void {
         this.programCounter = programCounter;
     }
 
