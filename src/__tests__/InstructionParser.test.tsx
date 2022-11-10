@@ -1,4 +1,34 @@
-import {InstructionParser} from "../exec/InstructionParser";
+import {InstructionParser, ParseError} from "../exec/InstructionParser";
+import {SignLabel} from "../exec/SignLabel";
+import {Call} from "../exec/instructions/Call";
+import {InvalidInstruction} from "../exec/instructions/InvalidInstruction";
+import {Pop} from "../exec/instructions/Pop";
+
+test("parse pop", () => {
+    const instr = InstructionParser.parseInstruction("POP", []);
+    expect(instr).toBeInstanceOf(Pop);
+});
+
+test("parse call", () => {
+    const instr = InstructionParser.parseInstruction("CALL f/4", [new SignLabel(2, "f/4")]);
+    expect(instr).toBeInstanceOf(Call);
+
+    const call = instr as Call;
+    expect(call.sign).toBe("f/4");
+    expect(call.size).toBe(4);
+    expect(call.labelLine).toBe(2);
+});
+
+test("invalid instruction", () => {
+    const instr = InstructionParser.parseInstruction("UNKNOWN 1 2", []);
+    expect(instr).toBeInstanceOf(InvalidInstruction);
+});
+
+test("missing label", () => {
+    expect(
+        () => InstructionParser.parseInstruction("CALL f/4", [new SignLabel(2, "f/5")])
+    ).toThrow(ParseError);
+});
 
 const page140Example: string [] =
         ["init N",
@@ -43,8 +73,7 @@ test("page 140 example no check", () => {
     const instructions = result.at(0)!;
     const labels = result.at(1)!;
 
-    console.log("Parsing finished");
-    console.log(labels);
-    console.log(instructions);
+    //console.log("Parsing finished");
+    //console.log(labels);
+    //console.log(instructions);
 });
-
