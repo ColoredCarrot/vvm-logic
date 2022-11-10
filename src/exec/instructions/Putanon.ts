@@ -1,5 +1,9 @@
 import {Instruction} from "./Instruction";
 import {State} from "../../model/State";
+import {VariableCell} from "../../model/VariableCell";
+import {Cell} from "../../model/Cell";
+import {Heap} from "../../model/Heap";
+import {UninitializedCell} from "../../model/UninitializedCell";
 
 export class Putanon extends Instruction {
 
@@ -12,6 +16,10 @@ export class Putanon extends Instruction {
         // allokiere Platz für eine Zelle auf Heap
         // lege Cell mit Typ Variable auf den Heap mit Wert der Adresse von Heap (= Selbstreferenz)
         // increase the HeapPointer um 1 (macht Heap!)
+
+        let [newHeap, address] = state.heap.alloc([new UninitializedCell()])
+
+        state.heap = newHeap.set(address, new VariableCell(address))
 
         //state.stack.push(Adresse von Heap, ist Pointer zu Heap)
 
