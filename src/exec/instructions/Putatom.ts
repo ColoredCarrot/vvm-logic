@@ -3,10 +3,10 @@ import {State} from "../../model/State";
 
 export class Putatom extends Instruction {
 
-    atom : string;
+    atom: string;
 
     constructor(atom: string) {
-        super("PUTATOM "+atom);
+        super("PUTATOM " + atom);
         this.atom = atom;
     }
 

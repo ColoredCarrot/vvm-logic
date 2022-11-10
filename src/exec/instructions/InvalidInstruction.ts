@@ -1,8 +1,8 @@
-import { State } from "../../model/State";
+import {State} from "../../model/State";
 import {Instruction} from "./Instruction";
 
 export class InvalidInstruction extends Instruction {
-    instruction : string
+    instruction: string;
 
 
     constructor(instruction: string) {

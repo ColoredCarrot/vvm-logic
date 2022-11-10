@@ -6,57 +6,59 @@ import {GarbageCollector} from "./GarbageCollector";
  * Encapsulates the entire state of the virtual machine.
  */
 export class State {
-    heap: Heap = Heap.empty();
-    stack: Stack = new Stack();
-    trail : Stack = new Stack();
-    garbageCollector: GarbageCollector = new GarbageCollector();
+    constructor(
+        public heap: Heap = Heap.empty(),
+        public stack: Stack = new Stack(),
+        public trail: Stack = new Stack(),
+        public garbageCollector: GarbageCollector = new GarbageCollector(),
+        public framePointer = -1,
+        public backtrackPointer = -1,
+        public trailPointer = -1,
+        public programCounter = 0,
+        // heapPointer = heap.newAllocAddress
+        // stackPointer = stack.length
+    ) {
+    }
 
-    framePointer = -1;
-    backtrackPointer = -1;
-    trailPointer = -1;
-    programCounter = 0;
-    heapPointer = 0;
-    // stackPointer = stack.length
+    setProgramCounter(pc: number): State {
+        return new State(
+            this.heap,
+            this.stack,
+            this.trail,
+            this.garbageCollector,
+            this.framePointer,
+            this.backtrackPointer,
+            this.trailPointer,
+            pc,
+        );
+    }
 
     getFramePointer(): number {
         return this.framePointer;
     }
 
-    setFramePointer(framePointer: number){
+    setFramePointer(framePointer: number): void {
         this.framePointer = framePointer;
     }
 
-    getBacktrackPointer(): number{
+    getBacktrackPointer(): number {
         return this.backtrackPointer;
     }
 
-    setBacktrackPointer(backtrackPointer: number): void{
+    setBacktrackPointer(backtrackPointer: number): void {
         this.backtrackPointer = backtrackPointer;
     }
 
-    getTrailPointer(): number{
+    getTrailPointer(): number {
         return this.trailPointer;
     }
 
-    setTrailPointer(trailPointer: number): void{
+    setTrailPointer(trailPointer: number): void {
         this.trailPointer = trailPointer;
     }
 
-    getHeapPointer(): number{
-        return this.heapPointer;
-    }
-
-    setHeapPointer(heapPointer: number): void{
-        this.heapPointer = heapPointer;
-    }
-
-    getProgramCounter(): number{
+    getProgramCounter(): number {
         return this.programCounter;
     }
-
-    setProgramCounter(programCounter: number){
-        this.programCounter = programCounter;
-    }
-
 
 }

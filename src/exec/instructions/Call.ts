@@ -4,19 +4,19 @@ import {SignLabel} from "../SignLabel";
 
 export class Call extends Instruction {
 
-    private sign : string
-    private size : number;
-    private labelLine : number;
+    private sign: string;
+    private size: number;
+    private labelLine: number;
 
     /**
      *
      * @param label - SignLabel (only labels that look like f/2)
      */
-    constructor(label : SignLabel) {
+    constructor(label: SignLabel) {
         super("CALL " + label.text);
-        this.labelLine = label.line
-        this.sign = label.text
-        this.size = label.size
+        this.labelLine = label.line;
+        this.sign = label.text;
+        this.size = label.size;
     }
 
     step(state: State): State {
