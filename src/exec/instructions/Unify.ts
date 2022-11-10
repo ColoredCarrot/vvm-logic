@@ -10,8 +10,8 @@ export class Unify extends Instruction {
     }
 
     step(state: State): State {
-        let topOfStack = (<PointerToHeapCell>state.stack.get(state.stack.stackPointer)).value;
-        let nextOnStack = (<PointerToHeapCell>state.stack.get(state.stack.stackPointer - 1)).value;
+        const topOfStack = (<PointerToHeapCell>state.stack.get(state.stack.stackPointer)).value;
+        const nextOnStack = (<PointerToHeapCell>state.stack.get(state.stack.stackPointer - 1)).value;
 
         Instruction.unify(state, nextOnStack, topOfStack);
 

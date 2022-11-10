@@ -24,6 +24,7 @@ import {Lastmark} from "./instructions/Lastmark";
 import {Ustruct} from "./instructions/Ustruct";
 import {Uref} from "./instructions/Uref";
 import {Unify} from "./instructions/Unify";
+import {Son} from "./instructions/Son";
 
 export class ParseError extends Error {
 }
@@ -206,7 +207,7 @@ export class InstructionParser {
         case "putvar":
             return new Putvar(param);
         case "son":
-            return new InvalidInstruction(instr + param); //TODO: Replace with actual Implementation
+            return new Son(param);
         case "trim":
             return new InvalidInstruction(instr + param); //TODO: Replace with actual Implementation
         case "uref":
