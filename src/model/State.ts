@@ -6,17 +6,32 @@ import {GarbageCollector} from "./GarbageCollector";
  * Encapsulates the entire state of the virtual machine.
  */
 export class State {
-    heap: Heap = Heap.empty();
-    stack: Stack = new Stack();
-    trail: Stack = new Stack();
-    garbageCollector: GarbageCollector = new GarbageCollector();
+    constructor(
+        public heap: Heap = Heap.empty(),
+        public stack: Stack = new Stack(),
+        public trail: Stack = new Stack(),
+        public garbageCollector: GarbageCollector = new GarbageCollector(),
+        public framePointer = -1,
+        public backtrackPointer = -1,
+        public trailPointer = -1,
+        public programCounter = 0,
+        // heapPointer = heap.newAllocAddress
+        // stackPointer = stack.length
+    ) {
+    }
 
-    framePointer = -1;
-    backtrackPointer = -1;
-    trailPointer = -1;
-    programCounter = 0;
-    // heapPointer = heap.newAllocAddress
-    // stackPointer = stack.length
+    setProgramCounter(pc: number): State {
+        return new State(
+            this.heap,
+            this.stack,
+            this.trail,
+            this.garbageCollector,
+            this.framePointer,
+            this.backtrackPointer,
+            this.trailPointer,
+            pc,
+        );
+    }
 
     getFramePointer(): number {
         return this.framePointer;
@@ -45,10 +60,5 @@ export class State {
     getProgramCounter(): number {
         return this.programCounter;
     }
-
-    setProgramCounter(programCounter: number): void {
-        this.programCounter = programCounter;
-    }
-
 
 }
