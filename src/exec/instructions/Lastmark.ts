@@ -13,8 +13,8 @@ export class Lastmark extends Instruction {
 
     step(state: State): State {
         if (state.framePointer <= state.backtrackPointer) {
-            let framePointer = state.framePointer;
-            let stackAtFramePointer = (<ValueCell>state.stack.get(state.framePointer)).value;
+            const framePointer = state.framePointer;
+            const stackAtFramePointer = (<ValueCell>state.stack.get(state.framePointer)).value;
 
             return state.modifyStack(s => s.push(new UninitializedCell()))
                 .modifyStack(s => s.push(new UninitializedCell()))
