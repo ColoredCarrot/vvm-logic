@@ -2,11 +2,11 @@ import {Instruction} from "./Instruction";
 import {Label} from "../Label";
 import {State} from "../../model/State";
 
-export class Jump extends Instruction{
+export class Jump extends Instruction {
 
-    label : Label;
+    label: Label;
 
-    constructor(label : Label) {
+    constructor(label: Label) {
         super("jump" + label.text);
         this.label = label;
     }
