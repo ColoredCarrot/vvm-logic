@@ -1,16 +1,22 @@
 import {Instruction} from "./Instruction";
 import {State} from "../../model/State";
+import {SignLabel} from "../SignLabel";
 
 export class Call extends Instruction {
 
-    private size: number;
-    private dest: number;
+    private sign : string
+    private size : number;
+    private labelLine : number;
 
-    constructor(dest: number) {
-        //FIXME
-        super("CALL " + dest.toString());
-        this.dest = dest;
-        this.size = 1;
+    /**
+     *
+     * @param label - SignLabel (only labels that look like f/2)
+     */
+    constructor(label : SignLabel) {
+        super("CALL " + label.text);
+        this.labelLine = label.line
+        this.sign = label.text
+        this.size = label.size
     }
 
     step(state: State): State {
