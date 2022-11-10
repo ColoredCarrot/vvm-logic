@@ -9,7 +9,6 @@ export class Fail extends Instruction {
     }
 
     step(state: State): State {
-        Instruction.backtrack(state);
-        return state;
+        return Instruction.backtrack(state);
     }
 }

@@ -25,9 +25,7 @@ export class Ustruct extends Instruction {
         } else if (heapElem instanceof VariableCell) {
             return state.setProgramCounter(this.p1.line);
         } else {
-            Instruction.backtrack(state);
+            return Instruction.backtrack(state);
         }
-
-        return state;
     }
 }

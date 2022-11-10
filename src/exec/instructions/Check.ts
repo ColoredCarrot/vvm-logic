@@ -17,7 +17,7 @@ export class Check extends Instruction {
 
         if (!Instruction.check(state, topOfStack,
             Instruction.deref(state, ref))) {
-            Instruction.backtrack(state);
+            return Instruction.backtrack(state);
         }
 
         return state;
