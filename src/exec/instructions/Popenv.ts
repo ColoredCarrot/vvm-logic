@@ -20,7 +20,7 @@ export class Popenv extends Instruction {
 
         if (state.backtrackPointer < state.framePointer) {
             for (let i = 0; i < 8; i++) {
-               state = state.modifyStack(stack => stack.pop());
+                state = state.modifyStack(stack => stack.pop());
             }
             state = state.pushStack(savedCell);
         }

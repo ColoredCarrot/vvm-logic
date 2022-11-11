@@ -15,9 +15,9 @@ test("Instruction: INIT", () => {
         setTrail(Trail.of().setTrailPointer(-1));
 
     const expectedState = State.new()
-        .setStack(Stack.of(new ValueCell(4),new ValueCell(-1),new ValueCell(-1),new ValueCell(0),
-            new UninitializedCell(),new UninitializedCell()))
-        .setFramePointer(5).setBacktrackPointer(5).setHeap(Heap.of(100)).setTrail(Trail.of().setTrailPointer(-1))
+        .setStack(Stack.of(new ValueCell(4), new ValueCell(-1), new ValueCell(-1), new ValueCell(0),
+            new UninitializedCell(), new UninitializedCell()))
+        .setFramePointer(5).setBacktrackPointer(5).setHeap(Heap.of(100)).setTrail(Trail.of().setTrailPointer(-1));
 
     expect(instr.step(prevState)).toStrictEqual(expectedState);
 });
