@@ -99,6 +99,7 @@ export abstract class Instruction {
         return state;
     }
 
+    // TODO: Warum nicht schauen ob u < backtrackpointer - 2 ? So wie in Java-Implementierung
     public static trail(state: State, u: number): State {
         const onStack = state.stack.get(state.backtrackPointer - 2);
         if (!(onStack instanceof ValueCell)) {

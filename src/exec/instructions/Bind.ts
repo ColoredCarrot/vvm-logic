@@ -1,6 +1,7 @@
 import {Instruction} from "./Instruction";
 import {State} from "../../model/State";
 import {PointerToHeapCell} from "../../model/PointerToHeapCell";
+import {VariableCell} from "../../model/VariableCell";
 
 export class Bind extends Instruction {
 
@@ -10,10 +11,11 @@ export class Bind extends Instruction {
 
     step(state: State): State {
 
-        const secondCell = state.stack.get(state.stack.stackPointer) as PointerToHeapCell;
+        const firstCell = state.stack.get(state.stack.stackPointer) as VariableCell
+        const secondCell = state.stack.get(state.stack.stackPointer - 1) as PointerToHeapCell;
 
         return state
-            .setHeap(state.heap.set(secondCell.value, state.stack.get(state.stack.stackPointer)))
+            .setHeap(state.heap.set(secondCell.value, new VariableCell(firstCell.value)))
             .modify(s => Instruction.trail(s, secondCell.value))
             .modifyStack(stack => stack.pop(2));
     }
