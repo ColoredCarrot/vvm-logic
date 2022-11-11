@@ -1,6 +1,6 @@
 export class Label {
-    private _line: number;
-    private _text: string;
+    private readonly _line: number;
+    private readonly _text: string;
 
     constructor(line: number, text: string) {
         this._line = line;

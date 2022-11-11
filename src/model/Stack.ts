@@ -13,6 +13,10 @@ export class Stack {
         return new Stack(Immutable.List());
     }
 
+    static of(...elems: Cell[]): Stack {
+        return new Stack(Immutable.List(elems));
+    }
+
     push(value: Cell): Stack {
         return new Stack(this.values.push(value));
     }
