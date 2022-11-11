@@ -11,7 +11,7 @@ export class Bind extends Instruction {
 
     step(state: State): State {
 
-        const firstCell = state.stack.get(state.stack.stackPointer) as VariableCell
+        const firstCell = state.stack.get(state.stack.stackPointer) as VariableCell;
         const secondCell = state.stack.get(state.stack.stackPointer - 1) as PointerToHeapCell;
 
         return state

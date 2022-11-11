@@ -2,10 +2,10 @@ import {UninitializedCell} from "../../model/UninitializedCell";
 import {ValueCell} from "../../model/ValueCell";
 import {Stack} from "../../model/Stack";
 import {PointerToHeapCell} from "../../model/PointerToHeapCell";
-import { Heap } from "../../model/Heap";
-import { State } from "../../model/State";
+import {Heap} from "../../model/Heap";
+import {State} from "../../model/State";
 import {Putvar} from "../../exec/instructions/Putvar";
-import { VariableCell } from "../../model/VariableCell";
+import {VariableCell} from "../../model/VariableCell";
 
 test("Instruction: PUTVAR", () => {
     const instr = new Putvar(2);

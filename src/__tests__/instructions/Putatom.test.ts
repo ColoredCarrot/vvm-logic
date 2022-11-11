@@ -2,10 +2,10 @@ import {UninitializedCell} from "../../model/UninitializedCell";
 import {ValueCell} from "../../model/ValueCell";
 import {Stack} from "../../model/Stack";
 import {PointerToHeapCell} from "../../model/PointerToHeapCell";
-import { Heap } from "../../model/Heap";
-import { Putatom } from "../../exec/instructions/Putatom";
+import {Heap} from "../../model/Heap";
+import {Putatom} from "../../exec/instructions/Putatom";
 import {AtomCell} from "../../model/AtomCell";
-import { State } from "../../model/State";
+import {State} from "../../model/State";
 
 test("Instruction: PUTATOM", () => {
     const instr = new Putatom("a");

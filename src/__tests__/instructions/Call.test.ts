@@ -1,7 +1,7 @@
 import {UninitializedCell} from "../../model/UninitializedCell";
 import {ValueCell} from "../../model/ValueCell";
 import {Stack} from "../../model/Stack";
-import { State } from "../../model/State";
+import {State} from "../../model/State";
 import {Call} from "../../exec/instructions/Call";
 import {SignLabel} from "../../exec/SignLabel";
 

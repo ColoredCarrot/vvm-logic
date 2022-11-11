@@ -2,8 +2,8 @@ import {UninitializedCell} from "../../model/UninitializedCell";
 import {ValueCell} from "../../model/ValueCell";
 import {Stack} from "../../model/Stack";
 import {PointerToHeapCell} from "../../model/PointerToHeapCell";
-import { Heap } from "../../model/Heap";
-import { State } from "../../model/State";
+import {Heap} from "../../model/Heap";
+import {State} from "../../model/State";
 import {Putref} from "../../exec/instructions/Putref";
 
 test("Instruction: PUTREF", () => {
