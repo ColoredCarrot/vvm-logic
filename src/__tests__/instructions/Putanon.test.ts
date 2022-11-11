@@ -5,7 +5,7 @@ import {Stack} from "../../model/Stack";
 import {PointerToHeapCell} from "../../model/PointerToHeapCell";
 import {Putanon} from "../../exec/instructions/Putanon";
 import {VariableCell} from "../../model/VariableCell";
-import { Heap } from "../../model/Heap";
+import {Heap} from "../../model/Heap";
 
 test("Instruction: PUTANON", () => {
     const instr = new Putanon();
