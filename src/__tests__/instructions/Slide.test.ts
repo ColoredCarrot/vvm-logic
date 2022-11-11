@@ -2,7 +2,7 @@ import {State} from "../../model/State";
 import {Stack} from "../../model/Stack";
 import {ValueCell} from "../../model/ValueCell";
 import {Slide} from "../../exec/instructions/Slide";
-import "../toEqualState";
+import "../../infrastructure/jest/toEqualState";
 
 test("Instruction: SLIDE", () => {
     const instr = new Slide(4, 2);

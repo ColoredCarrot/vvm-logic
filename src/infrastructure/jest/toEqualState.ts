@@ -1,4 +1,4 @@
-import {State} from "../model/State";
+import {State} from "../../model/State";
 import {expect} from "@jest/globals";
 
 expect.extend({
