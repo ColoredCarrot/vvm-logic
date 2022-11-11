@@ -25,7 +25,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts --inspect-brk __tests__ --runInBand --no-cache",
+    "test": "react-scripts test --watchAll=false",
     "lint": "eslint src",
     "lint:fix": "npm run lint -- --fix",
     "eject": "react-scripts eject"
