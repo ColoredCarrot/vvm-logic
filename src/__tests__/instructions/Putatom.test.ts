@@ -17,7 +17,7 @@ test("Instruction: PUTATOM", () => {
 
     const expectedState = State.new()
         .setHeap(Heap.of(102,
-            // existing cell on heap
+            // untouched heap
             [100, new UninitializedCell()],
             // new atom cell
             [101, new AtomCell("a")]))
