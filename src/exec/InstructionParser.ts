@@ -26,6 +26,10 @@ import {Uref} from "./instructions/Uref";
 import {Unify} from "./instructions/Unify";
 import {Son} from "./instructions/Son";
 import {Uatom} from "./instructions/Uatom";
+import {Mark} from "./instructions/Mark";
+import {Delbtp} from "./instructions/Delbtp";
+import {Prune} from "./instructions/Prune";
+import {No} from "./instructions/No";
 
 export class ParseError extends Error {
 }
@@ -172,7 +176,7 @@ export class InstructionParser {
         case "init":
             return new Init(param);
         case "mark":
-            return new InvalidInstruction(instr + " " + param.text); //TODO: Replace with actual implementation
+            return new Mark(param); //TODO: Replace with actual implementation
         case "try":
             return new InvalidInstruction(instr + " " + param.text); //TODO: Replace with actual implementation
         case "up":
@@ -257,19 +261,21 @@ export class InstructionParser {
         case "bind":
             return new Bind();
         case "delbtp":
-            return new InvalidInstruction(input); //TODO: Replace once implemented
+            return new Delbtp(); //TODO: Replace once implemented
         case "fail":
             return new Fail();
         case "getnode":
             return new InvalidInstruction(input); //TODO: Replace once implemented
         case "lastmark":
             return new Lastmark();
+        case "no":
+            return new No();
         case "pop":
             return new Pop();
         case "popenv":
             return new Popenv();
         case "prune":
-            return new InvalidInstruction(input); //TODO: Replace once implemented
+            return new Prune();
         case "putanon":
             return new Putanon();
         case "setbtp":
