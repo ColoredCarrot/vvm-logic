@@ -1,14 +1,14 @@
-import {State} from "../../model/State";
 import {UninitializedCell} from "../../model/UninitializedCell";
 import {ValueCell} from "../../model/ValueCell";
 import {Stack} from "../../model/Stack";
 import {PointerToHeapCell} from "../../model/PointerToHeapCell";
-import {Putanon} from "../../exec/instructions/Putanon";
-import {VariableCell} from "../../model/VariableCell";
 import {Heap} from "../../model/Heap";
+import {Putatom} from "../../exec/instructions/Putatom";
+import {AtomCell} from "../../model/AtomCell";
+import {State} from "../../model/State";
 
-test("Instruction: PUTANON", () => {
-    const instr = new Putanon();
+test("Instruction: PUTATOM", () => {
+    const instr = new Putatom("a");
 
     const prevState = State.new()
         .setHeap(Heap.of(101, [100, new UninitializedCell()]))
@@ -19,8 +19,8 @@ test("Instruction: PUTANON", () => {
         .setHeap(Heap.of(102,
             // untouched heap
             [100, new UninitializedCell()],
-            // new variable cell
-            [101, new VariableCell(101)]))
+            // new atom cell
+            [101, new AtomCell("a")]))
         .setStack(Stack.of(
             // untouched stack
             new UninitializedCell(), new ValueCell(123),

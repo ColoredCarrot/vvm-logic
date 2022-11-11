@@ -31,4 +31,8 @@ export class Trail {
         }
         return new Trail(this.values.slice(0, tp + 1));
     }
+
+    static of(...values: number[]): Trail {
+        return new Trail(Immutable.List(values));
+    }
 }

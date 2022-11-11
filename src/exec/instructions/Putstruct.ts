@@ -3,6 +3,7 @@ import {State} from "../../model/State";
 import {Cell} from "../../model/Cell";
 import {StructCell} from "../../model/StructCell";
 import {SignLabel} from "../SignLabel";
+import {PointerToHeapCell} from "../../model/PointerToHeapCell";
 
 export class Putstruct extends Instruction {
 
@@ -17,7 +18,7 @@ export class Putstruct extends Instruction {
     step(state: State): State {
 
         const size = this.param.size;
-        const newStackPointer = state.stack.stackPointer - size;
+        const newStackPointer = state.stack.stackPointer - size + 1;
 
         const cells: Cell[] = new Array(size + 1);
         const [newHeap, address] = state.heap.alloc(cells);
@@ -25,13 +26,14 @@ export class Putstruct extends Instruction {
         let heap = newHeap;
         heap = heap.set(address, new StructCell(this.param.text, size));
 
-        for (let i = 0; i < size; i++) {
-            heap = heap.set(address + 1 + i, state.stack.get(newStackPointer + i));
+        for (let i = 1; i <= size; i++) {
+            heap = heap.set(address + i, state.stack.get(newStackPointer + i - 1) as PointerToHeapCell);
         }
 
         return state
             .setHeap(heap)
-            .setStack(state.stack.pop(size));
+            .setStack(state.stack.pop(size))
+            .pushStack(new PointerToHeapCell(address));
     }
 
 }
