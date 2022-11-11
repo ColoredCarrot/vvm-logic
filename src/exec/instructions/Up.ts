@@ -4,20 +4,14 @@ import {Label} from "../Label";
 
 export class Up extends Instruction {
 
-    //Unifikationsstruktur
-    private label: Label;
-
-    constructor(label: Label) {
-        super("POP");
-        this.label = label;
+    constructor(private readonly label: Label) {
+        super("UP " + label.text);
     }
 
     step(state: State): State {
-
-        state.stack.pop();
-        state.setProgramCounter(this.label.line);
-
-        return state.garbageCollector.run(state);
-
+        return state
+            .modifyStack(s => s.pop())
+            .setProgramCounter(this.label.line)
+            .modify(s => s.garbageCollector.run(s));
     }
 }
