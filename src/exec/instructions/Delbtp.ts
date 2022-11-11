@@ -11,9 +11,9 @@ export class Delbtp extends Instruction {
     step(state: State): State {
 
         //Was ist wenn die Zelle keine  Value hat?
-       const cell = state.stack.get(state.framePointer - 4) as ValueCell;
-       state.setBacktrackPointer(cell.getValue());
-       return state;
+        const cell = state.stack.get(state.framePointer - 4) as ValueCell;
+        state.setBacktrackPointer(cell.getValue());
+        return state;
     }
 
 }

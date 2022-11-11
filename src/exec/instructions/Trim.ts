@@ -13,10 +13,10 @@ export class Trim extends Instruction {
 
     step(state: State): State {
 
-        const number1 = state.stack.getStackPointer() - state.getFramePointer();
+        const number1 = state.stack.stackPointer - state.framePointer;
         const number2 = number1 - this.numberM;
 
-        if(state.getFramePointer() >= state.getBacktrackPointer()){
+        if (state.framePointer >= state.backtrackPointer) {
             for (let i = 0; i <  number2; i++) {
                 state.stack.pop();
             }

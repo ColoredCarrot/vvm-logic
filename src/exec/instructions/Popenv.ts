@@ -13,23 +13,23 @@ export class Popenv extends Instruction {
     }
 
     step(state: State): State {
-        const currentFP = state.getFramePointer();
+        const currentFP = state.framePointer;
         const fPCell = state.stack.get(currentFP) as ValueCell;
         const paramPC = fPCell.getValue();
-        const savedCell = state.stack.get(state.stack.size() - 1);
-        const newFPCell = state.stack.get(state.getFramePointer() - 1) as ValueCell;
+        const savedCell = state.stack.get(state.stack.stackPointer - 1);
+        const newFPCell = state.stack.get(state.framePointer - 1) as ValueCell;
         const valueFP = newFPCell.getValue();
 
 
-        if (state.getBacktrackPointer() < state.getFramePointer()) {
+        if (state.backtrackPointer < state.backtrackPointer) {
             for (let i = 0; i < 7; i++) {
-                state.stack.pop();
+                state = state.modifyStack(stack => stack.pop());
             }
-            state.stack.push(savedCell);
+            state.pushStack(savedCell);
         }
 
-        state.setFramePointer(valueFP);
-        state.setProgramCounter(paramPC);
+        state = state.setFramePointer(valueFP);
+        state = state.setProgramCounter(paramPC);
 
         state.garbageCollector.run(state);
 

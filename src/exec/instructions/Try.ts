@@ -15,7 +15,7 @@ export class Try extends Instruction {
 
     step(state: State): State {
 
-        state.stack.set(state.framePointer - 5, new ValueCell(state.getProgramCounter()));
+        state.stack.set(state.framePointer - 5, new ValueCell(state.programCounter));
         state.setProgramCounter(this.value.line);
         return state;
     }

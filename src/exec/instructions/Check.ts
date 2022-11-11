@@ -15,7 +15,7 @@ export class Check  extends Instruction {
         const valueCell = state.stack.get(state.stack.stackPointer) as ValueCell;
         const value = valueCell.value;
 
-        if(! Check.check(state, value, Check.deref(state, state.framePointer + this.number))){
+        if (!Check.check(state, value, Check.deref(state, state.framePointer + this.number))) {
             Check.backtrack(state);
         }
 
