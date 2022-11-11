@@ -21,10 +21,8 @@ export class Call extends Instruction {
 
     step(state: State): State {
 
-        //state.heap = state.heap.set(state.heap.get(state.stack.size - 2) + 1, state.heap.get(state.stack.size - 1))
-
         return state
-            .modifyStack(stack => stack.pop(2))
-            .modify(s => s.garbageCollector.run(s));
+            .setFramePointer(state.stack.stackPointer - this.size)
+            .setProgramCounter(this.labelLine);
     }
 }
