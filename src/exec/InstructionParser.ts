@@ -11,6 +11,21 @@ import {Putref} from "./instructions/Putref";
 import {Putvar} from "./instructions/Putvar";
 import {Up} from "./instructions/Up";
 import {Pushenv} from "./instructions/Pushenv";
+import {Init} from "./instructions/Init";
+import {Jump} from "./instructions/Jump";
+import {Lastcall} from "./instructions/Lastcall";
+import {Putanon} from "./instructions/Putanon";
+import {Putstruct} from "./instructions/Putstruct";
+import {Slide} from "./instructions/Slide";
+import {Uvar} from "./instructions/Uvar";
+import {Check} from "./instructions/Check";
+import {Fail} from "./instructions/Fail";
+import {Lastmark} from "./instructions/Lastmark";
+import {Ustruct} from "./instructions/Ustruct";
+import {Uref} from "./instructions/Uref";
+import {Unify} from "./instructions/Unify";
+import {Son} from "./instructions/Son";
+import {Uatom} from "./instructions/Uatom";
 
 export class ParseError extends Error {
 }
@@ -146,7 +161,7 @@ export class InstructionParser {
     private static parseNumberNumberParamInstruction(instr: string, p0: number, p1: number): Instruction {
         switch (instr) {
         case "slide":
-            return new InvalidInstruction(instr + " " + p0 + " " + p1); //TODO: Replace with actual implementation
+            return new Slide(p0, p1);
         default:
             return new InvalidInstruction(instr + " " + p0 + " " + p1);
         }
@@ -154,16 +169,18 @@ export class InstructionParser {
 
     private static parseLabelParamInstruction(instr: string, param: Label): Instruction {
         switch (instr) {
-        case "init":
-            return new InvalidInstruction(instr + " " + param.text); //TODO: Replace with actual implementation
-        case "mark":
-            return new InvalidInstruction(instr + " " + param.text); //TODO: Replace with actual implementation
-        case "try":
-            return new InvalidInstruction(instr + " " + param.text); //TODO: Replace with actual implementation
-        case "up":
-            return new Up(param);
-        default:
-            return new InvalidInstruction(instr + " " + param.text);
+            case "init":
+                return new Init(param);
+            case "mark":
+                return new InvalidInstruction(instr + " " + param.text); //TODO: Replace with actual implementation
+            case "try":
+                return new InvalidInstruction(instr + " " + param.text); //TODO: Replace with actual implementation
+            case "up":
+                return new Up(param);
+            case "jump":
+                return new Jump(param);
+            default:
+                return new InvalidInstruction(instr + " " + param.text);
         }
     }
 
@@ -174,7 +191,7 @@ export class InstructionParser {
         case "putatom":
             return new Putatom(param);
         case "uatom":
-            return new InvalidInstruction(instr + " " + param); //TODO: Replace with actual Implementation
+            return new Uatom(param);
         default:
             return new InvalidInstruction(instr + " " + param);
         }
@@ -183,7 +200,7 @@ export class InstructionParser {
     private static parseNumberParamInstruction(instr: string, param: number): Instruction {
         switch (instr) {
         case "check":
-            return new InvalidInstruction(instr + param); //TODO: Replace with actual Implementation
+            return new Check(param);
         case "pushenv":
             return new Pushenv(param);
         case "putref":
@@ -191,13 +208,13 @@ export class InstructionParser {
         case "putvar":
             return new Putvar(param);
         case "son":
-            return new InvalidInstruction(instr + param); //TODO: Replace with actual Implementation
+            return new Son(param);
         case "trim":
             return new InvalidInstruction(instr + param); //TODO: Replace with actual Implementation
         case "uref":
-            return new InvalidInstruction(instr + param); //TODO: Replace with actual Implementation
+            return new Uref(param);
         case "uvar":
-            return new InvalidInstruction(instr + param); //TODO: Replace with actual Implementation
+            return new Uvar(param);
         }
         return new InvalidInstruction(instr + param);
     }
@@ -205,7 +222,7 @@ export class InstructionParser {
     private static parseSignAndLabelParamInstruction(instr: string, sign: SignLabel, label: Label): Instruction {
         switch (instr) {
         case "ustruct":
-            return new Pop(); //TODO: Replace with actual Constructor
+            return new Ustruct(sign, label);
         default:
             return new InvalidInstruction(instr + " " + sign + " " + label);
         }
@@ -214,7 +231,7 @@ export class InstructionParser {
     private static parseSignAndNumberParamInstruction(instr: string, sign: SignLabel, secondParam: number): Instruction {
         switch (instr) {
         case "lastcall":
-            return new Pop(); //TODO: Change to actual Constructor
+            return new Lastcall(sign, secondParam);
         default:
             return new InvalidInstruction(instr + " " + sign + " " + secondParam);
         }
@@ -227,9 +244,9 @@ export class InstructionParser {
         case "index":
             return new Pop(); //TODO: Change to actual Constructor
         case "jump":
-            return new Pop(); //TODO: Change to actual Constructor
+            return new Jump(sign);
         case "putstruct":
-            return new Pop(); //TODO: Change to actual Constructor
+            return new Putstruct(sign);
         default:
             return new InvalidInstruction(instr + " " + sign.text);
         }
@@ -242,11 +259,11 @@ export class InstructionParser {
         case "delbtp":
             return new InvalidInstruction(input); //TODO: Replace once implemented
         case "fail":
-            return new InvalidInstruction(input); //TODO: Replace once implemented
+            return new Fail();
         case "getnode":
             return new InvalidInstruction(input); //TODO: Replace once implemented
         case "lastmark":
-            return new InvalidInstruction(input); //TODO: Replace once implemented
+            return new Lastmark();
         case "pop":
             return new Pop();
         case "popenv":
@@ -254,13 +271,13 @@ export class InstructionParser {
         case "prune":
             return new InvalidInstruction(input); //TODO: Replace once implemented
         case "putanon":
-            return new InvalidInstruction(input); //TODO: Replace once implemented
+            return new Putanon();
         case "setbtp":
             return new InvalidInstruction(input); //TODO: Replace once implemented
         case "setcut":
             return new InvalidInstruction(input); //TODO: Replace once implemented
         case "unify":
-            return new InvalidInstruction(input); //TODO: Replace once implemented
+            return new Unify();
         default:
             return new InvalidInstruction(input);
         }
