@@ -3,8 +3,8 @@ import {State} from "../../model/State";
 import {PointerToHeapCell} from "../../model/PointerToHeapCell";
 
 export class Check extends Instruction {
-    private i: number;
 
+    private readonly i: number;
 
     constructor(i: number) {
         super("CHECK " + i);

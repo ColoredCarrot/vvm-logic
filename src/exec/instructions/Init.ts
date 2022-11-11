@@ -6,19 +6,19 @@ import {Label} from "../Label";
 
 export class Init extends Instruction {
 
-    private readonly label: Label;
+    private readonly param: Label;
 
     constructor(label: Label) {
-        super("INIT");
-        this.label = label;
+        super("INIT " + label);
+        this.param = label;
     }
 
     step(state: State): State {
+
         state = state.setFramePointer(5);
         state = state.setBacktrackPointer(5);
 
-
-        state = state.pushStack(new ValueCell(this.label.line));
+        state = state.pushStack(new ValueCell(this.param.line));
         state = state.pushStack(new ValueCell(-1));
         state = state.pushStack(new ValueCell(-1));
         state = state.pushStack(new ValueCell(0));

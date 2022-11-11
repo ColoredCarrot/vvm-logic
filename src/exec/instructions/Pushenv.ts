@@ -5,7 +5,6 @@ import {Cell} from "../../model/Cell";
 
 export class Pushenv extends Instruction {
 
-    //reserviert Speicherplatz für lokale Variabeln
     private readonly mVar: number;
     private readonly cell: Cell = new UninitializedCell();
 

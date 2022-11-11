@@ -1,6 +1,7 @@
 import {Instruction} from "./Instruction";
 import {State} from "../../model/State";
 import {ValueCell} from "../../model/ValueCell";
+import {PointerToStackCell} from "../../model/PointerToStackCell";
 
 export class Delbtp extends Instruction {
 
@@ -10,9 +11,8 @@ export class Delbtp extends Instruction {
 
     step(state: State): State {
 
-        //Was ist wenn die Zelle keine  Value hat?
-        const cell = state.stack.get(state.framePointer - 4) as ValueCell;
-        state.setBacktrackPointer(cell.getValue());
+        const cell = state.stack.get(state.framePointer - 4) as PointerToStackCell;
+        state = state.setBacktrackPointer(cell.value);
         return state;
     }
 
