@@ -123,4 +123,14 @@ export class State implements StateVars {
     modify(f: (_: State)=> State): State {
         return f(this);
     }
+
+    equals(that: State): boolean {
+        return this.heap.equals(that.heap)
+            && this.stack.equals(that.stack)
+            && this.trail.equals(that.trail)
+            && this.framePointer === that.framePointer
+            && this.backtrackPointer === that.backtrackPointer
+            && this.programCounter === that.programCounter
+        ;
+    }
 }

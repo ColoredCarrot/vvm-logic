@@ -9,6 +9,10 @@ export class Trail {
         return new Trail(Immutable.List());
     }
 
+    static of(...values: number[]): Trail {
+        return new Trail(Immutable.List(values));
+    }
+
     push(value: number): Trail {
         return new Trail(this.values.push(value));
     }
@@ -30,5 +34,19 @@ export class Trail {
             throw new IllegalOperationError("Attempting to set trail pointer to higher value would lead to uninitialized memory");
         }
         return new Trail(this.values.slice(0, tp + 1));
+    }
+
+    equals(that: Trail): boolean {
+        if (this.values.size !== that.values.size) {
+            return false;
+        }
+
+        for (let idx = 0; idx < this.values.size; ++idx) {
+            if (this.values.get(idx) !== that.values.get(idx)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

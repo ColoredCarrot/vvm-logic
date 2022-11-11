@@ -106,7 +106,7 @@
     "@typescript-eslint/explicit-function-return-type": [
       "error",
       {
-        "allowExpressions": false
+        "allowExpressions": true
       }
     ],
     "@typescript-eslint/no-non-null-assertion": "off",

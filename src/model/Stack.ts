@@ -51,4 +51,20 @@ export class Stack {
     get stackPointer(): number {
         return this.size - 1;
     }
+
+    equals(that: Stack): boolean {
+        if (this.size !== that.size) {
+            return false;
+        }
+
+        for (let idx = 0; idx < this.size; ++idx) {
+            const thisCell = this.values.get(idx)!;
+            const thatCell = that.values.get(idx)!;
+            if (!thisCell.equals(thatCell)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }

@@ -61,4 +61,19 @@ export class Heap {
             addr,
         ];
     }
+
+    equals(that: Heap): boolean {
+        if (this.data.size !== that.data.size) {
+            return false;
+        }
+
+        // Check contents
+        for (const [addr, cell] of this.data) {
+            if (that.data.get(addr)?.equals(cell) !== true) {
+                return false;
+            }
+        }
+
+        return this._heapPointer === that._heapPointer;
+    }
 }
