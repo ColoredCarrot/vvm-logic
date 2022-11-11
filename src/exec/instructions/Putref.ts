@@ -14,8 +14,9 @@ export class Putref extends Instruction {
     step(state: State): State {
 
         const address: number = Instruction.deref(state, state.framePointer + this.reference);
-        state.stack.push(new PointerToHeapCell(address));
-        return state;
+
+        return state
+            .pushStack(new PointerToHeapCell(address));
     }
 
 }
