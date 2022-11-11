@@ -1,12 +1,8 @@
 import {UninitializedCell} from "../../model/UninitializedCell";
 import {ValueCell} from "../../model/ValueCell";
 import {Stack} from "../../model/Stack";
-import {PointerToHeapCell} from "../../model/PointerToHeapCell";
-import { Heap } from "../../model/Heap";
 import { State } from "../../model/State";
 import {Call} from "../../exec/instructions/Call";
-import {VariableCell} from "../../model/VariableCell";
-import {Trail} from "../../model/Trail";
 import {SignLabel} from "../../exec/SignLabel";
 
 test("Instruction: CALL", () => {
