@@ -7,5 +7,10 @@ export class ValueCell extends Cell {
         super();
         this.value = value;
     }
+
+    getValue(): number {
+        return this.value;
+    }
+
 }
 

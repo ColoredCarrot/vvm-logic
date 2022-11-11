@@ -1,22 +1,23 @@
 import {Instruction} from "./Instruction";
 import {State} from "../../model/State";
 import {PointerToStackCell} from "../../model/PointerToStackCell";
-import {ValueCell} from "../../model/ValueCell";
+import {Label} from "../Label";
 import {UninitializedCell} from "../../model/UninitializedCell";
+import {ValueCell} from "../../model/ValueCell";
 
 export class Mark extends Instruction {
 
-    private readonly addressB: number;
+    private readonly param: Label;
 
-    constructor(address: number) {
+    constructor(param: Label) {
         super("MARK");
-        this.addressB = address;
+        this.param = param;
     }
 
     // S[SP + 5] ← FP; S[SP + 6] ← B; SP ← SP + 6;
 
     step(state: State): State {
-        // 4 uninitialized cells
+        //4 uninitialized cell
         let stack = state.stack;
         for (let i = 0; i < 4; i++) {
             stack = stack.push(new UninitializedCell());
@@ -24,7 +25,7 @@ export class Mark extends Instruction {
 
         stack = stack
             .push(new ValueCell(state.framePointer))
-            .push(new PointerToStackCell(this.addressB));
+            .push(new PointerToStackCell(this.param.line));
 
         return state.setStack(stack);
     }

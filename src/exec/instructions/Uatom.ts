@@ -7,7 +7,7 @@ import {VariableCell} from "../../model/VariableCell";
 import {Heap} from "../../model/Heap";
 
 export class Uatom extends Instruction {
-    private name: string
+    private name: string;
 
     constructor(param: string) {
         super("UATOM");
@@ -15,16 +15,16 @@ export class Uatom extends Instruction {
     }
 
     step(state: State): State {
-        let h: number = (<PointerToHeapCell>state.stack.get(state.stack.stackPointer)).value;
-        let temp = state.modifyStack(s => s.pop());
-        let heapElem: Cell = state.heap.get(h);
+        const h: number = (<PointerToHeapCell>state.stack.get(state.stack.stackPointer)).value;
+        const temp = state.modifyStack(s => s.pop());
+        const heapElem: Cell = state.heap.get(h);
 
         if (heapElem instanceof AtomCell) {
             //Do Nothing
             return temp;
         } else if (heapElem instanceof VariableCell) {
-            let tempHeap = state.heap;
-            let newAtom: [Heap, number] = tempHeap.alloc([new AtomCell(this.name)]);
+            const tempHeap = state.heap;
+            const newAtom: [Heap, number] = tempHeap.alloc([new AtomCell(this.name)]);
 
             return state.modifyTrail(t => t.push(h))
                 .setHeap(newAtom[0])

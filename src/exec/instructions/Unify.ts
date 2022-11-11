@@ -13,7 +13,7 @@ export class Unify extends Instruction {
         const topOfStack = (<PointerToHeapCell>state.stack.get(state.stack.stackPointer)).value;
         const nextOnStack = (<PointerToHeapCell>state.stack.get(state.stack.stackPointer - 1)).value;
 
-        let temp: [State, boolean] = Instruction.unify(state, nextOnStack, topOfStack);
+        const temp: [State, boolean] = Instruction.unify(state, nextOnStack, topOfStack);
 
         return temp[0].modifyStack(s => s.pop(2));
     }
