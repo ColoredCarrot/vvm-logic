@@ -15,21 +15,18 @@ export class Putstruct extends Instruction {
     }
 
     step(state: State): State {
+
         const size = this.param.size;
+        const newStackPointer = state.stack.stackPointer - size;
 
-        const stackPointer = state.stack.size - size + 1;
-
-        // allokiere this.size + 1 Platz auf dem Heap
         const cells: Cell[] = new Array(size + 1);
         const [newHeap, address] = state.heap.alloc(cells);
 
-        // lege Typ Struct mit Wert this.structName auf Heap
         let heap = newHeap;
         heap = heap.set(address, new StructCell(this.param.text, size));
 
         for (let i = 0; i < size; i++) {
-            // lege auf Heap das Element von stage.stack.get(stackPointer+i)
-            heap = heap.set(address + 1 + i, state.stack.get(stackPointer + i));
+            heap = heap.set(address + 1 + i, state.stack.get(newStackPointer + i));
         }
 
         return state
