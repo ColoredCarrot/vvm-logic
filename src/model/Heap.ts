@@ -30,6 +30,10 @@ export class Heap {
         return new Heap(Immutable.Map(), 100);
     }
 
+    static of(heapPointer: Address, ...elems: [Address, Cell][]): Heap {
+        return new Heap(Immutable.Map(elems), heapPointer);
+    }
+
     get(address: Address): Cell {
         return this.data.get(address)!;
     }
