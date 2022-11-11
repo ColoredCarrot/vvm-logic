@@ -15,10 +15,10 @@ export class Putatom extends Instruction {
 
     step(state: State): State {
         const [newHeap, address] = state.heap.alloc([new UninitializedCell()]);
-        state = state.setHeap(newHeap.set(address, new AtomCell(this.atom)));
-        state = state.setStack(state.stack.push(new PointerToHeapCell(address)));
 
-        return state;
+        return state
+            .setHeap(newHeap.set(address, new AtomCell(this.atom)))
+            .pushStack(new PointerToHeapCell(address));
     }
 
 }
