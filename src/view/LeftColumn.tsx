@@ -28,20 +28,20 @@ export function LeftColumn({state, setState}: LeftColumnProps) {
         }
         }>Step</a>;
 
-    return <>
-        <div className="row">
-            <div className="input-field col s12">
-                <textarea
-                    id="program-text"
-                    className="materialize-textarea"
-                    rows={80}
-                    value={programText}
-                    onChange={(elem) => setProgramText(elem.target.value)}></textarea>
-                <label htmlFor="program-text">Program Text</label>
+    return <div className="h100 left-column">
+        <div className="program-text p">
+            <div className="h100">
+                <div style={{display: "flex", height: "100%"}} className="h100">
+                    <textarea
+                        id="program-text"
+                        className="program-text-input h100"
+                        value={programText}
+                        onChange={(elem) => setProgramText(elem.target.value)}></textarea>
+                </div>
             </div>
         </div>
-        <div className="row">
+        <div className="control-panel p">
             {actionBtn}
         </div>
-    </>;
+    </div>;
 }

@@ -6,7 +6,7 @@ interface VisualizationProps {
 }
 
 export function Visualization({state}: VisualizationProps) {
-    return <div>
+    return <div className="h100 visualization p">
         <h3>Visualization</h3>
 
         <p>State: {JSON.stringify(state)}</p>

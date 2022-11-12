@@ -1,0 +1,35 @@
+.program-text-input {
+    resize: none;
+    border: 4px solid #2A2A2A;
+    border-radius: 0;
+    outline: none;
+}
+
+.h100 {
+    height: 100%;
+}
+
+.visualization {
+    width: 70%;
+    background-color: #AFAFAF;
+    float: left;
+}
+
+.left-column {
+    width: 30%;
+    float: left;
+}
+
+.program-text {
+    height: 70vh;
+    float: none;
+}
+
+.control-panel {
+    height: 30vh;
+    float: none;
+}
+
+.p {
+    padding: 10px;
+}

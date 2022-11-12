@@ -7,18 +7,10 @@ import {State} from "../model/State";
 function App() {
     const [state, setState] = useState<State>(State.new());
 
-    return (
-        <div className="container">
-            <div className="row">
-                <div className="col s4">
-                    <LeftColumn state={state} setState={setState}></LeftColumn>
-                </div>
-                <div className="col s8">
-                </div>
-                <Visualization state={state}/>
-            </div>
-        </div>
-    );
+    return <>
+        <LeftColumn state={state} setState={setState}/>
+        <Visualization state={state}/>
+    </>;
 }
 
 export default App;
