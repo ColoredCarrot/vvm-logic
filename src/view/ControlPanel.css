@@ -1,3 +1,13 @@
 .ControlPanel {
+    min-height: 100px;
+    max-height: 300px;
+    padding: 10px;
+}
 
+.ControlPanel__button {
+    display: inline-block;
+    background-color: white;
+
+    padding: 10px 25px 10px 25px;
+    cursor: pointer;
 }

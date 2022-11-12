@@ -1,14 +1,15 @@
 import React from "react";
-import {State} from "../model/State";
+import {State} from "../../model/State";
+import "./Visualization.css";
 
 interface VisualizationProps {
     state: State;
 }
 
 export function Visualization({state}: VisualizationProps) {
-    return <div className="h100 visualization p">
+    return <div className="Visualization">
         <h3>Visualization</h3>
 
-        <p>State: {JSON.stringify(state)}</p>
+        <code>{JSON.stringify(state)}</code>
     </div>;
 }

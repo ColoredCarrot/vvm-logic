@@ -2,7 +2,7 @@ import React, {useState} from "react";
 import "./App.css";
 import {AppState, AppStateContext} from "./AppState";
 import {LeftColumn} from "./LeftColumn";
-import {Visualization} from "./Visualization";
+import {Visualization} from "./visualization/Visualization";
 import {State} from "../model/State";
 
 function App() {
@@ -12,10 +12,14 @@ function App() {
 
     return <>
         <AppStateContext.Provider value={[appState, setAppState]}>
-            <div className="left-column-container">
-                <LeftColumn state={state} setState={setState}/>
+            <div className="App">
+                <div className="left-column-container">
+                    <LeftColumn state={state} setState={setState}/>
+                </div>
+                <div className="visualization-container">
+                    <Visualization state={state}/>
+                </div>
             </div>
-            <Visualization state={state}/>
         </AppStateContext.Provider>
     </>;
 }

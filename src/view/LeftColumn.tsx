@@ -29,7 +29,7 @@ interface ProgramTextProps {
 }
 
 function ProgramText({state, programText, setProgramText}: ProgramTextProps) {
-    return <div className="ProgramText p">
+    return <div className="ProgramText">
         <ProgramTextEditor vmState={state} programText={programText} setProgramText={setProgramText}/>
     </div>;
 }

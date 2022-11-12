@@ -1,40 +1,29 @@
+html {
+    height: 100%;
+}
+
 body {
+    height: 100%;
     background-color: #3C3F41;
 }
 
-.program-text-input {
-    resize: none;
-    border: 4px solid #2A2A2A;
-    border-radius: 0;
-    outline: none;
-}
-
-.h100 {
+.App {
     height: 100%;
-}
-
-.visualization {
-    width: 70%;
-    background-color: #AFAFAF;
-    float: left;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
 }
 
 .left-column-container {
-    width: 30%;
-    height: 100%;
-    float: left;
+    flex: 1;
+
+    padding: 10px
 }
 
-.program-text {
-    height: 70vh;
-    float: none;
-}
+.visualization-container {
+    flex: 3;  /* Visualization should take up 3 times as much horizontal space as the left column */
 
-.control-panel {
-    height: 30vh;
-    float: none;
-}
-
-.p {
     padding: 10px;
+
+    display: flex;
 }

@@ -55,16 +55,16 @@ export function ControlPanel({vmState, setVmState, programText}: ControlPanelPro
     });
 
     const actionBtn = endOfProgram
-        ? <a className="btn" onClick={() => {
+        ? <a className="ControlPanel__button" onClick={() => {
             setVmState(State.new());
         }
         }>Restart</a>
-        : <a className="btn" onClick={() => {
+        : <a className="ControlPanel__button" onClick={() => {
             invokeStep();
         }
         }>Step</a>;
 
-    return <div className="ControlPanel p">
+    return <div className="ControlPanel">
         {actionBtn}
     </div>;
 }
