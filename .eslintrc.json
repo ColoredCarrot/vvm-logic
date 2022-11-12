@@ -106,7 +106,8 @@
       "error",
       {
         "arrays": "always-multiline",
-        "functions": "only-multiline"
+        "functions": "only-multiline",
+        "objects": "always-multiline"
       }
     ],
 

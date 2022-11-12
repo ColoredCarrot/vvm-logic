@@ -1,10 +1,16 @@
-import React, {useEffect, useState} from "react";
+import React, {useContext, useState} from "react";
 import {InvalidInstruction} from "../exec/instructions/InvalidInstruction";
-import {ProgramText} from "../model/ProgramText";
 import * as Model from "../model/ProgramText";
+import {ProgramText} from "../model/ProgramText";
+import {State} from "../model/State";
+import {AppStateContext} from "./AppState";
 import "./ProgramTextEditor.css";
+import {useGlobalEvent} from "./util/UseGlobalEvent";
 
 interface ProgramTextEditorProps {
+
+    vmState: State;
+
     programText: Model.ProgramText;
 
     setProgramText(rawLines: string[]): void;
@@ -12,22 +18,13 @@ interface ProgramTextEditorProps {
 
 type Cursor = readonly [number, number];
 
-export function ProgramTextEditor({programText, setProgramText}: ProgramTextEditorProps) {
+export function ProgramTextEditor({vmState, programText, setProgramText}: ProgramTextEditorProps) {
 
     const [cursor, setCursor] = useState([2, 0] as Cursor);
 
-    // Set up global key listener
-    useEffect(() => {
-        const keyListener = (evt: KeyboardEvent) => handleKeyDown(evt, cursor, setCursor, programText, setProgramText);
-        const pasteListener = (evt: ClipboardEvent) => handlePaste(evt);
-        document.addEventListener("keydown", keyListener);
-        document.addEventListener("paste", pasteListener);
-
-        return () => {
-            document.removeEventListener("keydown", keyListener);
-            document.removeEventListener("paste", pasteListener);
-        };
-    });
+    // Set up global listeners
+    useGlobalEvent("keydown", evt => handleKeyDown(evt, cursor, setCursor, programText, setProgramText));
+    useGlobalEvent("paste", evt => handlePaste(evt));
 
     function handlePaste(evt: ClipboardEvent): void {
         const toPaste = evt.clipboardData?.getData("text/plain");
@@ -46,7 +43,9 @@ export function ProgramTextEditor({programText, setProgramText}: ProgramTextEdit
                 key={num}
                 raw={ln} num={num}
                 cursor={cursor}
-                codeLine={programText.getCodeLineAtLine(num)}/>,
+                codeLine={programText.getCodeLineAtLine(num)}
+                vmState={vmState}
+            />,
         )}
     </div>;
 }
@@ -56,14 +55,29 @@ interface ProgramTextLineProps {
     num: number;
     codeLine: Model.ProgramTextLine | null;
     cursor: readonly [number, number];
+    vmState: State;
 }
 
-function ProgramTextLine({raw, num, codeLine, cursor}: ProgramTextLineProps) {
-
+function ProgramTextLine({raw, num, codeLine, cursor, vmState}: ProgramTextLineProps) {
     // Replace spaces with non-breaking spaces (U+00A0)
     raw = raw.replaceAll(" ", "\u00A0");
+    const isActiveLine = codeLine?.num === vmState.programCounter + 1;
+
+    const [appState, setAppState] = useContext(AppStateContext);
 
     let content: React.ReactElement;
+
+    let cssClass = "ProgramTextEditor__Line";
+    if (isActiveLine) {
+        if (appState.lastExecutionError !== null) {
+            // We were the last instruction to attempt to be executed, but it failed!
+            cssClass += " ProgramTextEditor__Line--critical";
+        } else {
+            cssClass += " ProgramTextEditor__Line--active";
+        }
+    } else if (codeLine?.instruction instanceof InvalidInstruction) {
+        cssClass += " ProgramTextEditor__Line--error";
+    }
 
     if (cursor[0] === num) {
         // Cursor is on our line
@@ -73,13 +87,6 @@ function ProgramTextLine({raw, num, codeLine, cursor}: ProgramTextLineProps) {
             className="ProgramTextEditor__Line__RightOfCursor">{afterCursor}</span></>;
     } else {
         content = <span>{raw || "\u200B"}</span>;
-    }
-
-    let cssClass = "ProgramTextEditor__Line";
-    if (codeLine?.instruction instanceof InvalidInstruction) {
-        cssClass += " ProgramTextEditor__Line--error";
-    } else {
-        console.log(codeLine);
     }
 
     return <div className={cssClass}>

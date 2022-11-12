@@ -17,18 +17,19 @@ export function LeftColumn({state, setState}: LeftColumnProps) {
     const programText = useMemo(() => parseProgramText(rawProgramText), [rawProgramText]);
 
     return <div className="LeftColumn">
-        <ProgramText programText={programText} setProgramText={setRawProgramText}/>
+        <ProgramText state={state} programText={programText} setProgramText={setRawProgramText}/>
         <ControlPanel vmState={state} setVmState={setState} programText={programText}/>
     </div>;
 }
 
 interface ProgramTextProps {
+    state: State;
     programText: ProgText;
     setProgramText(rawLines: string[]): void;
 }
 
-function ProgramText({programText, setProgramText}: ProgramTextProps) {
+function ProgramText({state, programText, setProgramText}: ProgramTextProps) {
     return <div className="ProgramText p">
-        <ProgramTextEditor programText={programText} setProgramText={setProgramText}/>
+        <ProgramTextEditor vmState={state} programText={programText} setProgramText={setProgramText}/>
     </div>;
 }

@@ -29,7 +29,7 @@ export class State implements StateVars {
             garbageCollector: new GarbageCollector(),
             framePointer: -1,
             backtrackPointer: -1,
-            programCounter: 0
+            programCounter: -1,
         });
     }
 

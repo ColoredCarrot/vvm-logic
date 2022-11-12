@@ -18,6 +18,14 @@
     background-color: #8d3300;
 }
 
+.ProgramTextEditor__Line--critical {
+    background-color: #710000;
+}
+
+.ProgramTextEditor__Line--active {
+    background-color: #2f31ff;
+}
+
 .ProgramTextEditor__Line__RightOfCursor {
     border-left: 1px solid #ededed;
 }

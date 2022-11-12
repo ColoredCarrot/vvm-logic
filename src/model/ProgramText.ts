@@ -6,6 +6,7 @@ import {Instruction} from "../exec/instructions/Instruction";
 
 export class ProgramTextLine {
     constructor(
+        readonly num: number,
         readonly srcLine: number,
         /** Does not contain trailing comment, if any */
         readonly content: string,
@@ -41,7 +42,7 @@ export function parseProgramText(rawLines: readonly string[]): ProgramText {
         .map(line => line.trim().toLowerCase())
         .map((line, num) => [line, num] as const)
         .filter(([line]) => line.length > 0)
-        .map(([line, num]) => new ProgramTextLine(num, line, InstructionParser.parseInstruction(line, [])))
+        .map(([line, num], codeLineNum) => new ProgramTextLine(codeLineNum, num, line, InstructionParser.parseInstruction(line, [])))
     ;
     return new ProgramText(rawLines, codeLines);
 }
