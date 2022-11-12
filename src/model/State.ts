@@ -41,7 +41,7 @@ export class State implements StateVars {
         return new State({...this.vars, heap: heap});
     }
 
-    modifyHeap(f: (_: Heap)=> Heap): State {
+    modifyHeap(f: (_: Heap) => Heap): State {
         return this.setHeap(f(this.heap));
     }
 
@@ -76,7 +76,7 @@ export class State implements StateVars {
      *     .setStack(state.stack.push(x))
      *     .setStack(state.stack.push(y))
      */
-    modifyStack(f: (_: Stack)=> Stack): State {
+    modifyStack(f: (_: Stack) => Stack): State {
         return this.setStack(f(this.stack));
     }
 
@@ -88,7 +88,7 @@ export class State implements StateVars {
         return new State({...this.vars, trail: trail});
     }
 
-    modifyTrail(f: (_: Trail)=> Trail): State {
+    modifyTrail(f: (_: Trail) => Trail): State {
         return this.setTrail(f(this.trail));
     }
 
@@ -120,7 +120,7 @@ export class State implements StateVars {
         return new State({...this.vars, programCounter: pc});
     }
 
-    modify(f: (_: State)=> State): State {
+    modify(f: (_: State) => State): State {
         return f(this);
     }
 }

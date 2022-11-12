@@ -4,7 +4,7 @@ import {step} from "../exec/step";
 
 interface LeftColumnProps {
     state: State;
-    setState: (newState: State)=> void;
+    setState: (newState: State) => void;
 }
 
 export function LeftColumn({state, setState}: LeftColumnProps) {
