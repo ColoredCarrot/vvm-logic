@@ -17,13 +17,27 @@ export function ProgramTextEditor({programText, setProgramText}: ProgramTextEdit
 
     // Set up global key listener
     useEffect(() => {
-        const listener = (evt: KeyboardEvent) => handleKeyDown(evt, cursor, setCursor, programText, setProgramText);
-        document.addEventListener("keydown", listener);
+        const keyListener = (evt: KeyboardEvent) => handleKeyDown(evt, cursor, setCursor, programText, setProgramText);
+        const pasteListener = (evt: ClipboardEvent) => handlePaste(evt);
+        document.addEventListener("keydown", keyListener);
+        document.addEventListener("paste", pasteListener);
 
         return () => {
-            document.removeEventListener("keydown", listener);
+            document.removeEventListener("keydown", keyListener);
+            document.removeEventListener("paste", pasteListener);
         };
     });
+
+    function handlePaste(evt: ClipboardEvent): void {
+        const toPaste = evt.clipboardData?.getData("text/plain");
+        if (!toPaste) {
+            return;
+        }
+
+        // TODO: Don't replace, but insert
+        setProgramText(toPaste.split("\n"));
+        setCursor([0, 0]);
+    }
 
     return <div className="ProgramTextEditor">
         {programText.rawLines.map((ln, num) =>
@@ -128,6 +142,34 @@ function handleKeyDown(
 
         setProgramText(updatedLines);
         setCursor(moveCursor(cursor, "ArrowLeft", updatedLines));
+
+        break;
+    }
+
+    case "Delete": {
+        // Special case: At the very end of the text, do nothing
+        if (row === programText.rawLines.length - 1 && col === programText.rawLines[row].length) {
+            break;
+        }
+
+        // Special case: At the end of a line, merge the next line into the current one
+        if (col === programText.rawLines[row].length) {
+            const updatedLines = [
+                ...programText.rawLines.slice(0, row),
+                programText.rawLines[row] + programText.rawLines[row + 1],
+                ...programText.rawLines.slice(row + 2),
+            ];
+
+            setProgramText(updatedLines);
+            // cursor isn't moved
+
+            break;
+        }
+
+        const updatedLine = touchedLine.slice(0, col) + touchedLine.slice(col + 1);
+        const updatedLines = untouchedLinesBefore.concat(updatedLine, untouchedLinesAfter);
+        setProgramText(updatedLines);
+        // cursor isn't moved
 
         break;
     }
