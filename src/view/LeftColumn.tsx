@@ -3,6 +3,7 @@ import {parseProgramText, ProgramText as ProgText} from "../model/ProgramText";
 import {State} from "../model/State";
 import {ControlPanel} from "./ControlPanel";
 import "./LeftColumn.css";
+import {ProgramTextEditor} from "./ProgramTextEditor";
 
 interface LeftColumnProps {
     state: State;
@@ -10,7 +11,7 @@ interface LeftColumnProps {
 }
 
 export function LeftColumn({state, setState}: LeftColumnProps) {
-    const [rawProgramText, setRawProgramText] = useState("");
+    const [rawProgramText, setRawProgramText] = useState(["ADD 1 2", "MUL", "JMP label"] as readonly string[]);
 
     // Parsing the program text is expensive, so only do it when it is actually changed
     const programText = useMemo(() => parseProgramText(rawProgramText), [rawProgramText]);
@@ -23,15 +24,11 @@ export function LeftColumn({state, setState}: LeftColumnProps) {
 
 interface ProgramTextProps {
     programText: ProgText;
-    setProgramText(raw: string): void;
+    setProgramText(rawLines: string[]): void;
 }
 
 function ProgramText({programText, setProgramText}: ProgramTextProps) {
     return <div className="ProgramText p">
-        <textarea
-            id="program-text"
-            className="program-text-input h100"
-            value={programText.raw}
-            onChange={(elem) => setProgramText(elem.target.value)}></textarea>
+        <ProgramTextEditor programText={programText} setProgramText={setProgramText}/>
     </div>;
 }

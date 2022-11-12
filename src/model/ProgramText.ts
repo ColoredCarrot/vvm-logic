@@ -19,7 +19,10 @@ export class ProgramTextLine {
  */
 export class ProgramText {
 
-    constructor(readonly raw: string, readonly codeLines: ProgramTextLine[]) {
+    constructor(
+        readonly rawLines: readonly string[],
+        readonly codeLines: readonly ProgramTextLine[],
+    ) {
     }
 
     get codeLineCount(): number {
@@ -28,14 +31,13 @@ export class ProgramText {
 
 }
 
-export function parseProgramText(raw: string): ProgramText {
+export function parseProgramText(rawLines: readonly string[]): ProgramText {
     // TODO: Remove comments
-    const codeLines = raw
-        .split("\n")
+    const codeLines = rawLines
         .map(line => line.trim().toLowerCase())
         .map((line, num) => [line, num] as const)
         .filter(([line]) => line.length > 0)
         .map(([line, num]) => new ProgramTextLine(num, line, InstructionParser.parseInstruction(line, [])))
     ;
-    return new ProgramText(raw, codeLines);
+    return new ProgramText(rawLines, codeLines);
 }
