@@ -10,3 +10,12 @@ body {
 code {
     font-family: "JetBrains Mono", source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
+
+:root {
+    /* Adjust some browser-default components to use their dark version, like the scrollbar.
+     * Supported by new versions of all major browsers.
+     * See https://developer.mozilla.org/en-US/docs/Web/CSS/color-scheme
+     */
+    /* noinspection CssUnknownProperty */
+    color-scheme: dark;
+}

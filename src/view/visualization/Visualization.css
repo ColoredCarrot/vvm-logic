@@ -1,4 +1,7 @@
 .Visualization {
+    flex: 1; /* Fill remaining horizontal space */
+
     padding: 10px;
-    background-color: #AFAFAF;
+    background-color: #424242;
+    color: #f5f5f5;
 }

@@ -56,8 +56,10 @@ interface ProgramTextLineProps {
 }
 
 function ProgramTextLine({line, cursor, vmState}: ProgramTextLineProps) {
-    // Replace spaces with non-breaking spaces (U+00A0)
-    const raw = line.raw.replaceAll(" ", "\u00A0");
+    const NON_BREAKING_SPACE = "\u00A0";
+    const ZERO_WIDTH_SPACE = "\u200B";
+
+    const raw = line.raw.replaceAll(" ", NON_BREAKING_SPACE);
     const isActiveLine = line instanceof CodeLine && line.codeLineNum === vmState.programCounter + 1;
 
     const [appState, setAppState] = useContext(AppStateContext);
@@ -83,10 +85,11 @@ function ProgramTextLine({line, cursor, vmState}: ProgramTextLineProps) {
         content = <><span>{beforeCursor}</span><span
             className="ProgramTextEditor__Line__RightOfCursor">{afterCursor}</span></>;
     } else {
-        content = <span>{raw || "\u200B"}</span>;
+        content = <span>{raw || ZERO_WIDTH_SPACE}</span>;
     }
 
     return <div className={cssClass}>
+        <span className="ProgramTextEditor__Line__Num">{(line.num + 1).toString().padStart(3, NON_BREAKING_SPACE)}</span>
         {content}
     </div>;
 }

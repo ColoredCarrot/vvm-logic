@@ -1,9 +1,11 @@
 .ProgramTextEditor {
-    height: calc(100% - 16px);
-    background-color: #2B2B2B;
+    /* Stretch to fill out available space */
+    flex: 1;
+
+    background-color: #353535;/*303030*/
 
     font-family: "JetBrains Mono", source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
-    color: #ededed;
+    color: #ffffffde;
 
     padding: 8px;
 }
@@ -14,7 +16,7 @@
 }
 
 .ProgramTextEditor__Line--error {
-    background-color: #8d3300;
+    background-color: #cf6679;/*ff3f80*/
 }
 
 .ProgramTextEditor__Line--critical {
@@ -22,9 +24,16 @@
 }
 
 .ProgramTextEditor__Line--active {
-    background-color: #2f31ff;
+    background-color: #03dac6;
 }
 
 .ProgramTextEditor__Line__RightOfCursor {
     border-left: 1px solid #ededed;
+}
+
+.ProgramTextEditor__Line__Num {
+    font-size: 0.7em;
+    padding-right: 0.5em;
+    color: #ffffff3c;
+    user-select: none;
 }

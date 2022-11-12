@@ -54,17 +54,17 @@ export function ControlPanel({vmState, setVmState, programText}: ControlPanelPro
         evt.preventDefault();
     });
 
-    const actionBtn = endOfProgram
-        ? <a className="ControlPanel__button" onClick={() => {
-            setVmState(State.new());
-        }
-        }>Restart</a>
-        : <a className="ControlPanel__button" onClick={() => {
-            invokeStep();
-        }
-        }>Step</a>;
+    const btnStep = <a
+        className={"ControlPanel__button" + (endOfProgram && " ControlPanel__button--disabled" || "")}
+        onClick={() => invokeStep()}
+    >Step (F8)</a>;
+    const btnRestart = <a className="ControlPanel__button" onClick={() => {
+        setAppState({...appState, lastExecutionError: null});
+        setVmState(State.new());
+    }}>Restart</a>;
 
     return <div className="ControlPanel">
-        {actionBtn}
+        {btnStep}
+        {btnRestart}
     </div>;
 }
