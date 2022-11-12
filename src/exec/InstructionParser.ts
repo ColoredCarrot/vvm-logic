@@ -1,32 +1,35 @@
-import {Instruction} from "./instructions/Instruction";
-import {Mark} from "./instructions/Mark";
-import {Label} from "./Label";
-import {Pop} from "./instructions/Pop";
 import {Bind} from "./instructions/Bind";
-import {InvalidInstruction} from "./instructions/InvalidInstruction";
 import {Call} from "./instructions/Call";
-import {SignLabel} from "./SignLabel";
-import {Popenv} from "./instructions/Popenv";
-import {Putatom} from "./instructions/Putatom";
-import {Putref} from "./instructions/Putref";
-import {Putvar} from "./instructions/Putvar";
-import {Up} from "./instructions/Up";
-import {Pushenv} from "./instructions/Pushenv";
+import {Check} from "./instructions/Check";
+import {Delbtp} from "./instructions/Delbtp";
+import {Fail} from "./instructions/Fail";
 import {Init} from "./instructions/Init";
+import {Instruction} from "./instructions/Instruction";
+import {InvalidInstruction} from "./instructions/InvalidInstruction";
 import {Jump} from "./instructions/Jump";
 import {Lastcall} from "./instructions/Lastcall";
-import {Putanon} from "./instructions/Putanon";
-import {Putstruct} from "./instructions/Putstruct";
-import {Slide} from "./instructions/Slide";
-import {Uvar} from "./instructions/Uvar";
-import {Check} from "./instructions/Check";
-import {Fail} from "./instructions/Fail";
 import {Lastmark} from "./instructions/Lastmark";
-import {Ustruct} from "./instructions/Ustruct";
-import {Uref} from "./instructions/Uref";
-import {Unify} from "./instructions/Unify";
+import {Mark} from "./instructions/Mark";
+import {No} from "./instructions/No";
+import {Pop} from "./instructions/Pop";
+import {Popenv} from "./instructions/Popenv";
+import {Prune} from "./instructions/Prune";
+import {Pushenv} from "./instructions/Pushenv";
+import {Putanon} from "./instructions/Putanon";
+import {Putatom} from "./instructions/Putatom";
+import {Putref} from "./instructions/Putref";
+import {Putstruct} from "./instructions/Putstruct";
+import {Putvar} from "./instructions/Putvar";
+import {Slide} from "./instructions/Slide";
 import {Son} from "./instructions/Son";
 import {Uatom} from "./instructions/Uatom";
+import {Unify} from "./instructions/Unify";
+import {Up} from "./instructions/Up";
+import {Uref} from "./instructions/Uref";
+import {Ustruct} from "./instructions/Ustruct";
+import {Uvar} from "./instructions/Uvar";
+import {Label} from "./Label";
+import {SignLabel} from "./SignLabel";
 
 export class ParseError extends Error {
 }
@@ -258,19 +261,21 @@ export class InstructionParser {
         case "bind":
             return new Bind();
         case "delbtp":
-            return new InvalidInstruction(input); //TODO: Replace once implemented
+            return new Delbtp(); //TODO: Replace once implemented
         case "fail":
             return new Fail();
         case "getnode":
             return new InvalidInstruction(input); //TODO: Replace once implemented
         case "lastmark":
             return new Lastmark();
+        case "no":
+            return new No();
         case "pop":
             return new Pop();
         case "popenv":
             return new Popenv();
         case "prune":
-            return new InvalidInstruction(input); //TODO: Replace once implemented
+            return new Prune();
         case "putanon":
             return new Putanon();
         case "setbtp":

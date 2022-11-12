@@ -1,6 +1,7 @@
 import {Instruction} from "./Instruction";
 import {State} from "../../model/State";
 import {ValueCell} from "../../model/ValueCell";
+import {PointerToStackCell} from "../../model/PointerToStackCell";
 
 export class Prune extends Instruction {
 
@@ -10,8 +11,8 @@ export class Prune extends Instruction {
 
     step(state: State): State {
 
-        const valueCell = state.stack.get(state.framePointer - 4) as ValueCell;
-        const value = valueCell.getValue();
+        const valueCell = state.stack.get(state.framePointer - 4) as PointerToStackCell;
+        const value = valueCell.value;
 
         state = state.setBacktrackPointer(value);
 

@@ -10,7 +10,7 @@ export class Mark extends Instruction {
     private readonly param: Label;
 
     constructor(param: Label) {
-        super("MARK");
+        super("MARK " + param);
         this.param = param;
     }
 
