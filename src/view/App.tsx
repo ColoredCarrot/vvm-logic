@@ -8,7 +8,9 @@ function App() {
     const [state, setState] = useState<State>(State.new());
 
     return <>
-        <LeftColumn state={state} setState={setState}/>
+        <div className="left-column-container">
+            <LeftColumn state={state} setState={setState}/>
+        </div>
         <Visualization state={state}/>
     </>;
 }

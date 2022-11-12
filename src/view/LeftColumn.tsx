@@ -1,6 +1,8 @@
-import React, {useState} from "react";
+import React, {useMemo, useState} from "react";
+import {parseProgramText, ProgramText as ProgText} from "../model/ProgramText";
 import {State} from "../model/State";
-import {step} from "../exec/step";
+import {ControlPanel} from "./ControlPanel";
+import "./LeftColumn.css";
 
 interface LeftColumnProps {
     state: State;
@@ -8,40 +10,28 @@ interface LeftColumnProps {
 }
 
 export function LeftColumn({state, setState}: LeftColumnProps) {
-    const [programText, setProgramText] = useState("");
+    const [rawProgramText, setRawProgramText] = useState("");
 
-    const programTextLines = programText.split("\n")
-        .map(line => line.trim())
-        .filter(line => line.length > 0);
-    const nextInstrIdx = state.programCounter + 1;
+    // Parsing the program text is expensive, so only do it when it is actually changed
+    const programText = useMemo(() => parseProgramText(rawProgramText), [rawProgramText]);
 
-    const endOfProgram = nextInstrIdx >= programTextLines.length;
+    return <div className="LeftColumn">
+        <ProgramText programText={programText} setProgramText={setRawProgramText}/>
+        <ControlPanel vmState={state} setVmState={setState} programText={programText}/>
+    </div>;
+}
 
-    const actionBtn = endOfProgram
-        ? <a className="btn" onClick={() => {
-            setState(State.new());
-        }
-        }>Restart</a>
-        : <a className="btn" onClick={() => {
-            const instrText = programTextLines[nextInstrIdx];
-            setState(step(state, instrText));
-        }
-        }>Step</a>;
+interface ProgramTextProps {
+    programText: ProgText;
+    setProgramText(raw: string): void;
+}
 
-    return <div className="h100 left-column">
-        <div className="program-text p">
-            <div className="h100">
-                <div style={{display: "flex", height: "100%"}} className="h100">
-                    <textarea
-                        id="program-text"
-                        className="program-text-input h100"
-                        value={programText}
-                        onChange={(elem) => setProgramText(elem.target.value)}></textarea>
-                </div>
-            </div>
-        </div>
-        <div className="control-panel p">
-            {actionBtn}
-        </div>
+function ProgramText({programText, setProgramText}: ProgramTextProps) {
+    return <div className="ProgramText p">
+        <textarea
+            id="program-text"
+            className="program-text-input h100"
+            value={programText.raw}
+            onChange={(elem) => setProgramText(elem.target.value)}></textarea>
     </div>;
 }

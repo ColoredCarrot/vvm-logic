@@ -15,8 +15,9 @@
     float: left;
 }
 
-.left-column {
+.left-column-container {
     width: 30%;
+    height: 100%;
     float: left;
 }
 
