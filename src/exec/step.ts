@@ -7,5 +7,5 @@ import {Instruction} from "./instructions/Instruction";
 export function step(state: State, instruction: Instruction): State {
     return state
         .setProgramCounter(state.programCounter + 1)
-        .modify(instruction.step);
+        .modify(instruction.step.bind(instruction));
 }
