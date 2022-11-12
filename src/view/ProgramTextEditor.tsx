@@ -1,7 +1,7 @@
 import React, {useContext, useState} from "react";
 import {InvalidInstruction} from "../exec/instructions/InvalidInstruction";
-import * as Model from "../model/ProgramText";
-import {ProgramText} from "../model/ProgramText";
+import {CodeLine} from "../model/ProgramText";
+import * as ProgramText from "../model/ProgramText";
 import {State} from "../model/State";
 import {AppStateContext} from "./AppState";
 import "./ProgramTextEditor.css";
@@ -11,7 +11,7 @@ interface ProgramTextEditorProps {
 
     vmState: State;
 
-    programText: Model.ProgramText;
+    programText: ProgramText.Text;
 
     setProgramText(rawLines: string[]): void;
 }
@@ -38,12 +38,11 @@ export function ProgramTextEditor({vmState, programText, setProgramText}: Progra
     }
 
     return <div className="ProgramTextEditor">
-        {programText.rawLines.map((ln, num) =>
+        {programText.lines.map(line =>
             <ProgramTextLine
-                key={num}
-                raw={ln} num={num}
+                key={line.num}
+                line={line}
                 cursor={cursor}
-                codeLine={programText.getCodeLineAtLine(num)}
                 vmState={vmState}
             />,
         )}
@@ -51,17 +50,15 @@ export function ProgramTextEditor({vmState, programText, setProgramText}: Progra
 }
 
 interface ProgramTextLineProps {
-    raw: string;
-    num: number;
-    codeLine: Model.ProgramTextLine | null;
-    cursor: readonly [number, number];
+    line: ProgramText.Line
+    cursor: Cursor;
     vmState: State;
 }
 
-function ProgramTextLine({raw, num, codeLine, cursor, vmState}: ProgramTextLineProps) {
+function ProgramTextLine({line, cursor, vmState}: ProgramTextLineProps) {
     // Replace spaces with non-breaking spaces (U+00A0)
-    raw = raw.replaceAll(" ", "\u00A0");
-    const isActiveLine = codeLine?.num === vmState.programCounter + 1;
+    const raw = line.raw.replaceAll(" ", "\u00A0");
+    const isActiveLine = line instanceof CodeLine && line.codeLineNum === vmState.programCounter + 1;
 
     const [appState, setAppState] = useContext(AppStateContext);
 
@@ -75,11 +72,11 @@ function ProgramTextLine({raw, num, codeLine, cursor, vmState}: ProgramTextLineP
         } else {
             cssClass += " ProgramTextEditor__Line--active";
         }
-    } else if (codeLine?.instruction instanceof InvalidInstruction) {
+    } else if (line instanceof CodeLine && line.instruction instanceof InvalidInstruction) {
         cssClass += " ProgramTextEditor__Line--error";
     }
 
-    if (cursor[0] === num) {
+    if (cursor[0] === line.num) {
         // Cursor is on our line
         const beforeCursor = raw.substring(0, cursor[1]);
         const afterCursor = raw.substring(cursor[1]);
@@ -98,7 +95,7 @@ function handleKeyDown(
     evt: KeyboardEvent,
     cursor: Cursor,
     setCursor: (_: Cursor) => void,
-    programText: ProgramText,
+    programText: ProgramText.Text,
     setProgramText: (rawLines: string[]) => void,
 ) {
     // We don't handle any keyboard commands (yet)
@@ -109,9 +106,9 @@ function handleKeyDown(
     const [row, col] = cursor;
 
     // Collect some values that we'll likely use further down
-    const untouchedLinesBefore = programText.rawLines.slice(0, row);
-    const untouchedLinesAfter = programText.rawLines.slice(row + 1);
-    const touchedLine = programText.rawLines[row];
+    const untouchedLinesBefore = programText.lines.slice(0, row).map(l => l.raw);
+    const untouchedLinesAfter = programText.lines.slice(row + 1).map(l => l.raw);
+    const touchedLine = programText.lines[row].raw;
 
     switch (evt.key) {
     case "ArrowLeft":
@@ -195,7 +192,12 @@ function handleKeyDown(
 
     default:
         // Handle simple directly-typable characters
-        if (evt.key.length === 1 && (evt.key >= "a" && evt.key <= "z" || evt.key >= "A" && evt.key <= "Z" || evt.key >= "0" && evt.key <= "9" || evt.key === " ")) {
+        if (evt.key.length === 1 && (
+            evt.key >= "a" && evt.key <= "z" ||
+            evt.key >= "A" && evt.key <= "Z" ||
+            evt.key >= "0" && evt.key <= "9" ||
+            [" ", ":", "/"].includes(evt.key)
+        )) {
             const char = evt.key;
 
             // TODO: Maybe, if we're in the first word of the line, automatically write in uppercase

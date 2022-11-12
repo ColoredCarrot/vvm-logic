@@ -1,48 +1,85 @@
-/**
- * A non-empty, non-comment line in the program text.
- */
 import {InstructionParser} from "../exec/InstructionParser";
 import {Instruction} from "../exec/instructions/Instruction";
 
-export class ProgramTextLine {
+export class Line {
     constructor(
         readonly num: number,
-        readonly srcLine: number,
-        /** Does not contain trailing comment, if any */
+        /** Trimmed and excluding any trailing comment */
         readonly content: string,
+        readonly raw: string,
+    ) {
+    }
+}
+
+export class CodeLine extends Line {
+    constructor(
+        num: number,
+        content: string,
+        raw: string,
+        readonly codeLineNum: number,
         readonly instruction: Instruction,
     ) {
+        super(num, content, raw);
+    }
+}
+
+export class LabelLine extends Line {
+    constructor(
+        num: number,
+        content: string,
+        raw: string,
+    ) {
+        super(num, content, raw);
     }
 }
 
 /**
  * Encapsulates the raw and parsed program text at any given point of time.
  */
-export class ProgramText {
-
+export class Text {
     constructor(
-        readonly rawLines: readonly string[],
-        readonly codeLines: readonly ProgramTextLine[],
+        readonly lines: readonly Line[],
     ) {
     }
 
+    get rawLines(): string[] {
+        return this.lines.map(l => l.raw);
+    }
+
     get codeLineCount(): number {
-        return this.codeLines.length;
+        let res = 0;
+        for (const line of this.lines) {
+            if (line instanceof CodeLine) {
+                ++res;
+            }
+        }
+        return res;
     }
 
-    getCodeLineAtLine(lineNum: number): ProgramTextLine | null {
-        return this.codeLines.find(codeLine => codeLine.srcLine === lineNum) ?? null;
+    getCodeLine(codeLineNum: number): CodeLine | null {
+        return <CodeLine | null>(
+            this.lines.find(l => l instanceof CodeLine && l.codeLineNum === codeLineNum)
+            ?? null
+        );
     }
-
 }
 
-export function parseProgramText(rawLines: readonly string[]): ProgramText {
-    // TODO: Remove comments
-    const codeLines = rawLines
-        .map(line => line.trim().toLowerCase())
-        .map((line, num) => [line, num] as const)
-        .filter(([line]) => line.length > 0)
-        .map(([line, num], codeLineNum) => new ProgramTextLine(codeLineNum, num, line, InstructionParser.parseInstruction(line, [])))
-    ;
-    return new ProgramText(rawLines, codeLines);
+export function parseProgramText(rawLines: readonly string[]): Text {
+    // TODO: Handle comments
+
+    const labels = InstructionParser.processLabels(rawLines);
+
+    let codeLineNum = 0;
+
+    return new Text(
+        rawLines
+            .map(line => line.trim().toLowerCase())
+            .map((line, num) =>
+                line.endsWith(":")
+                    ? new LabelLine(num, line, rawLines[num])
+                    : (line.length > 0
+                        ? new CodeLine(num, line, rawLines[num], codeLineNum++, InstructionParser.parseInstruction(line, labels))
+                        : new Line(num, line, rawLines[num])),
+            ),
+    );
 }

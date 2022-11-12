@@ -1,4 +1,5 @@
 import {Instruction} from "./instructions/Instruction";
+import {Mark} from "./instructions/Mark";
 import {Label} from "./Label";
 import {Pop} from "./instructions/Pop";
 import {Bind} from "./instructions/Bind";
@@ -32,7 +33,7 @@ export class ParseError extends Error {
 
 export class InstructionParser {
 
-    static parseInput(inputLines: string[]): [Instruction[], Label[]] {
+    static parseInput(inputLines: readonly string[]): [Instruction[], Label[]] {
         const labels: Label[]
             = this.processLabels(inputLines);
 
@@ -42,7 +43,7 @@ export class InstructionParser {
         return [instructions, labels];
     }
 
-    private static parseInstructions(input: string[], labels: Label[]): Instruction[] {
+    private static parseInstructions(input: readonly string[], labels: readonly Label[]): Instruction[] {
         const instrStrings: string[] = input.map(value => {
             return value.trim()
                 .replace("/  +/g", " ")
@@ -57,7 +58,7 @@ export class InstructionParser {
         return instructions;
     }
 
-    static parseInstruction(input: string, labels: Label[]): Instruction {
+    static parseInstruction(input: string, labels: readonly Label[]): Instruction {
         input = input.toLowerCase();
 
         const inputSplit: string[] = input.split(" ");
@@ -126,7 +127,7 @@ export class InstructionParser {
         return new InvalidInstruction(input);
     }
 
-    private static processLabels(inputLines: string[]): Label[] {
+    static processLabels(inputLines: readonly string[]): Label[] {
         const labels: Label[] = [];
 
         for (let i = 0; i < inputLines.length; i++) {
@@ -148,7 +149,7 @@ export class InstructionParser {
                 }
 
                 labels.push(l);
-                inputLines[i] = lblSplit.at(1)!;
+                // inputLines[i] = lblSplit.at(1)!;
             } else {
                 //Line has no label
             }
@@ -172,7 +173,7 @@ export class InstructionParser {
         case "init":
             return new Init(param);
         case "mark":
-            return new InvalidInstruction(instr + " " + param.text); //TODO: Replace with actual implementation
+            return new Mark(param);
         case "try":
             return new InvalidInstruction(instr + " " + param.text); //TODO: Replace with actual implementation
         case "up":

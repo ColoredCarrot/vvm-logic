@@ -1,5 +1,5 @@
 import React, {useMemo, useState} from "react";
-import {parseProgramText, ProgramText as ProgText} from "../model/ProgramText";
+import * as ProgText from "../model/ProgramText";
 import {State} from "../model/State";
 import {ControlPanel} from "./ControlPanel";
 import "./LeftColumn.css";
@@ -11,10 +11,10 @@ interface LeftColumnProps {
 }
 
 export function LeftColumn({state, setState}: LeftColumnProps) {
-    const [rawProgramText, setRawProgramText] = useState(["ADD 1 2", "MUL", "JMP label"] as readonly string[]);
+    const [rawProgramText, setRawProgramText] = useState(["a:", "POP", "MARK a"] as readonly string[]);
 
     // Parsing the program text is expensive, so only do it when it is actually changed
-    const programText = useMemo(() => parseProgramText(rawProgramText), [rawProgramText]);
+    const programText = useMemo(() => ProgText.parseProgramText(rawProgramText), [rawProgramText]);
 
     return <div className="LeftColumn">
         <ProgramText state={state} programText={programText} setProgramText={setRawProgramText}/>
@@ -24,7 +24,7 @@ export function LeftColumn({state, setState}: LeftColumnProps) {
 
 interface ProgramTextProps {
     state: State;
-    programText: ProgText;
+    programText: ProgText.Text;
     setProgramText(rawLines: string[]): void;
 }
 

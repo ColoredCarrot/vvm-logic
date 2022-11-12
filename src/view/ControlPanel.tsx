@@ -1,7 +1,7 @@
 import React, {useContext} from "react";
 import {ExecutionError} from "../exec/ExecutionError";
 import {step} from "../exec/step";
-import {ProgramText} from "../model/ProgramText";
+import * as ProgramText from "../model/ProgramText";
 import {State} from "../model/State";
 import "./ControlPanel.css";
 import {AppStateContext} from "./AppState";
@@ -12,7 +12,7 @@ interface ControlPanelProps {
 
     setVmState(newState: State): void;
 
-    programText: ProgramText;
+    programText: ProgramText.Text;
 }
 
 export function ControlPanel({vmState, setVmState, programText}: ControlPanelProps) {
@@ -28,7 +28,7 @@ export function ControlPanel({vmState, setVmState, programText}: ControlPanelPro
 
         let newState: State | null = null;
         try {
-            newState = step(vmState, programText.codeLines[vmState.programCounter + 1].instruction);
+            newState = step(vmState, programText.getCodeLine(vmState.programCounter + 1)!.instruction);
             if (newState !== null) {
                 setVmState(newState);
             }
