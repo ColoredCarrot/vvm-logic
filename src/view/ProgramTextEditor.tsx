@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from "react";
+import {InvalidInstruction} from "../exec/instructions/InvalidInstruction";
 import {ProgramText} from "../model/ProgramText";
 import * as Model from "../model/ProgramText";
 import "./ProgramTextEditor.css";
@@ -41,7 +42,11 @@ export function ProgramTextEditor({programText, setProgramText}: ProgramTextEdit
 
     return <div className="ProgramTextEditor">
         {programText.rawLines.map((ln, num) =>
-            <ProgramTextLine key={num} raw={ln} num={num} cursor={cursor}/>,
+            <ProgramTextLine
+                key={num}
+                raw={ln} num={num}
+                cursor={cursor}
+                codeLine={programText.getCodeLineAtLine(num)}/>,
         )}
     </div>;
 }
@@ -49,7 +54,7 @@ export function ProgramTextEditor({programText, setProgramText}: ProgramTextEdit
 interface ProgramTextLineProps {
     raw: string;
     num: number;
-    codeLine?: Model.ProgramTextLine;
+    codeLine: Model.ProgramTextLine | null;
     cursor: readonly [number, number];
 }
 
@@ -70,7 +75,14 @@ function ProgramTextLine({raw, num, codeLine, cursor}: ProgramTextLineProps) {
         content = <span>{raw || "\u200B"}</span>;
     }
 
-    return <div className="ProgramTextEditor__Line">
+    let cssClass = "ProgramTextEditor__Line";
+    if (codeLine?.instruction instanceof InvalidInstruction) {
+        cssClass += " ProgramTextEditor__Line--error";
+    } else {
+        console.log(codeLine);
+    }
+
+    return <div className={cssClass}>
         {content}
     </div>;
 }

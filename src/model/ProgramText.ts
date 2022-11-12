@@ -29,6 +29,10 @@ export class ProgramText {
         return this.codeLines.length;
     }
 
+    getCodeLineAtLine(lineNum: number): ProgramTextLine | null {
+        return this.codeLines.find(codeLine => codeLine.srcLine === lineNum) ?? null;
+    }
+
 }
 
 export function parseProgramText(rawLines: readonly string[]): ProgramText {
