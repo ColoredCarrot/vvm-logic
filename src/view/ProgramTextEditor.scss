@@ -1,11 +1,13 @@
+@use "colors";
+
 .ProgramTextEditor {
     /* Stretch to fill out available space */
     flex: 1;
 
-    background-color: #353535; /*303030*/
+    background-color: colors.$background-code;
 
     font-family: "JetBrains Mono", source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
-    color: #ffffffde;
+    color: colors.$text-code;
 
     padding: 8px;
 
@@ -13,21 +15,20 @@
         padding-top: 1px;
         padding-bottom: 1px;
 
-        background-color: #353535;
+        background-color: colors.$background-code;
 
         &--label {
-            color: #e7db52;
+            color: colors.$text-highlight;
         }
         &--error {
-            background-color: #cf6679; /*ff3f80*/
+            background-color: colors.$error;
         }
         &--critical {
-            background-color: #710000;
+            background-color: colors.$critical-error;
         }
         &--active {
-            background-color: #03dac6;
+            background-color: colors.$primary;
         }
-
 
         &__Inner--cursor {
             backdrop-filter: brightness(0.8);
@@ -36,7 +37,7 @@
         &__Num {
             font-size: 0.7em;
             padding-right: 0.5em;
-            color: #ffffff3c;
+            color: colors.$text-disabled;
             user-select: none;
         }
     }
@@ -53,7 +54,7 @@
     }
 
     &__Popout {
-        background-color: #cf6679;
+        background-color: colors.$error;
         padding: 8px;
         font-size: 0.85em;
         font-family: Arial, sans-serif;

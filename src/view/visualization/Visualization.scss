@@ -1,7 +1,9 @@
+@use "../colors";
+
 .Visualization {
     flex: 1; // Fill remaining horizontal space
 
     padding: 10px;
-    background-color: #424242;
+    background-color: colors.$background-visualization;
     color: #f5f5f5;
 }
