@@ -1,6 +1,6 @@
 import React, {useContext, useState} from "react";
 import {InvalidInstruction} from "../exec/instructions/InvalidInstruction";
-import {CodeLine} from "../model/ProgramText";
+import {CodeLine, LabelLine} from "../model/ProgramText";
 import * as ProgramText from "../model/ProgramText";
 import {State} from "../model/State";
 import {AppStateContext} from "./AppState";
@@ -33,7 +33,7 @@ export function ProgramTextEditor({vmState, programText, setProgramText}: Progra
         }
 
         // TODO: Don't replace, but insert
-        setProgramText(toPaste.split("\n"));
+        setProgramText(toPaste.split("\n").map(ln => ln.replaceAll(/[^0-9a-z/: ]/ig, "")));
         setCursor([0, 0]);
     }
 
@@ -59,7 +59,7 @@ function ProgramTextLine({line, cursor, vmState}: ProgramTextLineProps) {
     const NON_BREAKING_SPACE = "\u00A0";
     const ZERO_WIDTH_SPACE = "\u200B";
 
-    const raw = line.raw.replaceAll(" ", NON_BREAKING_SPACE);
+    const raw = line.raw.replaceAll(" ", NON_BREAKING_SPACE) || ZERO_WIDTH_SPACE;
     const isActiveLine = line instanceof CodeLine && line.codeLineNum === vmState.programCounter + 1;
 
     const [appState, setAppState] = useContext(AppStateContext);
@@ -76,21 +76,33 @@ function ProgramTextLine({line, cursor, vmState}: ProgramTextLineProps) {
         }
     } else if (line instanceof CodeLine && line.instruction instanceof InvalidInstruction) {
         cssClass += " ProgramTextEditor__Line--error";
+    } else if (line instanceof LabelLine) {
+        cssClass += " ProgramTextEditor__Line--label";
+    }
+
+    let innerCssClass = "ProgramTextEditor__Line__Inner";
+    if (cursor[0] === line.num) {
+        innerCssClass += " ProgramTextEditor__Line__Inner--cursor";
     }
 
     if (cursor[0] === line.num) {
-        // Cursor is on our line
-        const beforeCursor = raw.substring(0, cursor[1]);
-        const afterCursor = raw.substring(cursor[1]);
-        content = <><span>{beforeCursor}</span><span
-            className="ProgramTextEditor__Line__RightOfCursor">{afterCursor}</span></>;
+        // Caret is on our line
+        content = <span>
+            <span style={{zIndex: 10, position: "absolute"}}>
+                <span>{NON_BREAKING_SPACE.repeat(cursor[1])}</span>
+                <span className="ProgramTextEditor__Caret"></span>
+            </span>
+            <span>{raw}</span>
+        </span>;
     } else {
-        content = <span>{raw || ZERO_WIDTH_SPACE}</span>;
+        content = <span>{raw}</span>;
     }
 
     return <div className={cssClass}>
-        <span className="ProgramTextEditor__Line__Num">{(line.num + 1).toString().padStart(3, NON_BREAKING_SPACE)}</span>
-        {content}
+        <div className={innerCssClass}>
+            <span className="ProgramTextEditor__Line__Num">{(line.num + 1).toString().padStart(3, NON_BREAKING_SPACE)}</span>
+            {content}
+        </div>
     </div>;
 }
 
@@ -250,12 +262,12 @@ function moveCursor([row, col]: Cursor, direction: "ArrowLeft" | "ArrowRight" | 
         if (row === 0) {
             return [0, 0];
         }
-        return [row - 1, col];
+        return [row - 1, Math.min(col, rawLines[row - 1].length)];
 
     case "ArrowDown":
         if (row === rawLines.length - 1) {
             return [row, rawLines[row].length];
         }
-        return [row + 1, col];
+        return [row + 1, Math.min(col, rawLines[row + 1].length)];
     }
 }

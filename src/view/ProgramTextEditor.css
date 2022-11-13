@@ -2,7 +2,7 @@
     /* Stretch to fill out available space */
     flex: 1;
 
-    background-color: #353535;/*303030*/
+    background-color: #353535; /*303030*/
 
     font-family: "JetBrains Mono", source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
     color: #ffffffde;
@@ -13,10 +13,16 @@
 .ProgramTextEditor__Line {
     padding-top: 1px;
     padding-bottom: 1px;
+
+    background-color: #353535;
+}
+
+.ProgramTextEditor__Line--label {
+    color: #e7db52;
 }
 
 .ProgramTextEditor__Line--error {
-    background-color: #cf6679;/*ff3f80*/
+    background-color: #cf6679; /*ff3f80*/
 }
 
 .ProgramTextEditor__Line--critical {
@@ -27,8 +33,8 @@
     background-color: #03dac6;
 }
 
-.ProgramTextEditor__Line__RightOfCursor {
-    border-left: 1px solid #ededed;
+.ProgramTextEditor__Line__Inner--cursor {
+    backdrop-filter: brightness(0.8);
 }
 
 .ProgramTextEditor__Line__Num {
@@ -36,4 +42,24 @@
     padding-right: 0.5em;
     color: #ffffff3c;
     user-select: none;
+}
+
+.ProgramTextEditor__Caret {
+    animation: caret-blink 0.75s step-end infinite;
+
+    display: inline-block;
+    margin-left: -0.06em;
+    width: 0.12em;
+    height: 1em;
+    background: white;
+    margin-top: 0.12em;
+}
+
+@keyframes caret-blink {
+    from, to {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
 }
