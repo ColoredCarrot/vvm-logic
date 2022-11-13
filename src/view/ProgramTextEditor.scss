@@ -7,7 +7,6 @@
     background-color: colors.$background-code;
 
     font-family: "JetBrains Mono", source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
-    color: colors.$text-code;
 
     padding: 8px;
 
@@ -17,9 +16,6 @@
 
         background-color: colors.$background-code;
 
-        &--label {
-            color: colors.$text-highlight;
-        }
         &--error {
             background-color: colors.$error;
         }
@@ -30,7 +26,7 @@
             background-color: colors.$primary;
         }
 
-        &__Inner--cursor {
+        &__Inner--caret {
             backdrop-filter: brightness(0.8);
         }
 
@@ -39,6 +35,17 @@
             padding-right: 0.5em;
             color: colors.$text-disabled;
             user-select: none;
+        }
+
+        &__Content {
+            color: colors.$text-code;
+
+            &--error {
+                color: colors.$text-error;
+            }
+            &--label {
+                color: colors.$text-highlight;
+            }
         }
     }
 

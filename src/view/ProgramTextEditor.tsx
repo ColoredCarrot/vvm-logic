@@ -21,7 +21,7 @@ type Cursor = readonly [number, number];
 
 export function ProgramTextEditor({vmState, programText, setProgramText}: ProgramTextEditorProps) {
 
-    const [cursor, setCursor] = useState([2, 0] as Cursor);
+    const [cursor, setCursor] = useState([0, 0] as Cursor);
 
     // Set up global listeners
     useGlobalEvent("keydown", evt => handleKeyDown(evt, cursor, setCursor, programText, setProgramText));
@@ -68,6 +68,7 @@ function ProgramTextLine({line, cursor, vmState}: ProgramTextLineProps) {
     let content: React.ReactElement;
 
     let cssClass = "ProgramTextEditor__Line";
+    let contentCssClass = "ProgramTextEditor__Line__Content";
     if (isActiveLine) {
         if (appState.lastExecutionError !== null) {
             // We were the last instruction to attempt to be executed, but it failed!
@@ -76,14 +77,14 @@ function ProgramTextLine({line, cursor, vmState}: ProgramTextLineProps) {
             cssClass += " ProgramTextEditor__Line--active";
         }
     } else if (line instanceof CodeLine && line.instruction instanceof InvalidInstruction) {
-        cssClass += " ProgramTextEditor__Line--error";
+        contentCssClass += " ProgramTextEditor__Line__Content--error";
     } else if (line instanceof LabelLine) {
-        cssClass += " ProgramTextEditor__Line--label";
+        contentCssClass += " ProgramTextEditor__Line__Content--label";
     }
 
     let innerCssClass = "ProgramTextEditor__Line__Inner";
     if (cursor[0] === line.num) {
-        innerCssClass += " ProgramTextEditor__Line__Inner--cursor";
+        innerCssClass += " ProgramTextEditor__Line__Inner--caret";
     }
 
     if (cursor[0] === line.num) {
@@ -102,8 +103,11 @@ function ProgramTextLine({line, cursor, vmState}: ProgramTextLineProps) {
     const textLineElem = <div className={cssClass}>
         <div className={innerCssClass}>
             <span
-                className="ProgramTextEditor__Line__Num">{(line.num + 1).toString().padStart(3, NON_BREAKING_SPACE)}</span>
-            {content}
+                className="ProgramTextEditor__Line__Num">{(line.num + 1).toString().padStart(3, NON_BREAKING_SPACE)}
+            </span>
+            <span className={contentCssClass}>
+                {content}
+            </span>
         </div>
     </div>;
 
