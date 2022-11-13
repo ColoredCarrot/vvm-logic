@@ -33,6 +33,9 @@ import {No} from "./instructions/No";
 import {Setbtp} from "./instructions/Setbtp";
 import {Setcut} from "./instructions/Setcut";
 import {Trim} from "./instructions/Trim";
+import {Getnode} from "./instructions/Getnode";
+import {Index} from "./instructions/Index";
+import {Entry} from "./instructions/Entry";
 
 export class ParseError extends Error {
 }
@@ -125,8 +128,20 @@ export class InstructionParser {
             } else if (this.isValidNumber(p0) && this.isValidNumber(p1)) {
                 return this.parseNumberNumberParamInstruction(instr, Number(p0), Number(p1));
             }
-        } else {
-            //TODO: Error for >2 Parameters
+        } else if (params.length == 3) {
+            if (this.isValidSignLabel(params[0])
+                && this.isValidContex(params[1])
+                && this.isValidNumber(params[2])) {
+                const p0 = <SignLabel>labels.find(v => {
+                    return v.text === params[0] && v instanceof SignLabel;
+                });
+                const p1 = <string>params[1];
+                const p2 = Number(params[2]);
+                return this.parseSignStringNumberParamInstruction(instr, p0, p1, p2);
+            }
+
+        } else if (params.length > 3) {
+            throw new ParseError("No Instructions for >3 parameters");
         }
 
 
@@ -228,19 +243,31 @@ export class InstructionParser {
 
     private static parseSignAndLabelParamInstruction(instr: string, sign: SignLabel, label: Label): Instruction {
         switch (instr) {
-        case "ustruct":
-            return new Ustruct(sign, label);
-        default:
-            return new InvalidInstruction(instr + " " + sign + " " + label);
+            case "ustruct":
+                return new Ustruct(sign, label);
+            default:
+                return new InvalidInstruction(instr + " " + sign + " " + label);
+        }
+    }
+
+    private static parseSignStringNumberParamInstruction(instr: string,
+                                                         p0: SignLabel,
+                                                         p1: string,
+                                                         p2: number): Instruction {
+        switch (instr) {
+            case "entry":
+                return new Entry(p0, p1, p2);
+            default:
+                return new InvalidInstruction(instr + " " + p0 + " " + p1 + " " + p2);
         }
     }
 
     private static parseSignAndNumberParamInstruction(instr: string, sign: SignLabel, secondParam: number): Instruction {
         switch (instr) {
-        case "lastcall":
-            return new Lastcall(sign, secondParam);
-        default:
-            return new InvalidInstruction(instr + " " + sign + " " + secondParam);
+            case "lastcall":
+                return new Lastcall(sign, secondParam);
+            default:
+                return new InvalidInstruction(instr + " " + sign + " " + secondParam);
         }
     }
 
@@ -249,7 +276,7 @@ export class InstructionParser {
         case "call":
             return new Call(sign);
         case "index":
-            return new Pop(); //TODO: Change to actual Constructor
+            return new Index(sign);
         case "jump":
             return new Jump(sign);
         case "putstruct":
@@ -268,7 +295,7 @@ export class InstructionParser {
         case "fail":
             return new Fail();
         case "getnode":
-            return new InvalidInstruction(input); //TODO: Replace once implemented
+            return new Getnode();
         case "lastmark":
             return new Lastmark();
         case "no":
@@ -313,6 +340,11 @@ export class InstructionParser {
 
     private static isValidNumber(arg: string): boolean {
         const regex = new RegExp("[0-9]+");
+        return regex.test(arg);
+    }
+
+    private static isValidContex(arg: string): boolean {
+        const regex = new RegExp("default|S|R");
         return regex.test(arg);
     }
 
