@@ -2,7 +2,7 @@ import React, {useMemo, useState} from "react";
 import * as ProgText from "../model/ProgramText";
 import {State} from "../model/State";
 import {ControlPanel} from "./ControlPanel";
-import "./LeftColumn.css";
+import "./LeftColumn.scss";
 import {ProgramTextEditor} from "./ProgramTextEditor";
 
 interface LeftColumnProps {

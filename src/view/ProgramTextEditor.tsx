@@ -5,7 +5,7 @@ import {CodeLine, LabelLine} from "../model/ProgramText";
 import * as ProgramText from "../model/ProgramText";
 import {State} from "../model/State";
 import {AppStateContext} from "./AppState";
-import "./ProgramTextEditor.css";
+import "./ProgramTextEditor.scss";
 import {useGlobalEvent} from "./util/UseGlobalEvent";
 
 interface ProgramTextEditorProps {

@@ -1,6 +1,6 @@
 import React from "react";
 import {State} from "../../model/State";
-import "./Visualization.css";
+import "./Visualization.scss";
 
 interface VisualizationProps {
     state: State;

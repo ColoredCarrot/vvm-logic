@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import "./App.css";
+import "./App.scss";
 import {AppState, AppStateContext} from "./AppState";
 import {LeftColumn} from "./LeftColumn";
 import {Visualization} from "./visualization/Visualization";

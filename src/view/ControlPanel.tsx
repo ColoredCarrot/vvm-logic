@@ -4,7 +4,7 @@ import {step} from "../exec/step";
 import * as ProgramText from "../model/ProgramText";
 import {State} from "../model/State";
 import {AppStateContext} from "./AppState";
-import "./ControlPanel.css";
+import "./ControlPanel.scss";
 import {useGlobalEvent} from "./util/UseGlobalEvent";
 
 interface ControlPanelProps {

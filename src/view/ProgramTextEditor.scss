@@ -1,0 +1,80 @@
+.ProgramTextEditor {
+    /* Stretch to fill out available space */
+    flex: 1;
+
+    background-color: #353535; /*303030*/
+
+    font-family: "JetBrains Mono", source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+    color: #ffffffde;
+
+    padding: 8px;
+
+    &__Line {
+        padding-top: 1px;
+        padding-bottom: 1px;
+
+        background-color: #353535;
+
+        &--label {
+            color: #e7db52;
+        }
+        &--error {
+            background-color: #cf6679; /*ff3f80*/
+        }
+        &--critical {
+            background-color: #710000;
+        }
+        &--active {
+            background-color: #03dac6;
+        }
+
+
+        &__Inner--cursor {
+            backdrop-filter: brightness(0.8);
+        }
+
+        &__Num {
+            font-size: 0.7em;
+            padding-right: 0.5em;
+            color: #ffffff3c;
+            user-select: none;
+        }
+    }
+
+    &__Caret {
+        animation: caret-blink 0.75s step-end infinite;
+
+        display: inline-block;
+        margin-left: -0.06em;
+        width: 0.12em;
+        height: 1em;
+        background: white;
+        margin-top: 0.12em;
+    }
+
+    &__Popout {
+        background-color: #cf6679;
+        padding: 8px;
+        font-size: 0.85em;
+        font-family: Arial, sans-serif;
+
+        &__Heading {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        &__InternalMessage {
+            margin-left: 0.5em;
+        }
+    }
+}
+
+@keyframes caret-blink {
+    from, to {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
+}
