@@ -23,9 +23,16 @@ export function ProgramTextEditor({vmState, programText, setProgramText}: Progra
 
     const [cursor, setCursor] = useState([0, 0] as Cursor);
 
+    const [isDraggingInto, setIsDraggingInto] = useState(false);
+
     // Set up global listeners
     useGlobalEvent("keydown", evt => handleKeyDown(evt, cursor, setCursor, programText, setProgramText));
     useGlobalEvent("paste", evt => handlePaste(evt));
+
+    function setProgramTextFromExternalSource(text: string) {
+        setProgramText(text.split("\n").map(ln => ln.replaceAll(/[^0-9a-z/: ]/ig, "")));
+        setCursor([0, 0]);
+    }
 
     function handlePaste(evt: ClipboardEvent): void {
         const toPaste = evt.clipboardData?.getData("text/plain");
@@ -34,11 +41,37 @@ export function ProgramTextEditor({vmState, programText, setProgramText}: Progra
         }
 
         // TODO: Don't replace, but insert
-        setProgramText(toPaste.split("\n").map(ln => ln.replaceAll(/[^0-9a-z/: ]/ig, "")));
-        setCursor([0, 0]);
+        setProgramTextFromExternalSource(toPaste);
     }
 
-    return <div className="ProgramTextEditor">
+    function handleDrop(evt: React.DragEvent): void {
+        const file = evt.dataTransfer.files.item(0);
+        if (!file) {
+            return;
+        }
+
+        evt.preventDefault();
+        evt.stopPropagation();
+
+        file.text().then(
+            text => {
+                setProgramTextFromExternalSource(text);
+                setIsDraggingInto(false);
+            },
+            err => {
+                console.error("Could not drag-and-drop file", err);
+                setIsDraggingInto(false);
+            },
+        );
+    }
+
+    return <div
+        className={"ProgramTextEditor" + (isDraggingInto ? " ProgramTextEditor--dragging-into" : "")}
+        onDrop={evt => handleDrop(evt)}
+        onDragOver={evt => evt.preventDefault()}
+        onDragEnter={evt => setIsDraggingInto(true)}
+        onDragLeave={evt => setIsDraggingInto(false)}
+    >
         {programText.lines.map(line =>
             <ProgramTextLine
                 key={line.num}
