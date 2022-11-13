@@ -63,3 +63,20 @@
         opacity: 0;
     }
 }
+
+.ProgramTextEditor__Popout {
+    background-color: #cf6679;
+    padding: 8px;
+    font-size: 0.85em;
+    font-family: Arial, sans-serif;
+}
+
+.ProgramTextEditor__Popout__Heading {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 10px ;
+}
+
+.ProgramTextEditor__Popout__InternalMessage {
+    margin-left: 0.5em;
+}

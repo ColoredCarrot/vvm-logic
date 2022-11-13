@@ -1,4 +1,5 @@
 import React, {useContext, useState} from "react";
+import {ExecutionError} from "../exec/ExecutionError";
 import {InvalidInstruction} from "../exec/instructions/InvalidInstruction";
 import {CodeLine, LabelLine} from "../model/ProgramText";
 import * as ProgramText from "../model/ProgramText";
@@ -50,7 +51,7 @@ export function ProgramTextEditor({vmState, programText, setProgramText}: Progra
 }
 
 interface ProgramTextLineProps {
-    line: ProgramText.Line
+    line: ProgramText.Line;
     cursor: Cursor;
     vmState: State;
 }
@@ -98,12 +99,29 @@ function ProgramTextLine({line, cursor, vmState}: ProgramTextLineProps) {
         content = <span>{raw}</span>;
     }
 
-    return <div className={cssClass}>
+    const textLineElem = <div className={cssClass}>
         <div className={innerCssClass}>
-            <span className="ProgramTextEditor__Line__Num">{(line.num + 1).toString().padStart(3, NON_BREAKING_SPACE)}</span>
+            <span
+                className="ProgramTextEditor__Line__Num">{(line.num + 1).toString().padStart(3, NON_BREAKING_SPACE)}</span>
             {content}
         </div>
     </div>;
+
+    let resultElem = textLineElem;
+    if (isActiveLine && appState.lastExecutionError !== null) {
+        resultElem = <>
+            {textLineElem}
+            <div className="ProgramTextEditor__Popout">
+                <div className="ProgramTextEditor__Popout__Heading">Whoops!</div>
+                The instruction failed to execute:
+                <span className="ProgramTextEditor__Popout__InternalMessage">
+                    {appState.lastExecutionError instanceof ExecutionError ? appState.lastExecutionError.message : appState.lastExecutionError}
+                </span>
+            </div>
+        </>;
+    }
+
+    return resultElem;
 }
 
 function handleKeyDown(
