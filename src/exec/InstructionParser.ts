@@ -30,6 +30,9 @@ import {Mark} from "./instructions/Mark";
 import {Delbtp} from "./instructions/Delbtp";
 import {Prune} from "./instructions/Prune";
 import {No} from "./instructions/No";
+import {Setbtp} from "./instructions/Setbtp";
+import {Setcut} from "./instructions/Setcut";
+import {Trim} from "./instructions/Trim";
 
 export class ParseError extends Error {
 }
@@ -176,7 +179,7 @@ export class InstructionParser {
         case "init":
             return new Init(param);
         case "mark":
-            return new Mark(param); //TODO: Replace with actual implementation
+            return new Mark(param);
         case "try":
             return new InvalidInstruction(instr + " " + param.text); //TODO: Replace with actual implementation
         case "up":
@@ -214,7 +217,7 @@ export class InstructionParser {
         case "son":
             return new Son(param);
         case "trim":
-            return new InvalidInstruction(instr + param); //TODO: Replace with actual Implementation
+            return new Trim(param);
         case "uref":
             return new Uref(param);
         case "uvar":
@@ -261,7 +264,7 @@ export class InstructionParser {
         case "bind":
             return new Bind();
         case "delbtp":
-            return new Delbtp(); //TODO: Replace once implemented
+            return new Delbtp();
         case "fail":
             return new Fail();
         case "getnode":
@@ -279,9 +282,9 @@ export class InstructionParser {
         case "putanon":
             return new Putanon();
         case "setbtp":
-            return new InvalidInstruction(input); //TODO: Replace once implemented
+            return new Setbtp();
         case "setcut":
-            return new InvalidInstruction(input); //TODO: Replace once implemented
+            return new Setcut();
         case "unify":
             return new Unify();
         default:
