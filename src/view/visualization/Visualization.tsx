@@ -10,6 +10,6 @@ export function Visualization({state}: VisualizationProps) {
     return <div className="Visualization">
         <h3>Visualization</h3>
 
-        <code>{JSON.stringify(state)}</code>
+        <code style={{whiteSpace: "pre-wrap"}}>{JSON.stringify(state, null, 2)}</code>
     </div>;
 }

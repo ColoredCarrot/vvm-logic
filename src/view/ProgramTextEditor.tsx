@@ -1,8 +1,8 @@
 import React, {useContext, useState} from "react";
 import {ExecutionError} from "../exec/ExecutionError";
 import {InvalidInstruction} from "../exec/instructions/InvalidInstruction";
-import {CodeLine, LabelLine} from "../model/ProgramText";
 import * as ProgramText from "../model/ProgramText";
+import {CodeLine, LabelLine} from "../model/ProgramText";
 import {State} from "../model/State";
 import {AppStateContext} from "./AppState";
 import "./ProgramTextEditor.scss";
@@ -44,6 +44,7 @@ export function ProgramTextEditor({vmState, programText, setProgramText}: Progra
                 key={line.num}
                 line={line}
                 cursor={cursor}
+                setCursor={setCursor}
                 vmState={vmState}
             />,
         )}
@@ -53,10 +54,11 @@ export function ProgramTextEditor({vmState, programText, setProgramText}: Progra
 interface ProgramTextLineProps {
     line: ProgramText.Line;
     cursor: Cursor;
+    setCursor(_: Cursor): void;
     vmState: State;
 }
 
-function ProgramTextLine({line, cursor, vmState}: ProgramTextLineProps) {
+function ProgramTextLine({line, cursor, setCursor, vmState}: ProgramTextLineProps) {
     const NON_BREAKING_SPACE = "\u00A0";
     const ZERO_WIDTH_SPACE = "\u200B";
 
@@ -105,7 +107,14 @@ function ProgramTextLine({line, cursor, vmState}: ProgramTextLineProps) {
             <span
                 className="ProgramTextEditor__Line__Num">{(line.num + 1).toString().padStart(3, NON_BREAKING_SPACE)}
             </span>
-            <span className={contentCssClass}>
+            <span className={contentCssClass} onClick={evt => {
+                const lineContentElemBounds = evt.currentTarget.getBoundingClientRect();
+                const clickedX = evt.clientX - lineContentElemBounds.x;
+                const charWidth = lineContentElemBounds.width / line.raw.length;
+                const clickedChar = Math.round(clickedX / charWidth);
+
+                setCursor([line.num, Math.max(0, Math.min(line.raw.length, clickedChar))]);
+            }}>
                 {content}
             </span>
         </div>
