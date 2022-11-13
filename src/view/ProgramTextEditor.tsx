@@ -111,12 +111,14 @@ function ProgramTextLine({line, cursor, vmState}: ProgramTextLineProps) {
     if (isActiveLine && appState.lastExecutionError !== null) {
         resultElem = <>
             {textLineElem}
-            <div className="ProgramTextEditor__Popout">
-                <div className="ProgramTextEditor__Popout__Heading">Whoops!</div>
-                The instruction failed to execute:
-                <span className="ProgramTextEditor__Popout__InternalMessage">
-                    {appState.lastExecutionError instanceof ExecutionError ? appState.lastExecutionError.message : appState.lastExecutionError}
-                </span>
+            <div className="ProgramTextEditor__Popout__Wrapper">
+                <div className="ProgramTextEditor__Popout">
+                    <div className="ProgramTextEditor__Popout__Heading">Whoops!</div>
+                    The instruction failed to execute:
+                    <span className="ProgramTextEditor__Popout__InternalMessage">
+                        {appState.lastExecutionError instanceof ExecutionError ? appState.lastExecutionError.message : appState.lastExecutionError}
+                    </span>
+                </div>
             </div>
         </>;
     }

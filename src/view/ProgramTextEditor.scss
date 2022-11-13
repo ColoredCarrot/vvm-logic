@@ -54,6 +54,11 @@
     }
 
     &__Popout {
+        &__Wrapper {
+            animation: popout-open 0.5s cubic-bezier(1, 0, 0, 1) 1;
+            overflow: hidden;
+        }
+
         background-color: colors.$error;
         padding: 8px;
         font-size: 0.85em;
@@ -77,5 +82,14 @@
     }
     50% {
         opacity: 0;
+    }
+}
+
+@keyframes popout-open {
+    from {
+        max-height: 0;
+    }
+    to {
+        max-height: 100%;
     }
 }
