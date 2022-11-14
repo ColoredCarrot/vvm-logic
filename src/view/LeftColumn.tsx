@@ -8,10 +8,9 @@ import {useLocallyStoredState} from "./util/UseLocallyStoredState";
 
 interface LeftColumnProps {
     state: State;
-    setState: (newState: State) => void;
 }
 
-export function LeftColumn({state, setState}: LeftColumnProps) {
+export function LeftColumn({state}: LeftColumnProps) {
     const [rawProgramText, setRawProgramText] = useLocallyStoredState(["a:", "POP", "MARK a"], "program-text");
 
     // Parsing the program text is expensive, so only do it when it is actually changed
@@ -19,7 +18,7 @@ export function LeftColumn({state, setState}: LeftColumnProps) {
 
     return <div className="LeftColumn">
         <ProgramText state={state} programText={programText} setProgramText={setRawProgramText}/>
-        <ControlPanel vmState={state} setVmState={setState} programText={programText}/>
+        <ControlPanel programText={programText}/>
     </div>;
 }
 

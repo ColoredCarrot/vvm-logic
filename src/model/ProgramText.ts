@@ -39,6 +39,11 @@ export class Text {
     constructor(
         readonly lines: readonly Line[],
     ) {
+        for (let i = 0; i < lines.length; ++i) {
+            if (lines[i].num !== i) {
+                throw new Error("Line numbers are wrong");
+            }
+        }
     }
 
     get rawLines(): string[] {

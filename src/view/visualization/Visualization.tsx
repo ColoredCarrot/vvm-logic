@@ -3,10 +3,11 @@ import {State} from "../../model/State";
 import "./Visualization.scss";
 
 interface VisualizationProps {
+    prevState: State;
     state: State;
 }
 
-export function Visualization({state}: VisualizationProps) {
+export function Visualization({prevState, state}: VisualizationProps) {
     return <div className="Visualization">
         <h3>Visualization</h3>
 
