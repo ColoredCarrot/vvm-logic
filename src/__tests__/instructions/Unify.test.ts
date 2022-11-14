@@ -13,6 +13,32 @@ import {Init} from "../../exec/instructions/Init";
 import {Setbtp} from "../../exec/instructions/Setbtp";
 import {Label} from "../../exec/Label";
 
+let p124PrevHeap: Heap = Heap.of(111,
+    [100, new AtomCell("aAtom")],
+    [101, new VariableCell(101)],
+    [102, new VariableCell(101)],
+    [103, new VariableCell(103)],
+    [104, new VariableCell(104)],
+    [105, new StructCell("f/2", 2)],
+    [106, new PointerToHeapCell(100)],
+    [107, new PointerToHeapCell(104)],
+    [108, new StructCell("f/2", 2)],
+    [109, new PointerToHeapCell(102)],
+    [110, new PointerToHeapCell(103)]);
+
+let p124ExpectedHeap: Heap = Heap.of(111,
+    [100, new AtomCell("aAtom")],
+    [101, new VariableCell(100)],
+    [102, new VariableCell(101)],
+    [103, new VariableCell(103)],
+    [104, new VariableCell(103)],
+    [105, new StructCell("f/2", 2)],
+    [106, new PointerToHeapCell(100)],
+    [107, new PointerToHeapCell(104)],
+    [108, new StructCell("f/2", 2)],
+    [109, new PointerToHeapCell(102)],
+    [110, new PointerToHeapCell(103)]);
+
 test("Instruction: UNIFY", () => {
     const instr = new Unify();
 
@@ -40,34 +66,12 @@ test("Unify, p.124 Example", () => {
     prevState = new Init(new Label(5, "N")).step(prevState);
     prevState = new Setbtp().step(prevState);
 
-    prevState = prevState.setHeap(Heap.of(111,
-        [100, new AtomCell("aAtom")],
-        [101, new VariableCell(101)],
-        [102, new VariableCell(101)],
-        [103, new VariableCell(103)],
-        [104, new VariableCell(104)],
-        [105, new StructCell("f/2", 2)],
-        [106, new PointerToHeapCell(100)],
-        [107, new PointerToHeapCell(104)],
-        [108, new StructCell("f/2", 2)],
-        [109, new PointerToHeapCell(102)],
-        [110, new PointerToHeapCell(103)]));
+    prevState = prevState.setHeap(p124PrevHeap);
 
-    let expectedHeap = Heap.of(111,
-        [100, new AtomCell("aAtom")],
-        [101, new VariableCell(100)],
-        [102, new VariableCell(101)],
-        [103, new VariableCell(103)],
-        [104, new VariableCell(103)],
-        [105, new StructCell("f/2", 2)],
-        [106, new PointerToHeapCell(100)],
-        [107, new PointerToHeapCell(104)],
-        [108, new StructCell("f/2", 2)],
-        [109, new PointerToHeapCell(102)],
-        [110, new PointerToHeapCell(103)]);
-
+    //Test 105, 108
     let actualHeap = Instruction.unify(prevState, 105, 108)[0].heap;
-
-    expect(expectedHeap).toStrictEqual(actualHeap);
+    expect(actualHeap).toStrictEqual(p124ExpectedHeap);
 });
+
+
 
