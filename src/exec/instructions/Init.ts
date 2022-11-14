@@ -15,16 +15,15 @@ export class Init extends Instruction {
 
     step(state: State): State {
 
-        state = state.setFramePointer(5);
-        state = state.setBacktrackPointer(5);
+        return state
+            .setFramePointer(5)
+            .setBacktrackPointer(5)
+            .pushStack(new ValueCell(this.param.line))
+            .pushStack(new ValueCell(-1))
+            .pushStack(new ValueCell(-1))
+            .pushStack(new ValueCell(0))
+            .pushStack(new UninitializedCell())
+            .pushStack(new UninitializedCell());
 
-        state = state.pushStack(new ValueCell(this.param.line));
-        state = state.pushStack(new ValueCell(-1));
-        state = state.pushStack(new ValueCell(-1));
-        state = state.pushStack(new ValueCell(0));
-        state = state.pushStack(new UninitializedCell());
-        state = state.pushStack(new UninitializedCell());
-
-        return state;
     }
 }

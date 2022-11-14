@@ -10,6 +10,7 @@ export class Popenv extends Instruction {
     }
 
     step(state: State): State {
+
         const currentFP = state.framePointer;
         const fPCell = state.stack.get(currentFP) as ValueCell;
         const paramPC = fPCell.value;
