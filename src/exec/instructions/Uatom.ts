@@ -4,6 +4,7 @@ import {PointerToHeapCell} from "../../model/PointerToHeapCell";
 import {Cell} from "../../model/Cell";
 import {AtomCell} from "../../model/AtomCell";
 import {VariableCell} from "../../model/VariableCell";
+import {ExecutionError} from "../ExecutionError";
 
 export class Uatom extends Instruction {
     private readonly name: string;
@@ -14,7 +15,12 @@ export class Uatom extends Instruction {
     }
 
     step(state: State): State {
-        const h: number = (state.stack.get(state.stack.stackPointer) as PointerToHeapCell).value;
+        const cell = state.stack.get(state.stack.stackPointer);
+        if (!(cell instanceof PointerToHeapCell)) {
+            throw new ExecutionError("Expected cell at top of stack to be a pointer-to-heap, but is " + cell);
+        }
+
+        const h: number = cell.value;
         const heapElem: Cell = state.heap.get(h);
 
         if (heapElem instanceof AtomCell) {
