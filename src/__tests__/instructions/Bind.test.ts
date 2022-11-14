@@ -14,7 +14,7 @@ test("Instruction: BIND", () => {
     const prevState = State.new()
         .setHeap(Heap.of(100, [90, new VariableCell(90)], [91, new UninitializedCell()]))
         .setStack(Stack.of(new UninitializedCell(), new ValueCell(123), new UninitializedCell(),
-            new PointerToHeapCell(90), new PointerToHeapCell(91)))
+            new PointerToHeapCell(90), new VariableCell(91)))
         .setBacktrackPointer(3)
         .setTrail(Trail.empty());
 
