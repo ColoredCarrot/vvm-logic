@@ -5,7 +5,7 @@ import {Cell} from "../../model/Cell";
 
 export class Pushenv extends Instruction {
 
-    private readonly mVar: number;
+    readonly mVar: number;
     private readonly cell: Cell = new UninitializedCell();
 
     constructor(mVar: number) {

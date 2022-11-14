@@ -75,6 +75,7 @@ export function ProgramTextEditor({vmState, programText, setProgramText}: Progra
         {programText.lines.map(line =>
             <ProgramTextLine
                 key={line.num}
+                text={programText}
                 line={line}
                 cursor={cursor}
                 setCursor={setCursor}
@@ -85,18 +86,19 @@ export function ProgramTextEditor({vmState, programText, setProgramText}: Progra
 }
 
 interface ProgramTextLineProps {
+    text: ProgramText.Text;
     line: ProgramText.Line;
     cursor: Cursor;
     setCursor(_: Cursor): void;
     vmState: State;
 }
 
-function ProgramTextLine({line, cursor, setCursor, vmState}: ProgramTextLineProps) {
+function ProgramTextLine({text, line, cursor, setCursor, vmState}: ProgramTextLineProps) {
     const NON_BREAKING_SPACE = "\u00A0";
     const ZERO_WIDTH_SPACE = "\u200B";
 
     const raw = line.raw.replaceAll(" ", NON_BREAKING_SPACE) || ZERO_WIDTH_SPACE;
-    const isActiveLine = line instanceof CodeLine && line.codeLineNum === vmState.programCounter + 1;
+    const isActiveLine = line instanceof CodeLine && line.num === text.getNextCodeLine(vmState.programCounter)?.num;
 
     const [appState, setAppState] = useContext(AppStateContext);
 
@@ -135,7 +137,7 @@ function ProgramTextLine({line, cursor, setCursor, vmState}: ProgramTextLineProp
         content = <span>{raw}</span>;
     }
 
-    const textLineElem = <div className={cssClass}>
+    const textLineElem = <div className={cssClass} data-label-line={(line instanceof LabelLine)}>
         <div className={innerCssClass}>
             <span
                 className="ProgramTextEditor__Line__Num">{(line.num + 1).toString().padStart(3, NON_BREAKING_SPACE)}
