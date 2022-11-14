@@ -8,6 +8,7 @@ export class Try extends Instruction {
     value: Label;
 
     constructor(value: Label) {
+
         super("TRY");
         this.value = value;
 
