@@ -15,21 +15,20 @@ export class Uatom extends Instruction {
     }
 
     step(state: State): State {
-        const h: number = (<PointerToHeapCell>state.stack.get(state.stack.stackPointer)).value;
-        const temp = state.modifyStack(s => s.pop());
+        const h: number = (state.stack.get(state.stack.stackPointer) as PointerToHeapCell).value;
         const heapElem: Cell = state.heap.get(h);
 
         if (heapElem instanceof AtomCell) {
             //Do Nothing
-            return temp;
+            return state.modifyStack(s => s.pop());
         } else if (heapElem instanceof VariableCell) {
-            const tempHeap = state.heap;
-            const newAtom: [Heap, number] = tempHeap.alloc([new AtomCell(this.name)]);
+            const [newHeap, address] = state.heap.alloc([new AtomCell(this.name)]);
 
-            return state.modifyTrail(t => t.push(h))
-                .setHeap(newAtom[0])
-                .modifyHeap(mh => mh.set(h, new VariableCell(newAtom[1])));
-
+            return state
+                .modifyStack(s => s.pop())
+                .setHeap(newHeap)
+                .modifyHeap(mh => mh.set(h, new VariableCell(address)))
+                .modify(s => Instruction.trail(s, h));
         } else {
             return Instruction.backtrack(state);
         }

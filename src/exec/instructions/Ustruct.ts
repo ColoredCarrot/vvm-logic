@@ -17,7 +17,7 @@ export class Ustruct extends Instruction {
     }
 
     step(state: State): State {
-        const ref = (<PointerToHeapCell>state.stack.get(state.stack.stackPointer)).value;
+        const ref = (state.stack.get(state.stack.stackPointer) as PointerToHeapCell).value;
         const heapElem = state.heap.get(ref);
         if (heapElem instanceof StructCell) {
             //DO Nothing
