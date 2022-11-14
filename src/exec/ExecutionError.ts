@@ -1,5 +1,5 @@
 export class ExecutionError extends Error {
-    constructor(message: string) {
+    constructor(message: string, readonly explanation?: string) {
         super(message);
     }
 }

@@ -29,6 +29,16 @@ export function ControlPanel({programText}: ControlPanelProps) {
         let newState: State | null = null;
         try {
             newState = step(vmState.setProgramCounter(nextCodeLine.num - 1), nextCodeLine.instruction);
+
+            for (const oldState of appState.vmState) {
+                if (oldState.equals(newState)) {
+                    throw new ExecutionError(
+                        "Looks like you're stuck in an infinite loop. We stopped the execution for you.",
+                        "Executing this instruction yields a state that has already been seen. "
+                    );
+                }
+            }
+
             setAppState({
                 ...appState,
                 vmState: appState.vmState.push(newState),
