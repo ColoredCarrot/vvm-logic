@@ -21,7 +21,7 @@ export class Init extends Instruction {
             .pushStack(new ValueCell(this.param.line))
             .pushStack(new ValueCell(-1))
             .pushStack(new ValueCell(-1))
-            .pushStack(new ValueCell(0))
+            .pushStack(new ValueCell(state.heap.getHeapPointer()))
             .pushStack(new UninitializedCell())
             .pushStack(new UninitializedCell());
 

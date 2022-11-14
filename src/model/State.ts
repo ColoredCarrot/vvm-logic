@@ -123,4 +123,8 @@ export class State implements StateVars {
     modify(f: (_: State) => State): State {
         return f(this);
     }
+
+    equals(that: State): boolean {
+        return JSON.stringify(this) === JSON.stringify(that);
+    }
 }
