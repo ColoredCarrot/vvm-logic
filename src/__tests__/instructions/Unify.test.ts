@@ -5,7 +5,7 @@ import {State} from "../../model/State";
 import {Unify} from "../../exec/instructions/Unify";
 import {PointerToHeapCell} from "../../model/PointerToHeapCell";
 import {Heap} from "../../model/Heap";
-import { VariableCell } from "../../model/VariableCell";
+import {VariableCell} from "../../model/VariableCell";
 
 test("Instruction: UNIFY", () => {
     const instr = new Unify();
