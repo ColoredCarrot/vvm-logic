@@ -4,10 +4,9 @@ import {PointerToHeapCell} from "../../model/PointerToHeapCell";
 import {Cell} from "../../model/Cell";
 import {AtomCell} from "../../model/AtomCell";
 import {VariableCell} from "../../model/VariableCell";
-import {Heap} from "../../model/Heap";
 
 export class Uatom extends Instruction {
-    private name: string;
+    private readonly name: string;
 
     constructor(param: string) {
         super("UATOM");

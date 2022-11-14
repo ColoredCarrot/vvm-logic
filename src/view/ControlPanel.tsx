@@ -19,16 +19,17 @@ export function ControlPanel({vmState, setVmState, programText}: ControlPanelPro
 
     const [appState, setAppState] = useContext(AppStateContext);
 
-    const endOfProgram = vmState.programCounter + 1 >= programText.codeLineCount;
+    const nextCodeLine = programText.getNextCodeLine(vmState.programCounter);
+    const endOfProgram = nextCodeLine === null;
 
     function invokeStep(): void {
-        if (endOfProgram) {
+        if (nextCodeLine === null) {
             return;
         }
 
         let newState: State | null = null;
         try {
-            newState = step(vmState, programText.getCodeLine(vmState.programCounter + 1)!.instruction);
+            newState = step(vmState.setProgramCounter(nextCodeLine.num - 1), nextCodeLine.instruction);
             if (newState !== null) {
                 setVmState(newState);
             }
