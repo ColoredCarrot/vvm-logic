@@ -18,7 +18,7 @@ export class Trim extends Instruction {
 
         if (state.framePointer >= state.backtrackPointer) {
             for (let i = 0; i <  number2; i++) {
-                state.stack.pop();
+                state = state.setStack(state.stack.pop());
             }
         }
         return state;

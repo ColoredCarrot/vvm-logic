@@ -1,5 +1,6 @@
 import {Instruction} from "./Instruction";
 import {State} from "../../model/State";
+import {PointerToStackCell} from "../../model/PointerToStackCell";
 
 export class Setcut extends Instruction {
 
@@ -9,8 +10,8 @@ export class Setcut extends Instruction {
 
     step(state: State): State {
 
-        state = state.setBacktrackPointer(state.framePointer - 4);
-        return state;
+        const stack = state.stack.set(state.framePointer - 4, new PointerToStackCell(state.backtrackPointer));
+        return state.setStack(stack);
     }
 
 }

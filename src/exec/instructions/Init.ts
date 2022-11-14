@@ -24,5 +24,6 @@ export class Init extends Instruction {
             .pushStack(new ValueCell(0))
             .pushStack(new UninitializedCell())
             .pushStack(new UninitializedCell());
+
     }
 }

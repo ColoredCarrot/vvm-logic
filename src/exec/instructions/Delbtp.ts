@@ -12,8 +12,8 @@ export class Delbtp extends Instruction {
     step(state: State): State {
 
         const cell = state.stack.get(state.framePointer - 4) as PointerToStackCell;
-        state = state.setBacktrackPointer(cell.value);
-        return state;
+        return state.setBacktrackPointer(cell.value);
+
     }
 
 }
