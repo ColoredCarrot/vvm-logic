@@ -13,7 +13,7 @@ import {Init} from "../../exec/instructions/Init";
 import {Setbtp} from "../../exec/instructions/Setbtp";
 import {Label} from "../../exec/Label";
 
-let p124PrevHeap: Heap = Heap.of(111,
+const p124PrevHeap: Heap = Heap.of(111,
     [100, new AtomCell("aAtom")],
     [101, new VariableCell(101)],
     [102, new VariableCell(101)],
@@ -26,7 +26,7 @@ let p124PrevHeap: Heap = Heap.of(111,
     [109, new PointerToHeapCell(102)],
     [110, new PointerToHeapCell(103)]);
 
-let p124ExpectedHeap: Heap = Heap.of(111,
+const p124ExpectedHeap: Heap = Heap.of(111,
     [100, new AtomCell("aAtom")],
     [101, new VariableCell(100)],
     [102, new VariableCell(101)],
@@ -69,9 +69,7 @@ test("Unify, p.124 Example", () => {
     prevState = prevState.setHeap(p124PrevHeap);
 
     //Test 105, 108
-    let actualHeap = Instruction.unify(prevState, 105, 108)[0].heap;
+    const actualHeap = Instruction.unify(prevState, 105, 108)[0].heap;
     expect(actualHeap).toStrictEqual(p124ExpectedHeap);
 });
-
-
 
