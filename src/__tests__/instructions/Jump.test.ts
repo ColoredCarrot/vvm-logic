@@ -6,7 +6,7 @@ test("Instruction: JUMP", () => {
     const instr = new Jump(new Label(5, "B"));
 
     const prevState = State.new()
-        .setProgramCounter(1)
+        .setProgramCounter(1);
 
     const expectedState = State.new()
         .setProgramCounter(5);

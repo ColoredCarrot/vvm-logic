@@ -7,9 +7,9 @@ import {PointerToHeapCell} from "../../model/PointerToHeapCell";
 import {Heap} from "../../model/Heap";
 import {VariableCell} from "../../model/VariableCell";
 import {AtomCell} from "../../model/AtomCell";
-import { Trail } from "../../model/Trail";
-import { SignLabel } from "../../exec/SignLabel";
-import { Label } from "../../exec/Label";
+import {Trail} from "../../model/Trail";
+import {SignLabel} from "../../exec/SignLabel";
+import {Label} from "../../exec/Label";
 
 test("Instruction: USTRUCT", () => {
     const instr = new Ustruct(new SignLabel(2, "f/2"), new Label(3, "A"));

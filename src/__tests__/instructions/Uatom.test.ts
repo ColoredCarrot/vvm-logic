@@ -7,7 +7,7 @@ import {PointerToHeapCell} from "../../model/PointerToHeapCell";
 import {Heap} from "../../model/Heap";
 import {VariableCell} from "../../model/VariableCell";
 import {AtomCell} from "../../model/AtomCell";
-import { Trail } from "../../model/Trail";
+import {Trail} from "../../model/Trail";
 
 test("Instruction: UATOM", () => {
     const instr = new Uatom("a");
