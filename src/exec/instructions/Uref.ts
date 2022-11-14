@@ -1,19 +1,27 @@
 import {Instruction} from "./Instruction";
 import {State} from "../../model/State";
 import {PointerToHeapCell} from "../../model/PointerToHeapCell";
+import {ExecutionError} from "../ExecutionError";
 
 export class Uref extends Instruction {
-    private i: number;
 
-
-    constructor(i: number) {
+    constructor(private readonly i: number) {
         super("UREF " + i);
         this.i = i;
     }
 
     step(state: State): State {
-        const topOfStack: number = (state.stack.get(state.stack.stackPointer) as PointerToHeapCell).value;
-        const fpi: number = (state.stack.get(state.framePointer + this.i) as PointerToHeapCell).value;
+        const topOfStackCell = state.stack.get(state.stack.stackPointer);
+        if (!(topOfStackCell instanceof PointerToHeapCell)) {
+            throw new ExecutionError("Expected cell at top of stack to be a pointer-to-heap, but is " + topOfStackCell);
+        }
+
+        const topOfStack: number = topOfStackCell.value;
+        const fpiCell = state.stack.get(state.framePointer + this.i);
+        if (!(fpiCell instanceof PointerToHeapCell)) {
+            throw new ExecutionError("Expected cell at FP + " + this.i + " to be a pointer-to-heap, but is " + fpiCell);
+        }
+        const fpi: number = fpiCell.value;
 
         const temp: [State, boolean] = Instruction.unify(state, topOfStack, fpi);
 
