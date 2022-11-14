@@ -3,6 +3,7 @@ import {SignLabel} from "../exec/SignLabel";
 import {Call} from "../exec/instructions/Call";
 import {InvalidInstruction} from "../exec/instructions/InvalidInstruction";
 import {Pop} from "../exec/instructions/Pop";
+import {Pushenv} from "../exec/instructions/Pushenv";
 
 test("parse pop", () => {
     const instr = InstructionParser.parseInstruction("POP", []);
@@ -28,6 +29,14 @@ test("missing label", () => {
     expect(
         () => InstructionParser.parseInstruction("CALL f/4", [new SignLabel(2, "f/5")])
     ).toThrow(ParseError);
+});
+
+test("parse pushenv", () => {
+    const instr = InstructionParser.parseInstruction("PUSHENV 0", []);
+    expect(instr).toBeInstanceOf(Pushenv);
+
+    const pushenv = instr as Pushenv;
+    expect(pushenv.mVar).toStrictEqual(0);
 });
 
 const page140Example: string [] =

@@ -16,7 +16,6 @@ export class CodeLine extends Line {
         num: number,
         content: string,
         raw: string,
-        readonly codeLineNum: number,
         readonly instruction: Instruction,
     ) {
         super(num, content, raw);
@@ -56,11 +55,20 @@ export class Text {
         return res;
     }
 
-    getCodeLine(codeLineNum: number): CodeLine | null {
+    getCodeLine(num: number): CodeLine | null {
         return <CodeLine | null>(
-            this.lines.find(l => l instanceof CodeLine && l.codeLineNum === codeLineNum)
+            this.lines.find(l => l instanceof CodeLine && l.num === num)
             ?? null
         );
+    }
+
+    getNextCodeLine(programCounter: number): CodeLine | null {
+        let numToExec = programCounter + 1;
+        while (numToExec < this.lines.length && this.getCodeLine(numToExec) === null) {
+            ++numToExec;
+        }
+
+        return this.getCodeLine(numToExec);
     }
 }
 
@@ -69,8 +77,6 @@ export function parseProgramText(rawLines: readonly string[]): Text {
 
     const labels = InstructionParser.processLabels(rawLines);
 
-    let codeLineNum = 0;
-
     return new Text(
         rawLines
             .map(line => line.trim().toLowerCase())
@@ -78,7 +84,7 @@ export function parseProgramText(rawLines: readonly string[]): Text {
                 line.endsWith(":")
                     ? new LabelLine(num, line, rawLines[num])
                     : (line.length > 0
-                        ? new CodeLine(num, line, rawLines[num], codeLineNum++, InstructionParser.parseInstruction(line, labels))
+                        ? new CodeLine(num, line, rawLines[num], InstructionParser.parseInstruction(line, labels))
                         : new Line(num, line, rawLines[num])),
             ),
     );

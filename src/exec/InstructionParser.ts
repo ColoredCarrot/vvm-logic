@@ -30,6 +30,8 @@ import {Ustruct} from "./instructions/Ustruct";
 import {Uvar} from "./instructions/Uvar";
 import {Label} from "./Label";
 import {SignLabel} from "./SignLabel";
+import {Setbtp} from "./instructions/Setbtp";
+import {Try} from "./instructions/Try";
 
 export class ParseError extends Error {
 }
@@ -90,10 +92,10 @@ export class InstructionParser {
                     return v.text === param;
                 })!;
                 return this.parseLabelParamInstruction(instr, l1);
-            } else if (this.isValidAtomName(param)) {
-                return this.parseStringParamInstructor(instr, param);
             } else if (this.isValidNumber(param)) {
                 return this.parseNumberParamInstruction(instr, Number(param));
+            } else if (this.isValidAtomName(param)) {
+                return this.parseStringParamInstructor(instr, param);
             }
         } else if (params.length == 2) {
             const p1 = params.pop()!;
@@ -178,7 +180,7 @@ export class InstructionParser {
         case "mark":
             return new Mark(param);
         case "try":
-            return new InvalidInstruction(instr + " " + param.text); //TODO: Replace with actual implementation
+            return new Try(param);
         case "up":
             return new Up(param);
         case "jump":
@@ -279,7 +281,7 @@ export class InstructionParser {
         case "putanon":
             return new Putanon();
         case "setbtp":
-            return new InvalidInstruction(input); //TODO: Replace once implemented
+            return new Setbtp();
         case "setcut":
             return new InvalidInstruction(input); //TODO: Replace once implemented
         case "unify":
