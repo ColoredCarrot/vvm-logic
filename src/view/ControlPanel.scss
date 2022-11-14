@@ -1,0 +1,24 @@
+@use "colors";
+
+.ControlPanel {
+    min-height: 100px;
+    max-height: 300px;
+
+    &__button {
+        display: inline-block;
+        padding: 10px 25px 10px 25px;
+        margin-right: 2px; /* Spacing between buttons */
+
+        background-color: colors.$btn;
+        color: colors.$btn-text;
+        font-weight: bold;
+        cursor: pointer;
+        user-select: none;
+
+        &--disabled {
+            background-color: colors.$btn-disabled;
+            color: colors.$btn-disabled-text;
+            cursor: revert;
+        }
+    }
+}

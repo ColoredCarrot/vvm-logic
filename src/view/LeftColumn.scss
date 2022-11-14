@@ -1,0 +1,17 @@
+.LeftColumn {
+    height: 100%;
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.ProgramText {
+    flex: 1;
+
+    // While we are a flex child, we also act as a flex container for our children (namely ProgramTextEditor)
+    display: flex;
+    flex-direction: column;
+
+    overflow: auto;
+}

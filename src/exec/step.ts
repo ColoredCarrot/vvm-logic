@@ -1,10 +1,11 @@
 import {State} from "../model/State";
+import {Instruction} from "./instructions/Instruction";
 
 /**
  * Step from one machine state to the next by parsing and processing the given instruction.
  */
-export function step(state: State, instruction: string): State {
-    console.log("Step " + instruction);
-
-    return state.setProgramCounter(state.programCounter + 1);
+export function step(state: State, instruction: Instruction): State {
+    return state
+        .setProgramCounter(state.programCounter + 1)
+        .modify(instruction.step.bind(instruction));
 }
