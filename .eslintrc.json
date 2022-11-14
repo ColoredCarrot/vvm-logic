@@ -6,6 +6,7 @@
   "extends": [
     "eslint:recommended",
     "plugin:react/recommended",
+    "plugin:react-hooks/recommended",
     "plugin:@typescript-eslint/recommended"
   ],
   "overrides": [
@@ -91,7 +92,13 @@
       "error",
       {
         "before": false,
-        "after": true
+        "after": true,
+        "overrides": {
+          "arrow": {
+            "before": true,
+            "after": true
+          }
+        }
       }
     ],
 
@@ -99,7 +106,8 @@
       "error",
       {
         "arrays": "always-multiline",
-        "functions": "only-multiline"
+        "functions": "only-multiline",
+        "objects": "always-multiline"
       }
     ],
 

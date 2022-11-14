@@ -1,24 +1,27 @@
 import React, {useState} from "react";
-import "./App.css";
+import "./App.scss";
+import {AppState, AppStateContext} from "./AppState";
 import {LeftColumn} from "./LeftColumn";
-import {Visualization} from "./Visualization";
+import {Visualization} from "./visualization/Visualization";
 import {State} from "../model/State";
 
 function App() {
     const [state, setState] = useState<State>(State.new());
 
-    return (
-        <div className="container">
-            <div className="row">
-                <div className="col s4">
-                    <LeftColumn state={state} setState={setState}></LeftColumn>
+    const [appState, setAppState] = useState<AppState>({lastExecutionError: null});
+
+    return <>
+        <AppStateContext.Provider value={[appState, setAppState]}>
+            <div className="App">
+                <div className="left-column-container">
+                    <LeftColumn state={state} setState={setState}/>
                 </div>
-                <div className="col s8">
+                <div className="visualization-container">
+                    <Visualization state={state}/>
                 </div>
-                <Visualization state={state}/>
             </div>
-        </div>
-    );
+        </AppStateContext.Provider>
+    </>;
 }
 
 export default App;

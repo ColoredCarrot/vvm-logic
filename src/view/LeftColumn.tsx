@@ -1,47 +1,36 @@
-import React, {useState} from "react";
+import React, {useMemo} from "react";
+import * as ProgText from "../model/ProgramText";
 import {State} from "../model/State";
-import {step} from "../exec/step";
+import {ControlPanel} from "./ControlPanel";
+import "./LeftColumn.scss";
+import {ProgramTextEditor} from "./ProgramTextEditor";
+import {useLocallyStoredState} from "./util/UseLocallyStoredState";
 
 interface LeftColumnProps {
     state: State;
-    setState: (newState: State)=> void;
+    setState: (newState: State) => void;
 }
 
 export function LeftColumn({state, setState}: LeftColumnProps) {
-    const [programText, setProgramText] = useState("");
+    const [rawProgramText, setRawProgramText] = useLocallyStoredState(["a:", "POP", "MARK a"], "program-text");
 
-    const programTextLines = programText.split("\n")
-        .map(line => line.trim())
-        .filter(line => line.length > 0);
-    const nextInstrIdx = state.programCounter + 1;
+    // Parsing the program text is expensive, so only do it when it is actually changed
+    const programText = useMemo(() => ProgText.parseProgramText(rawProgramText), [rawProgramText]);
 
-    const endOfProgram = nextInstrIdx >= programTextLines.length;
+    return <div className="LeftColumn">
+        <ProgramText state={state} programText={programText} setProgramText={setRawProgramText}/>
+        <ControlPanel vmState={state} setVmState={setState} programText={programText}/>
+    </div>;
+}
 
-    const actionBtn = endOfProgram
-        ? <a className="btn" onClick={() => {
-            setState(State.new());
-        }
-        }>Restart</a>
-        : <a className="btn" onClick={() => {
-            const instrText = programTextLines[nextInstrIdx];
-            setState(step(state, instrText));
-        }
-        }>Step</a>;
+interface ProgramTextProps {
+    state: State;
+    programText: ProgText.Text;
+    setProgramText(rawLines: string[]): void;
+}
 
-    return <>
-        <div className="row">
-            <div className="input-field col s12">
-                <textarea
-                    id="program-text"
-                    className="materialize-textarea"
-                    rows={80}
-                    value={programText}
-                    onChange={(elem) => setProgramText(elem.target.value)}></textarea>
-                <label htmlFor="program-text">Program Text</label>
-            </div>
-        </div>
-        <div className="row">
-            {actionBtn}
-        </div>
-    </>;
+function ProgramText({state, programText, setProgramText}: ProgramTextProps) {
+    return <div className="ProgramText">
+        <ProgramTextEditor vmState={state} programText={programText} setProgramText={setProgramText}/>
+    </div>;
 }
