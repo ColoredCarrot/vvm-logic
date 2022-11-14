@@ -16,5 +16,6 @@ export class Unify extends Instruction {
         const temp: [State, boolean] = Instruction.unify(state, nextOnStack, topOfStack);
 
         return temp[0].modifyStack(s => s.pop(2));
+        // FIXME: Frage: greift das nur zu wenn unify true ausgibt?? Weil sonst wäre es falsch
     }
 }
