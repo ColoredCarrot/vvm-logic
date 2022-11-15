@@ -9,13 +9,12 @@ import {Instruction} from "../../exec/instructions/Instruction";
 
 test("Instruction: Backtrack", () => {
 
-  /* const prevState = State.new()
+    /* const prevState = State.new()
         .setStack(Stack.of(new UninitializedCell(), new ValueCell(5), new UninitializedCell(), new ValueCell(1),
             new ValueCell(20), new UninitializedCell(), new UninitializedCell(), new UninitializedCell()))
         .setBacktrackPointer(6)
         .setTrail(Trail.of(1, 2 ,3).setTrailPointer(2))
         .setHeap(Heap.of(2));
-
 
 
     const expectedState = State.new()
