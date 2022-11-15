@@ -8,6 +8,11 @@ interface VisualizationProps {
 }
 
 export function Visualization({prevState, state}: VisualizationProps) {
+
+    /////////////
+    // Don't display heap cells whose address is >= heap pointer
+    /////////////
+
     return <div className="Visualization">
         <h3>Visualization</h3>
 

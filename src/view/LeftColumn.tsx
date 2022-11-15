@@ -11,7 +11,7 @@ interface LeftColumnProps {
 }
 
 export function LeftColumn({state}: LeftColumnProps) {
-    const [rawProgramText, setRawProgramText] = useLocallyStoredState(["a:", "POP", "MARK a"], "program-text");
+    const [rawProgramText, setRawProgramText] = useLocallyStoredState([""], "program-text");
 
     // Parsing the program text is expensive, so only do it when it is actually changed
     const programText = useMemo(() => ProgText.parseProgramText(rawProgramText), [rawProgramText]);
