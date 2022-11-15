@@ -32,6 +32,8 @@ import {Label} from "./Label";
 import {SignLabel} from "./SignLabel";
 import {Setbtp} from "./instructions/Setbtp";
 import {Try} from "./instructions/Try";
+import {Trim} from "./instructions/Trim";
+import {Setcut} from "./instructions/Setcut";
 
 export class ParseError extends Error {
 }
@@ -216,7 +218,7 @@ export class InstructionParser {
         case "son":
             return new Son(param);
         case "trim":
-            return new InvalidInstruction(instr + param); //TODO: Replace with actual Implementation
+            return new Trim(param);
         case "uref":
             return new Uref(param);
         case "uvar":
@@ -263,7 +265,7 @@ export class InstructionParser {
         case "bind":
             return new Bind();
         case "delbtp":
-            return new Delbtp(); //TODO: Replace once implemented
+            return new Delbtp();
         case "fail":
             return new Fail();
         case "getnode":
@@ -283,7 +285,7 @@ export class InstructionParser {
         case "setbtp":
             return new Setbtp();
         case "setcut":
-            return new InvalidInstruction(input); //TODO: Replace once implemented
+            return new Setcut();
         case "unify":
             return new Unify();
         default:
