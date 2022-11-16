@@ -175,8 +175,8 @@ function VisualizationGraph({state}: VisualizationProps) {
                 data: {
                     id: "S" + i,
                     label: ("Stack[" + i + "]:" + stackCell.value),
-                    type: "stack-pointerToHeap"
-                }
+                    type: "stack-pointerToHeap",
+                },
             });
             edges.push({
                 data: {
