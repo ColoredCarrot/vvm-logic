@@ -14,6 +14,7 @@
     "cytoscape": "^3.23.0",
     "cytoscape-avsdf": "^1.0.0",
     "cytoscape-cola": "^2.5.1",
+    "cytoscape-fcose": "^2.1.0",
     "immutable": "^4.1.0",
     "jointjs": "^3.6.2",
     "parser-generator": "^0.2.0",
@@ -49,6 +50,7 @@
     ]
   },
   "devDependencies": {
+    "@types/cytoscape-fcose": "^2.1.0",
     "@types/react-cytoscapejs": "^1.2.2",
     "@typescript-eslint/eslint-plugin": "^5.42.0",
     "@typescript-eslint/parser": "^5.42.0",
