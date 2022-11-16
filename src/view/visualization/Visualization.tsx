@@ -65,7 +65,7 @@ function generateLayout(state: State, cy: React.MutableRefObject<Cytoscape.Core 
 
     const relPlacementJson = JSON.parse("[" + stackVertRelPlacement + "]");
 
-    const registerVertAlignment = "[\"PC\",\"BP\"]";
+    const registerVertAlignment = "[\"PC\",\"FP\",\"BP\"]";
     const alignmentConstraints = "{\"vertical\": [" + stackVertAlignment + registerVertAlignment + "]}";
     const alignmentJson = JSON.parse(alignmentConstraints);
 
