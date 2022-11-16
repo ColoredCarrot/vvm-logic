@@ -138,7 +138,7 @@ function VisualizationGraph({state}: VisualizationProps) {
             },
         ]}
         elements={CytoscapeComponent.normalizeElements({
-            nodes: a,
+            nodes: nodes,
             edges: edges,
         })}
     />;
