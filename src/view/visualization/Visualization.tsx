@@ -167,10 +167,9 @@ function VisualizationGraph({state}: VisualizationProps) {
     }
 
     // HEAP
-    // FIX: keyset in heap, und nur darüber iterieren!
+    // FIXME: keyset in heap, und nur darüber iterieren!
     for (let i = 0; i < state.heap.getHeapPointer(); ++i) {
 
-        // nur wenn an Heapadresse etwas steht!
         if (state.heap.get(i)) {
 
             const heapCell = state.heap.get(i);
@@ -224,7 +223,6 @@ function VisualizationGraph({state}: VisualizationProps) {
                 });
             }
         }
-        // sonst einfach weiter Heap durchgehen!
     }
 
     // TRAIL (if exists)
