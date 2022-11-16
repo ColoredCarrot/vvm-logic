@@ -37,17 +37,17 @@ function generateLayout(state: State, cy: React.MutableRefObject<Cytoscape.Core 
         for (let i = 0; i < state.stack.size; i++) {
             if (i == state.stack.size - 1) {
                 //Last
-                stackVertAlignment = stackVertAlignment + "\"s" + i + "\"";
+                stackVertAlignment = stackVertAlignment + "\"S" + i + "\"";
             } else {
-                stackVertAlignment = stackVertAlignment + "\"s" + i + "\",";
+                stackVertAlignment = stackVertAlignment + "\"S" + i + "\",";
             }
         }
         stackVertAlignment = stackVertAlignment + "],";
 
         for (let i = 1; i < state.stack.size; i++) {
             stackVertRelPlacement +=
-                "{\"top\": \"s" + i + "\"," +
-                "\"bottom\": \"s" + (i - 1) + "\"," +
+                "{\"top\": \"S" + i + "\"," +
+                "\"bottom\": \"S" + (i - 1) + "\"," +
                 "\"gap\": 0}";
             if (i < state.stack.size - 1)
                 stackVertRelPlacement += ",";
