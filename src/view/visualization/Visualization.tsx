@@ -2,8 +2,6 @@ import React, {useLayoutEffect, useRef} from "react";
 import {State} from "../../model/State";
 import Cytoscape from "cytoscape";
 import cytoscape from "cytoscape";
-import Cola from "cytoscape-cola";
-import Avsdf from "cytoscape-avsdf";
 import CytoscapeComponent from "react-cytoscapejs";
 import "./Visualization.scss";
 import "springy/springy";
@@ -18,8 +16,6 @@ import { AtomCell } from "../../model/AtomCell";
 import {VariableCell} from "../../model/VariableCell";
 import { StructCell } from "../../model/StructCell";
 
-Cytoscape.use(Cola);
-Cytoscape.use(Avsdf);
 Cytoscape.use(fcose);
 
 interface VisualizationProps {
@@ -42,26 +38,44 @@ export function Visualization({prevState, state}: VisualizationProps) {
 
 function generateLayout(state: State, cy: React.MutableRefObject<Cytoscape.Core | undefined>): cytoscape.LayoutOptions {
     //Try with cose
-    /*
-        cytoscape.use(fcose);
-        let aConstr = JSO
-        let stackVertAlignment = "[";
+    cytoscape.use(fcose);
+    let stackVertAlignment = "";
+    let stackVertRelPlacement = "";
+    if (state.stack.size > 0) {
+        stackVertAlignment = "[";
         for (let i = 0; i < state.stack.size; i++) {
-            stackVertAlignment = stackVertAlignment + "\"s" + i + "\"";
+            if (i == state.stack.size - 1) {
+                //Last
+                stackVertAlignment = stackVertAlignment + "\"S" + i + "\"";
+            } else {
+                stackVertAlignment = stackVertAlignment + "\"S" + i + "\",";
+            }
         }
+        stackVertAlignment = stackVertAlignment + "],";
 
-        stackVertAlignment = stackVertAlignment + "]";
+        for (let i = 1; i < state.stack.size; i++) {
+            stackVertRelPlacement +=
+                "{\"top\": \"S" + i + "\"," +
+                "\"bottom\": \"S" + (i - 1) + "\"," +
+                "\"gap\": 0}";
+            if (i < state.stack.size - 1)
+                stackVertRelPlacement += ",";
+        }
+    }
 
-        const alignmentConstraint = "{vertical: [" + stackVertAlignment + "]";
-        const aConstr = JSON.parse(alignmentConstraint);
-    */
+    const relPlacementJson = JSON.parse("[" + stackVertRelPlacement + "]");
+
+    const registerVertAlignment = "[\"PC\",\"BP\"]";
+    const alignmentConstraints = "{\"vertical\": [" + stackVertAlignment + registerVertAlignment + "]}";
+    const alignmentJson = JSON.parse(alignmentConstraints);
 
     return {
         name: "fcose",
         // @ts-ignore
         animate: true,
         randomize: false,
-        //alignment: {vertical: [["FP", "BP", "PC"]]},
+        alignmentConstraint: alignmentJson,
+        relativePlacementConstraint: relPlacementJson,
     };
 }
 
@@ -73,15 +87,6 @@ function VisualizationGraph({state}: VisualizationProps) {
         //cy.current!.$id("s3").positions({x: 300, y: 300}).lock();
         cy.current!
             .layout(generateLayout(state, cy)).run();
-
-        // cy.current!
-        //     .elements("node[type = 'stack']")
-        //     .layout({
-        //         name: "preset", positions: function(nodeid): Position {
-        //             return cy.current!.$id(nodeid)!.position();
-        //         },
-        //     })
-        //     .run();
     });
 
     const nodes = [];
@@ -225,6 +230,9 @@ function VisualizationGraph({state}: VisualizationProps) {
     return <CytoscapeComponent
         cy={theCy => {
             cy.current = theCy;
+            //   cy.current.on("tapend", function(ev) {
+            //       cy.current!.layout(generateLayout(state, cy)).run();
+            //   });
         }}
         style={{width: "100%", height: "100%"}}
         stylesheet={[
