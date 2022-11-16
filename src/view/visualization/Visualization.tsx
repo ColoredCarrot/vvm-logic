@@ -7,14 +7,14 @@ import "./Visualization.scss";
 import "springy/springy";
 import fcose from "cytoscape-fcose";
 import {UninitializedCell} from "../../model/UninitializedCell";
-import { ValueCell } from "../../model/ValueCell";
+import {ValueCell} from "../../model/ValueCell";
 import {PointerToStackCell} from "../../model/PointerToStackCell";
 import {PointerToHeapCell} from "../../model/PointerToHeapCell";
 import {stat} from "fs";
 import {Address} from "cluster";
-import { AtomCell } from "../../model/AtomCell";
+import {AtomCell} from "../../model/AtomCell";
 import {VariableCell} from "../../model/VariableCell";
-import { StructCell } from "../../model/StructCell";
+import {StructCell} from "../../model/StructCell";
 
 Cytoscape.use(fcose);
 
@@ -95,15 +95,15 @@ function VisualizationGraph({state}: VisualizationProps) {
     // REGISTER
     const programmCounter = state.programCounter;
     nodes.push({
-            data: {id: "PC", label: programmCounter, type: "register-value"},
-            style: {label: programmCounter},
-        });
+        data: {id: "PC", label: programmCounter, type: "register-value"},
+        style: {label: programmCounter},
+    });
     const framePointer = state.framePointer;
     nodes.push({
         data: {id: "FP", label: framePointer, type: "register-value"},
         style: {label: framePointer},
     });
-    if (framePointer != -1){
+    if (framePointer != -1) {
         edges.push({
             data: {
                 id: "FP",
@@ -118,7 +118,7 @@ function VisualizationGraph({state}: VisualizationProps) {
         data: {id: "BP", label: backtrackPointer, type: "register-value"},
         style: {label: backtrackPointer},
     });
-    if (backtrackPointer != -1){
+    if (backtrackPointer != -1) {
         edges.push({
             data: {
                 id: "BP",
@@ -134,16 +134,16 @@ function VisualizationGraph({state}: VisualizationProps) {
         const stackCell = state.stack.get(i);
 
         if (stackCell instanceof UninitializedCell) {
-            nodes.push({data: {id: "S" + i, label: "Stack[" + i +"]", type: "stack-uninitialized"}});
+            nodes.push({data: {id: "S" + i, label: "Stack[" + i + "]", type: "stack-uninitialized"}});
         }
         else if (stackCell instanceof ValueCell) {
             nodes.push({
-                data: {id: "S" + i, label: "Stack[" + i +"]", type: "stack-value"},
-                style: {label: stackCell.value}
+                data: {id: "S" + i, label: "Stack[" + i + "]", type: "stack-value"},
+                style: {label: stackCell.value},
             });
         }
         else if (stackCell instanceof PointerToStackCell) {
-            nodes.push({data: {id: "S" + i, label: "Stack[" + i +"]", type: "stack-pointerToStack"}});
+            nodes.push({data: {id: "S" + i, label: "Stack[" + i + "]", type: "stack-pointerToStack"}});
             edges.push({
                 data: {
                     id: "SP" + i,
@@ -154,7 +154,7 @@ function VisualizationGraph({state}: VisualizationProps) {
             });
         }
         else if (stackCell instanceof PointerToHeapCell) {
-            nodes.push({data: {id: "S" + i, label: "Stack[" + i +"]", type: "stack-pointerToHeap"}});
+            nodes.push({data: {id: "S" + i, label: "Stack[" + i + "]", type: "stack-pointerToHeap"}});
             edges.push({
                 data: {
                     id: "SP" + i,
@@ -167,26 +167,27 @@ function VisualizationGraph({state}: VisualizationProps) {
     }
 
     // HEAP
-    for (let i = 0; i < state.heap.getHeapPointer(); ++i){
+    // FIX: keyset in heap, und nur darüber iterieren!
+    for (let i = 0; i < state.heap.getHeapPointer(); ++i) {
 
         // nur wenn an Heapadresse etwas steht!
-        if (state.heap.get(i)){
+        if (state.heap.get(i)) {
 
             const heapCell = state.heap.get(i);
 
             if (heapCell instanceof UninitializedCell) {
-                nodes.push({data: {id: "H" + i, label: "Heap[" + i +"]", type: "heap-uninitialized"}});
+                nodes.push({data: {id: "H" + i, label: "Heap[" + i + "]", type: "heap-uninitialized"}});
             }
             else if (heapCell instanceof AtomCell) {
                 nodes.push({
-                    data: {id: "H" + i, label: "Heap[" + i +"]", type: "heap-atom"},
-                    style: {label: "A " + heapCell.value}
+                    data: {id: "H" + i, label: "Heap[" + i + "]", type: "heap-atom"},
+                    style: {label: "A " + heapCell.value},
                 });
             }
             else if (heapCell instanceof VariableCell) {
                 nodes.push({
-                    data: {id: "H" + i, label: "Heap[" + i +"]", type: "heap-variable"},
-                    style: {label: heapCell.tag + " " + heapCell.value}
+                    data: {id: "H" + i, label: "Heap[" + i + "]", type: "heap-variable"},
+                    style: {label: heapCell.tag + " " + heapCell.value},
                 });
                 edges.push({
                     data: {
@@ -199,12 +200,20 @@ function VisualizationGraph({state}: VisualizationProps) {
             }
             else if (heapCell instanceof StructCell) {
                 nodes.push({
-                    data: {id: "H" + i, label: "Heap[" + i +"]", type: "heap-struct"},
-                    style: {label: "S " + heapCell.label}
+                    data: {id: "H" + i, label: "Heap[" + i + "]", type: "heap-struct"},
+                    style: {label: "S " + heapCell.label},
+                });
+                edges.push({
+                    data: {
+                        id: "HP" + i,
+                        source: "H" + i,
+                        target: "H" + i + 1,
+                        type: "heap-pointerToHeap",
+                    },
                 });
             }
             else if (heapCell instanceof PointerToHeapCell) {
-                nodes.push({data: {id: "H" + i, label: "Heap[" + i +"]", type: "heap-pointerToHeap"}});
+                nodes.push({data: {id: "H" + i, label: "Heap[" + i + "]", type: "heap-pointerToHeap"}});
                 edges.push({
                     data: {
                         id: "HP" + i,
@@ -221,9 +230,9 @@ function VisualizationGraph({state}: VisualizationProps) {
     // TRAIL (if exists)
     for (let i = 0; i < state.trail.trailPointer; ++i) {
         nodes.push({
-            data: {id: "T"+i, label: "Trail["+i+"]", type: "trail-value"},
-            style: {label: state.trail.get(i)}
-        })
+            data: {id: "T" + i, label: "Trail[" + i + "]", type: "trail-value"},
+            style: {label: state.trail.get(i)},
+        });
     }
 
 
@@ -239,8 +248,8 @@ function VisualizationGraph({state}: VisualizationProps) {
             {
                 selector: "node",
                 style: {
-                    width: 50,
-                    height: 20,
+                    width: 5,
+                    height: 2,
                     shape: "rectangle",
                 },
             },
@@ -253,7 +262,7 @@ function VisualizationGraph({state}: VisualizationProps) {
             {
                 selector: "edge",
                 style: {
-                    width: 15,
+                    width: 1,
                 },
             },
         ]}
