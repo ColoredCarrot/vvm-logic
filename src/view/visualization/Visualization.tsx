@@ -10,8 +10,6 @@ import {UninitializedCell} from "../../model/UninitializedCell";
 import {ValueCell} from "../../model/ValueCell";
 import {PointerToStackCell} from "../../model/PointerToStackCell";
 import {PointerToHeapCell} from "../../model/PointerToHeapCell";
-import {stat} from "fs";
-import {Address} from "cluster";
 import {AtomCell} from "../../model/AtomCell";
 import {VariableCell} from "../../model/VariableCell";
 import {StructCell} from "../../model/StructCell";
@@ -43,6 +41,7 @@ function generateLayout(state: State, cy: React.MutableRefObject<Cytoscape.Core 
     let stackVertRelPlacement = "";
     if (state.stack.size > 0) {
         stackVertAlignment = "[";
+        //Stack nodes are vertically aligned
         for (let i = 0; i < state.stack.size; i++) {
             if (i == state.stack.size - 1) {
                 //Last
@@ -53,14 +52,24 @@ function generateLayout(state: State, cy: React.MutableRefObject<Cytoscape.Core 
         }
         stackVertAlignment = stackVertAlignment + "],";
 
+        //Stack elements are on top of each other
         for (let i = 1; i < state.stack.size; i++) {
             stackVertRelPlacement +=
                 "{\"top\": \"S" + i + "\"," +
                 "\"bottom\": \"S" + (i - 1) + "\"," +
-                "\"gap\": 0}";
+                "\"gap\": 20}";
             if (i < state.stack.size - 1)
                 stackVertRelPlacement += ",";
         }
+    }
+
+    //All heap nodes are right of the Stack
+    let relPlacementHeap = "";
+    for (const h of state.heap.getKeySet()) {
+        relPlacementHeap +=
+            "{\"left\": \"S0\"," +
+            "\"right\": \"H" + h + "\"," +
+            "\"gap\": 0}";
     }
 
     const relPlacementJson = JSON.parse("[" + stackVertRelPlacement + "]");
@@ -166,26 +175,22 @@ function VisualizationGraph({state}: VisualizationProps) {
         }
     }
 
-    // HEAP
-    // FIXME: keyset in heap, und nur darüber iterieren!
-    for (let i = 0; i < state.heap.getHeapPointer(); ++i) {
-
+    for (const i of state.heap.getKeySet()) {
         if (state.heap.get(i)) {
 
             const heapCell = state.heap.get(i);
 
             if (heapCell instanceof UninitializedCell) {
-                nodes.push({data: {id: "H" + i, label: "Heap[" + i + "]", type: "heap-uninitialized"}});
-            }
-            else if (heapCell instanceof AtomCell) {
+                nodes.push({data: {id: ("H" + i), label: "Heap[" + i + "]", type: "heap-uninitialized"}});
+            } else if (heapCell instanceof AtomCell) {
                 nodes.push({
-                    data: {id: "H" + i, label: "Heap[" + i + "]", type: "heap-atom"},
+                    data: {id: ("H" + i), label: "Heap[" + i + "]", type: "heap-atom"},
                     style: {label: "A " + heapCell.value},
                 });
             }
             else if (heapCell instanceof VariableCell) {
                 nodes.push({
-                    data: {id: "H" + i, label: "Heap[" + i + "]", type: "heap-variable"},
+                    data: {id: ("H" + i), label: "Heap[" + i + "]", type: "heap-variable"},
                     style: {label: heapCell.tag + " " + heapCell.value},
                 });
                 edges.push({
@@ -202,17 +207,22 @@ function VisualizationGraph({state}: VisualizationProps) {
                     data: {id: "H" + i, label: "Heap[" + i + "]", type: "heap-struct"},
                     style: {label: "S " + heapCell.label},
                 });
-                edges.push({
-                    data: {
-                        id: "HP" + i,
-                        source: "H" + i,
-                        target: "H" + i + 1,
-                        type: "heap-pointerToHeap",
-                    },
-                });
+                for (let j = 0; j < heapCell.size; j++) {
+                    edges.push({
+                        data: {
+                            id: "HP" + i,
+                            source: "H" + i,
+                            target: "H" + (i + j + 1),
+                            type: "heap-pointerToHeap",
+                        },
+                    });
+                }
             }
             else if (heapCell instanceof PointerToHeapCell) {
-                nodes.push({data: {id: "H" + i, label: "Heap[" + i + "]", type: "heap-pointerToHeap"}});
+                nodes.push({
+                    data: {id: "H" + i, label: "Heap[" + i + "]", type: "heap-pointerToHeap"},
+                    style: {label: "H " + i}
+                });
                 edges.push({
                     data: {
                         id: "HP" + i,
@@ -246,9 +256,11 @@ function VisualizationGraph({state}: VisualizationProps) {
             {
                 selector: "node",
                 style: {
-                    width: 5,
-                    height: 2,
+                    width: 14,
+                    height: 7,
                     shape: "rectangle",
+                    "text-valign": "center",
+                    "font-size": 5,
                 },
             },
             {
