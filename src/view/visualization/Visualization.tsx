@@ -35,67 +35,53 @@ export function Visualization({prevState, state}: VisualizationProps) {
 }
 
 function generateLayout(state: State, cy: React.MutableRefObject<Cytoscape.Core | undefined>): cytoscape.LayoutOptions {
-    //Try with cose
     cytoscape.use(fcose);
-    let stackVertAlignment = "";
-    let stackVertRelPlacement = "";
+
+    const stack_x = 50;
+    const stack_y_bottom = 0;
+    const stack_y_step = 10;
     if (state.stack.size > 0) {
-        stackVertAlignment = "[";
-        //Stack nodes are vertically aligned
         for (let i = 0; i < state.stack.size; i++) {
-            if (i == state.stack.size - 1) {
-                //Last
-                stackVertAlignment = stackVertAlignment + "\"S" + i + "\"";
-            } else {
-                stackVertAlignment = stackVertAlignment + "\"S" + i + "\",";
-            }
+            cy.current?.$id("S" + i).position({y: stack_y_bottom - i * stack_y_step, x: stack_x}).lock();
         }
-        stackVertAlignment = stackVertAlignment + "],";
-
-        stackVertRelPlacement = ",";
-        //Stack elements are on top of each other
-        for (let i = 1; i < state.stack.size; i++) {
-            stackVertRelPlacement +=
-                "{\"top\": \"S" + i + "\"," +
-                "\"bottom\": \"S" + (i - 1) + "\"," +
-                "\"gap\": 20},";
-        }
-
-        stackVertRelPlacement = stackVertRelPlacement.substring(0, stackVertRelPlacement.length - 1);
     }
 
+    const regs_x = 10;
+    const regs_y_bottom = stack_y_bottom;
+    const regs_y_step = stack_y_step;
+    const registers = cy.current?.elements("[type='register-value']");
+    if (registers) {
+        registers.forEach((ele, i) => {
+            ele.position({x: regs_x, y: regs_y_bottom - i * regs_y_step}).lock();
+        });
+    }
+
+
     //All heap nodes are right of the Stack
-    let relPlacementHeap = "";
+    let relPlHeapRightOfStack = "";
     if (state.heap.getKeySet().size > 0) {
-        relPlacementHeap += ",";
         for (const h of state.heap.getKeySet()) {
-            relPlacementHeap +=
+            relPlHeapRightOfStack +=
                 "{\"left\": \"S0\"," +
                 "\"right\": \"H" + h + "\"," +
                 "\"gap\": 30},";
         }
-        relPlacementHeap = relPlacementHeap.substring(0, relPlacementHeap.length - 1);
+        relPlHeapRightOfStack = relPlHeapRightOfStack.substring(0, relPlHeapRightOfStack.length - 1);
     }
 
-    let relPlacementHeapRegisters = "";
-    if (state.stack.size > 0) {
-        relPlacementHeapRegisters = "{\"left\": \"PC\",\"right\": \"S0\",\"gap\": 30}";
-    }
-
-    const relPlacementCombined = "[" + relPlacementHeapRegisters + stackVertRelPlacement + relPlacementHeap + "]";
+    const relPlacementCombined = "[" + relPlHeapRightOfStack + "]";
 
     const relPlacementJson = JSON.parse(relPlacementCombined);
 
-    const registerVertAlignment = "[\"PC\",\"FP\",\"BP\"]";
-    const alignmentConstraints = "{\"vertical\": [" + stackVertAlignment + registerVertAlignment + "]}";
-    const alignmentJson = JSON.parse(alignmentConstraints);
+    //const alignmentConstraints = "{\"vertical\": [" + registerVertAlignment + "]}";
+    //const alignmentJson = JSON.parse(alignmentConstraints);
 
     return {
         name: "fcose",
         // @ts-ignore
         animate: true,
         randomize: false,
-        alignmentConstraint: alignmentJson,
+        // alignmentConstraint: alignmentJson,
         relativePlacementConstraint: relPlacementJson,
     };
 }
@@ -116,11 +102,11 @@ function VisualizationGraph({state}: VisualizationProps) {
     // REGISTER
     const programmCounter = state.programCounter;
     nodes.push({
-        data: {id: "PC", label: programmCounter, type: "register-value"},
+        data: {id: "PC", label: "PC: " + programmCounter, type: "register-value"},
     });
     const framePointer = state.framePointer;
     nodes.push({
-        data: {id: "FP", label: framePointer, type: "register-value"},
+        data: {id: "FP", label: "FP: " + framePointer, type: "register-value"},
     });
     if (framePointer != -1) {
         edges.push({
@@ -134,7 +120,7 @@ function VisualizationGraph({state}: VisualizationProps) {
     }
     const backtrackPointer = state.backtrackPointer;
     nodes.push({
-        data: {id: "BP", label: backtrackPointer, type: "register-value"},
+        data: {id: "BP", label: "BP: " + backtrackPointer, type: "register-value"},
     });
     if (backtrackPointer != -1) {
         edges.push({
@@ -153,13 +139,11 @@ function VisualizationGraph({state}: VisualizationProps) {
 
         if (stackCell instanceof UninitializedCell) {
             nodes.push({data: {id: "S" + i, label: "Stack[" + i + "]", type: "stack-uninitialized"}});
-        }
-        else if (stackCell instanceof ValueCell) {
+        } else if (stackCell instanceof ValueCell) {
             nodes.push({
                 data: {id: "S" + i, label: "Stack[" + i + "]", type: "stack-value"},
             });
-        }
-        else if (stackCell instanceof PointerToStackCell) {
+        } else if (stackCell instanceof PointerToStackCell) {
             nodes.push({data: {id: "S" + i, label: "Stack[" + i + "]", type: "stack-pointerToStack"}});
             edges.push({
                 data: {
@@ -169,8 +153,7 @@ function VisualizationGraph({state}: VisualizationProps) {
                     type: "stack-pointerToStack",
                 },
             });
-        }
-        else if (stackCell instanceof PointerToHeapCell) {
+        } else if (stackCell instanceof PointerToHeapCell) {
             nodes.push({
                 data: {
                     id: "S" + i,
@@ -200,8 +183,7 @@ function VisualizationGraph({state}: VisualizationProps) {
                 nodes.push({
                     data: {id: ("H" + i), label: "Heap[" + i + "]", type: "heap-atom"},
                 });
-            }
-            else if (heapCell instanceof VariableCell) {
+            } else if (heapCell instanceof VariableCell) {
                 nodes.push({
                     data: {id: ("H" + i), label: "Heap[" + i + "]", type: "heap-variable"},
                 });
@@ -213,8 +195,7 @@ function VisualizationGraph({state}: VisualizationProps) {
                         type: "heap-pointerToHeap",
                     },
                 });
-            }
-            else if (heapCell instanceof StructCell) {
+            } else if (heapCell instanceof StructCell) {
                 nodes.push({
                     data: {id: "H" + i, label: "Heap[" + i + "]", type: "heap-struct"},
                 });
@@ -228,8 +209,7 @@ function VisualizationGraph({state}: VisualizationProps) {
                         },
                     });
                 }
-            }
-            else if (heapCell instanceof PointerToHeapCell) {
+            } else if (heapCell instanceof PointerToHeapCell) {
                 nodes.push({
                     data: {id: "H" + i, label: "Heap[" + i + "]", type: "heap-pointerToHeap"},
                 });
@@ -265,8 +245,8 @@ function VisualizationGraph({state}: VisualizationProps) {
             {
                 selector: "node",
                 style: {
-                    width: 14,
-                    height: 7,
+                    width: 30,
+                    height: 9,
                     shape: "rectangle",
                     "text-valign": "center",
                     "font-size": 5,
