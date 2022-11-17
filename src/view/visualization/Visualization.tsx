@@ -252,25 +252,122 @@ function VisualizationGraph({state}: VisualizationProps) {
             //       cy.current!.layout(generateLayout(state, cy)).run();
             //   });
         }}
-        style={{width: "100%", height: "100%"}}
+        style={{width: "100%", height: "100%", backgroundColor: "#b5e8e3"}}
+
         stylesheet={[
+
+
             {
                 selector: "node",
                 style: {
-                    width: 14,
-                    height: 7,
-                    shape: "rectangle",
+                    width: 30,
+                    height: 10,
+                    backgroundColor: "cadetblue",
+
+                    shape: "roundrectangle",
                     "text-valign": "center",
-                    "font-size": 5,
+                    "font-size": 6.5,
+                    "font-family": "DIN Alternate",
+                    "font-weight": 1,
+                    "font-style": "normal",
                     "label": "data(label)",
                 },
             },
+
+            //register-cell:
+
             {
                 selector: "[type='register-value']",
                 style: {
-                    backgroundColor: "blue",
+                    backgroundColor: "#01695e",
+
                 },
             },
+
+            //stack-cells:
+
+            {
+                selector: "[type= 'stack-uninitialized']",
+                style: {
+                    backgroundColor: "#03dac6",
+                    //labelColor : "grey",
+
+                },
+            },
+            {
+                selector: "[type= 'stack-pointerToStack']",
+                style: {
+
+                    backgroundColor: "#549254",
+
+                },
+            },
+
+            {
+                selector: "[type= 'stack-pointerToHeap']",
+                style: {
+                    backgroundColor: "#0074D9",
+
+                },
+            },
+
+            {
+                selector: "[type= 'stack-value']",
+                style: {
+                    backgroundColor: "#ecbfb0",
+
+                },
+            },
+
+            //heap-cells:
+
+            {
+                selector: "[type= 'heap-uninitialized']",
+                style: {
+
+                },
+            },
+
+            {
+                selector: "[type= 'heap-atom']",
+                style: {
+
+
+                },
+            },
+
+            {
+                selector: "[type= 'heap-variable']",
+                style: {
+
+                },
+            },
+
+            {
+                selector: "[type= 'heap-struct']",
+                style: {
+
+                },
+            },
+
+            {
+                selector: "[type= 'heap-pointerToHeap']",
+                style: {
+
+                },
+            },
+
+            //trail-cell:
+
+            {
+                selector: "[type= 'trail-value']",
+                style: {
+
+                },
+            },
+
+            //edge
+
             {
                 selector: "edge",
                 style: {
@@ -281,6 +378,8 @@ function VisualizationGraph({state}: VisualizationProps) {
                     "arrow-scale": 0.5,
                 },
             },
+
+
         ]}
         elements={CytoscapeComponent.normalizeElements({
             nodes: nodes,
