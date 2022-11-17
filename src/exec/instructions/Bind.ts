@@ -13,7 +13,7 @@ export class Bind extends Instruction {
     step(state: State): State {
 
         const firstCell = state.stack.get(state.stack.stackPointer);
-        if (!(firstCell instanceof VariableCell)) {
+        if (!(firstCell instanceof PointerToHeapCell)) {
             throw new ExecutionError("Expected cell on top of stack to be a variable, but is " + firstCell);
         }
 
