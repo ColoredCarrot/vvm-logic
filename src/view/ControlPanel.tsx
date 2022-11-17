@@ -10,9 +10,10 @@ import Immutable from "immutable";
 
 interface ControlPanelProps {
     programText: ProgramText.Text;
+    setProgramTextFromExternal: (raw: string) => void;
 }
 
-export function ControlPanel({programText}: ControlPanelProps) {
+export function ControlPanel({programText, setProgramTextFromExternal}: ControlPanelProps) {
 
     const [appState, setAppState] = useContext(AppStateContext);
 
@@ -71,14 +72,18 @@ export function ControlPanel({programText}: ControlPanelProps) {
     const btnStep = <a
         className={"ControlPanel__button" + (endOfProgram && " ControlPanel__button--disabled" || "")}
         onClick={() => invokeStep()}
-    >Step (F8)</a>;
+    >
+        <img src="/icons/execute.svg" alt="Step"/>
+    </a>;
 
     const btnRestart = <a className="ControlPanel__button" onClick={() => {
         setAppState({
             vmState: Immutable.List(),
             lastExecutionError: null,
         });
-    }}>Restart</a>;
+    }}>
+        <img src="/icons/restart.svg" alt="Restart"/>
+    </a>;
 
     const btnBackEnabled = !appState.vmState.isEmpty();
     const btnBack = <a
@@ -89,11 +94,38 @@ export function ControlPanel({programText}: ControlPanelProps) {
                 vmState: appState.vmState.pop(),
                 lastExecutionError: null,
             });
-        }}>Back</a>;
+        }}>
+        <img src="/icons/undo_dark.svg" alt="Restart"/>
+    </a>;
+
+    const btnOpen = <a className="ControlPanel__button">
+        <input
+            id="open-file-input"
+            type="file"
+            accept=".txt"
+            onChange={evt => {
+                evt.preventDefault();
+                evt.stopPropagation();
+                const file = evt.target.files?.[0];
+                if (file) {
+                    const fileReader = new FileReader();
+                    fileReader.onload = (loadEvt => {
+                        const src = loadEvt.target!.result as string;
+                        setProgramTextFromExternal(src);
+                    });
+                    fileReader.readAsText(file);
+                }
+            }}
+        />
+        <label htmlFor="open-file-input">
+            <img src="/icons/menu-open_dark.svg" alt="Open..."/>
+        </label>
+    </a>;
 
     return <div className="ControlPanel">
+        {btnOpen}
         {btnStep}
-        {btnRestart}
         {btnBack}
+        {btnRestart}
     </div>;
 }

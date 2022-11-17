@@ -1,24 +1,61 @@
 @use "colors";
 
 .ControlPanel {
-    min-height: 100px;
-    max-height: 300px;
+
+    width: 100%;
+    margin-bottom: 4px;
+
+    background-color: colors.$btn-group;
 
     &__button {
         display: inline-block;
-        padding: 10px 25px 10px 25px;
-        margin-right: 2px; /* Spacing between buttons */
+        padding: 5px 15px;
+
+        height: 1rem;
+
+        // Spacing
+        margin: 0 0;
+        &:first-child {
+            margin-left: 0;
+        }
+        &:last-child {
+            margin-right: 0;
+        }
 
         background-color: colors.$btn;
+        &:hover {
+            background-color: colors.$btn-highlighted;
+        }
+
         color: colors.$btn-text;
+        font-family: "JetBrains Mono", source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
         font-weight: bold;
-        cursor: pointer;
+        font-size: 0.8rem;
         user-select: none;
 
         &--disabled {
             background-color: colors.$btn-disabled;
             color: colors.$btn-disabled-text;
             cursor: revert;
+
+            img {
+                filter: brightness(0.7);
+            }
+        }
+
+        cursor: pointer;
+        * {
+            cursor: pointer;
+        }
+
+        input {
+            width: 0;
+            height: 0;
+            display: none;
+        }
+
+        img {
+            vertical-align: middle;
         }
     }
 }
