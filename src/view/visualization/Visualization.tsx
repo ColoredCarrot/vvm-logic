@@ -268,7 +268,11 @@ function VisualizationGraph({state}: VisualizationProps) {
             {
                 selector: "edge",
                 style: {
-                    width: 1,
+                    width: 0.5,
+                    "curve-style": "unbundled-bezier",
+                    "target-arrow-shape": "vee",
+                    "target-arrow-fill": "filled",
+                    "arrow-scale": 0.5,
                 },
             },
         ]}
