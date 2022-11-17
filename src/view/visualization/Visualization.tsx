@@ -37,7 +37,7 @@ export function Visualization({prevState, state}: VisualizationProps) {
 function generateLayout(state: State, cy: React.MutableRefObject<Cytoscape.Core | undefined>): cytoscape.LayoutOptions {
     cytoscape.use(fcose);
 
-    const stack_x = 50;
+    const stack_x = 20;
     const stack_y_bottom = 0;
     const stack_y_step = 10;
     if (state.stack.size > 0) {
@@ -46,8 +46,18 @@ function generateLayout(state: State, cy: React.MutableRefObject<Cytoscape.Core 
         }
     }
 
-    const regs_x = 10;
-    const regs_y_bottom = stack_y_bottom;
+    const trail_x = 50;
+    const trail_y_bottom = 0;
+    const trail_y_step = 10;
+    console.log(state.trail.trailPointer);
+    if (state.trail.trailPointer > 0) {
+        for (let i = 0; i < state.trail.trailPointer; i++) {
+            cy.current?.$id("T" + i).position({y: trail_y_bottom - i * trail_y_step, x: trail_x}).lock();
+        }
+    }
+
+    const regs_x = -30;
+    const regs_y_bottom = -50;
     const regs_y_step = stack_y_step;
     const registers = cy.current?.elements("[type='register-value']");
     if (registers) {
@@ -103,6 +113,10 @@ function VisualizationGraph({state}: VisualizationProps) {
     const programCounter = state.programCounter;
     nodes.push({
         data: {id: "PC", label: programCounter, type: "register-value"},
+    });
+    const stackPointer = state.stack.stackPointer;
+    nodes.push({
+        data: {id: "SP", label: stackPointer, type: "register-value"},
     });
     const framePointer = state.framePointer;
     nodes.push({
