@@ -10,8 +10,6 @@ import {UninitializedCell} from "../../model/UninitializedCell";
 import {ValueCell} from "../../model/ValueCell";
 import {PointerToStackCell} from "../../model/PointerToStackCell";
 import {PointerToHeapCell} from "../../model/PointerToHeapCell";
-import {stat} from "fs";
-import {Address} from "cluster";
 import {AtomCell} from "../../model/AtomCell";
 import {VariableCell} from "../../model/VariableCell";
 import {StructCell} from "../../model/StructCell";
@@ -43,6 +41,7 @@ function generateLayout(state: State, cy: React.MutableRefObject<Cytoscape.Core 
     let stackVertRelPlacement = "";
     if (state.stack.size > 0) {
         stackVertAlignment = "[";
+        //Stack nodes are vertically aligned
         for (let i = 0; i < state.stack.size; i++) {
             if (i == state.stack.size - 1) {
                 //Last
@@ -53,17 +52,39 @@ function generateLayout(state: State, cy: React.MutableRefObject<Cytoscape.Core 
         }
         stackVertAlignment = stackVertAlignment + "],";
 
+        stackVertRelPlacement = ",";
+        //Stack elements are on top of each other
         for (let i = 1; i < state.stack.size; i++) {
             stackVertRelPlacement +=
                 "{\"top\": \"S" + i + "\"," +
                 "\"bottom\": \"S" + (i - 1) + "\"," +
-                "\"gap\": 0}";
-            if (i < state.stack.size - 1)
-                stackVertRelPlacement += ",";
+                "\"gap\": 20},";
         }
+
+        stackVertRelPlacement = stackVertRelPlacement.substring(0, stackVertRelPlacement.length - 1);
     }
 
-    const relPlacementJson = JSON.parse("[" + stackVertRelPlacement + "]");
+    //All heap nodes are right of the Stack
+    let relPlacementHeap = "";
+    if (state.heap.getKeySet().size > 0) {
+        relPlacementHeap += ",";
+        for (const h of state.heap.getKeySet()) {
+            relPlacementHeap +=
+                "{\"left\": \"S0\"," +
+                "\"right\": \"H" + h + "\"," +
+                "\"gap\": 30},";
+        }
+        relPlacementHeap = relPlacementHeap.substring(0, relPlacementHeap.length - 1);
+    }
+
+    let relPlacementHeapRegisters = "";
+    if (state.stack.size > 0) {
+        relPlacementHeapRegisters = "{\"left\": \"PC\",\"right\": \"S0\",\"gap\": 30}";
+    }
+
+    const relPlacementCombined = "[" + relPlacementHeapRegisters + stackVertRelPlacement + relPlacementHeap + "]";
+
+    const relPlacementJson = JSON.parse(relPlacementCombined);
 
     const registerVertAlignment = "[\"PC\",\"FP\",\"BP\"]";
     const alignmentConstraints = "{\"vertical\": [" + stackVertAlignment + registerVertAlignment + "]}";
@@ -96,12 +117,10 @@ function VisualizationGraph({state}: VisualizationProps) {
     const programmCounter = state.programCounter;
     nodes.push({
         data: {id: "PC", label: programmCounter, type: "register-value"},
-        style: {label: programmCounter},
     });
     const framePointer = state.framePointer;
     nodes.push({
         data: {id: "FP", label: framePointer, type: "register-value"},
-        style: {label: framePointer},
     });
     if (framePointer != -1) {
         edges.push({
@@ -116,7 +135,6 @@ function VisualizationGraph({state}: VisualizationProps) {
     const backtrackPointer = state.backtrackPointer;
     nodes.push({
         data: {id: "BP", label: backtrackPointer, type: "register-value"},
-        style: {label: backtrackPointer},
     });
     if (backtrackPointer != -1) {
         edges.push({
@@ -139,7 +157,6 @@ function VisualizationGraph({state}: VisualizationProps) {
         else if (stackCell instanceof ValueCell) {
             nodes.push({
                 data: {id: "S" + i, label: "Stack[" + i + "]", type: "stack-value"},
-                style: {label: stackCell.value},
             });
         }
         else if (stackCell instanceof PointerToStackCell) {
@@ -154,7 +171,13 @@ function VisualizationGraph({state}: VisualizationProps) {
             });
         }
         else if (stackCell instanceof PointerToHeapCell) {
-            nodes.push({data: {id: "S" + i, label: "Stack[" + i + "]", type: "stack-pointerToHeap"}});
+            nodes.push({
+                data: {
+                    id: "S" + i,
+                    label: ("Stack[" + i + "]:" + stackCell.value),
+                    type: "stack-pointerToHeap",
+                },
+            });
             edges.push({
                 data: {
                     id: "SP" + i,
@@ -166,27 +189,21 @@ function VisualizationGraph({state}: VisualizationProps) {
         }
     }
 
-    // HEAP
-    // FIXME: keyset in heap, und nur darüber iterieren!
-    for (let i = 0; i < state.heap.getHeapPointer(); ++i) {
-
+    for (const i of state.heap.getKeySet()) {
         if (state.heap.get(i)) {
 
             const heapCell = state.heap.get(i);
 
             if (heapCell instanceof UninitializedCell) {
-                nodes.push({data: {id: "H" + i, label: "Heap[" + i + "]", type: "heap-uninitialized"}});
-            }
-            else if (heapCell instanceof AtomCell) {
+                nodes.push({data: {id: ("H" + i), label: "Heap[" + i + "]", type: "heap-uninitialized"}});
+            } else if (heapCell instanceof AtomCell) {
                 nodes.push({
-                    data: {id: "H" + i, label: "Heap[" + i + "]", type: "heap-atom"},
-                    style: {label: "A " + heapCell.value},
+                    data: {id: ("H" + i), label: "Heap[" + i + "]", type: "heap-atom"},
                 });
             }
             else if (heapCell instanceof VariableCell) {
                 nodes.push({
-                    data: {id: "H" + i, label: "Heap[" + i + "]", type: "heap-variable"},
-                    style: {label: heapCell.tag + " " + heapCell.value},
+                    data: {id: ("H" + i), label: "Heap[" + i + "]", type: "heap-variable"},
                 });
                 edges.push({
                     data: {
@@ -200,19 +217,22 @@ function VisualizationGraph({state}: VisualizationProps) {
             else if (heapCell instanceof StructCell) {
                 nodes.push({
                     data: {id: "H" + i, label: "Heap[" + i + "]", type: "heap-struct"},
-                    style: {label: "S " + heapCell.label},
                 });
-                edges.push({
-                    data: {
-                        id: "HP" + i,
-                        source: "H" + i,
-                        target: "H" + i + 1,
-                        type: "heap-pointerToHeap",
-                    },
-                });
+                for (let j = 0; j < heapCell.size; j++) {
+                    edges.push({
+                        data: {
+                            id: "HP" + i,
+                            source: "H" + i,
+                            target: "H" + (i + j + 1),
+                            type: "heap-pointerToHeap",
+                        },
+                    });
+                }
             }
             else if (heapCell instanceof PointerToHeapCell) {
-                nodes.push({data: {id: "H" + i, label: "Heap[" + i + "]", type: "heap-pointerToHeap"}});
+                nodes.push({
+                    data: {id: "H" + i, label: "Heap[" + i + "]", type: "heap-pointerToHeap"},
+                });
                 edges.push({
                     data: {
                         id: "HP" + i,
@@ -229,7 +249,6 @@ function VisualizationGraph({state}: VisualizationProps) {
     for (let i = 0; i < state.trail.trailPointer; ++i) {
         nodes.push({
             data: {id: "T" + i, label: "Trail[" + i + "]", type: "trail-value"},
-            style: {label: state.trail.get(i)},
         });
     }
 
@@ -246,9 +265,12 @@ function VisualizationGraph({state}: VisualizationProps) {
             {
                 selector: "node",
                 style: {
-                    width: 5,
-                    height: 2,
+                    width: 14,
+                    height: 7,
                     shape: "rectangle",
+                    "text-valign": "center",
+                    "font-size": 5,
+                    "label": "data(label)",
                 },
             },
             {
