@@ -33,19 +33,22 @@
         font-size: 0.8rem;
         user-select: none;
 
+        cursor: pointer;
+        * {
+            cursor: pointer;
+        }
+
         &--disabled {
             background-color: colors.$btn-disabled;
             color: colors.$btn-disabled-text;
             cursor: revert;
+            * {
+                cursor: revert;
+            }
 
             img {
                 filter: brightness(0.7);
             }
-        }
-
-        cursor: pointer;
-        * {
-            cursor: pointer;
         }
 
         input {
@@ -56,6 +59,7 @@
 
         img {
             vertical-align: middle;
+            height: 100%;
         }
     }
 }

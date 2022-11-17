@@ -2,33 +2,26 @@ import React, {useContext, useState} from "react";
 import {ExecutionError} from "../exec/ExecutionError";
 import {InvalidInstruction} from "../exec/instructions/InvalidInstruction";
 import * as ProgramText from "../model/ProgramText";
-import {CodeLine, LabelLine} from "../model/ProgramText";
+import {Caret, CodeLine, LabelLine} from "../model/ProgramText";
 import {State} from "../model/State";
-import {AppStateContext} from "./AppState";
+import {AppStateContext, ProgramTextContext, ProgramTextFacade} from "./AppState";
 import "./ProgramTextEditor.scss";
 import {useGlobalEvent} from "./util/UseGlobalEvent";
-import {Caret} from "./LeftColumn";
 
 interface ProgramTextEditorProps {
-
     vmState: State;
-
-    programText: ProgramText.Text;
-
-    setProgramText(rawLines: string[]): void;
-
-    setProgramTextFromExternal(raw: string): void;
-
     caret: Caret;
     setCaret(newCaret: Caret): void;
 }
 
-export function ProgramTextEditor({vmState, programText, setProgramText, setProgramTextFromExternal, caret, setCaret}: ProgramTextEditorProps) {
+export function ProgramTextEditor({vmState, caret, setCaret}: ProgramTextEditorProps) {
 
     const [isDraggingInto, setIsDraggingInto] = useState(false);
 
+    const programTextFacade = useContext(ProgramTextContext);
+
     // Set up global listeners
-    useGlobalEvent("keydown", evt => handleKeyDown(evt, caret, setCaret, programText, setProgramText));
+    useGlobalEvent("keydown", evt => handleKeyDown(evt, caret, setCaret, programTextFacade));
     useGlobalEvent("paste", evt => handlePaste(evt));
 
     function handlePaste(evt: ClipboardEvent): void {
@@ -38,7 +31,7 @@ export function ProgramTextEditor({vmState, programText, setProgramText, setProg
         }
 
         // TODO: Don't replace, but insert
-        setProgramTextFromExternal(toPaste);
+        programTextFacade.setProgramTextFromExternal(toPaste);
     }
 
     function handleDrop(evt: React.DragEvent): void {
@@ -52,7 +45,7 @@ export function ProgramTextEditor({vmState, programText, setProgramText, setProg
 
         file.text().then(
             text => {
-                setProgramTextFromExternal(text);
+                programTextFacade.setProgramTextFromExternal(text);
                 setIsDraggingInto(false);
             },
             err => {
@@ -66,13 +59,13 @@ export function ProgramTextEditor({vmState, programText, setProgramText, setProg
         className={"ProgramTextEditor" + (isDraggingInto ? " ProgramTextEditor--dragging-into" : "")}
         onDrop={evt => handleDrop(evt)}
         onDragOver={evt => evt.preventDefault()}
-        onDragEnter={evt => setIsDraggingInto(true)}
-        onDragLeave={evt => setIsDraggingInto(false)}
+        onDragEnter={_ => setIsDraggingInto(true)}
+        onDragLeave={_ => setIsDraggingInto(false)}
     >
-        {programText.lines.map(line =>
+        {programTextFacade.programText.lines.map(line =>
             <ProgramTextLine
                 key={line.num}
-                text={programText}
+                text={programTextFacade.programText}
                 line={line}
                 caret={caret}
                 setCaret={setCaret}
@@ -175,8 +168,7 @@ function handleKeyDown(
     evt: KeyboardEvent,
     caret: Caret,
     setCaret: (_: Caret) => void,
-    programText: ProgramText.Text,
-    setProgramText: (rawLines: string[]) => void,
+    {programText, setProgramText}: ProgramTextFacade,
 ) {
     // We don't handle any keyboard commands (yet)
     if (evt.altKey || evt.ctrlKey || evt.metaKey) {
