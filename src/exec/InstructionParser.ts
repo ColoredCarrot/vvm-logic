@@ -84,7 +84,7 @@ export class InstructionParser {
                 });
                 if (!signLabel) {
                     //ERROR
-                    throw new ParseError("Label not found: " + signLabel);
+                    return new InvalidInstruction(input);
                 }
                 return this.parseSignParamInstruction(instr, <SignLabel>signLabel);
             } else if (this.isValidLabel(param) && labels.find(v => {
@@ -112,7 +112,7 @@ export class InstructionParser {
                 });
                 if (!l0 || !l1) {
                     //ERROR
-                    throw new ParseError("Label not found: " + p0);
+                    return new InvalidInstruction(input);
                 }
                 return this.parseSignAndLabelParamInstruction(instr, l0!, l1!);
             } else if (this.isValidSignLabel(p0) && this.isValidNumber(p1)) {
@@ -120,7 +120,7 @@ export class InstructionParser {
                     return v.text === p0 && v instanceof SignLabel;
                 });
                 if (!l0) {
-                    throw new ParseError("Label not found!");
+                    return new InvalidInstruction(input);
                 }
                 return this.parseSignAndNumberParamInstruction(instr, l0, Number(p1));
             } else if (this.isValidNumber(p0) && this.isValidNumber(p1)) {
