@@ -100,9 +100,9 @@ function VisualizationGraph({state}: VisualizationProps) {
     const edges = [];
 
     // REGISTER
-    const programmCounter = state.programCounter;
+    const programCounter = state.programCounter;
     nodes.push({
-        data: {id: "PC", label: programmCounter, type: "register-value"},
+        data: {id: "PC", label: programCounter, type: "register-value"},
     });
     const framePointer = state.framePointer;
     nodes.push({
