@@ -102,11 +102,11 @@ function VisualizationGraph({state}: VisualizationProps) {
     // REGISTER
     const programmCounter = state.programCounter;
     nodes.push({
-        data: {id: "PC", label: "PC: " + programmCounter, type: "register-value"},
+        data: {id: "PC", label: programmCounter, type: "register-value"},
     });
     const framePointer = state.framePointer;
     nodes.push({
-        data: {id: "FP", label: "FP: " + framePointer, type: "register-value"},
+        data: {id: "FP", label: framePointer, type: "register-value"},
     });
     if (framePointer != -1) {
         edges.push({
@@ -120,7 +120,7 @@ function VisualizationGraph({state}: VisualizationProps) {
     }
     const backtrackPointer = state.backtrackPointer;
     nodes.push({
-        data: {id: "BP", label: "BP: " + backtrackPointer, type: "register-value"},
+        data: {id: "BP", label: backtrackPointer, type: "register-value"},
     });
     if (backtrackPointer != -1) {
         edges.push({
@@ -138,13 +138,15 @@ function VisualizationGraph({state}: VisualizationProps) {
         const stackCell = state.stack.get(i);
 
         if (stackCell instanceof UninitializedCell) {
-            nodes.push({data: {id: "S" + i, label: "Stack[" + i + "]", type: "stack-uninitialized"}});
-        } else if (stackCell instanceof ValueCell) {
+            nodes.push({data: {id: "S" + i, label: "S[" + i + "]", type: "stack-uninitialized"}});
+        }
+        else if (stackCell instanceof ValueCell) {
             nodes.push({
-                data: {id: "S" + i, label: "Stack[" + i + "]", type: "stack-value"},
+                data: {id: "S" + i, label: stackCell.value, type: "stack-value"},
             });
-        } else if (stackCell instanceof PointerToStackCell) {
-            nodes.push({data: {id: "S" + i, label: "Stack[" + i + "]", type: "stack-pointerToStack"}});
+        }
+        else if (stackCell instanceof PointerToStackCell) {
+            nodes.push({data: {id: "S" + i, label: "[" + stackCell.value + "]", type: "stack-pointerToStack"}});
             edges.push({
                 data: {
                     id: "SP" + i,
@@ -153,11 +155,12 @@ function VisualizationGraph({state}: VisualizationProps) {
                     type: "stack-pointerToStack",
                 },
             });
-        } else if (stackCell instanceof PointerToHeapCell) {
+        }
+        else if (stackCell instanceof PointerToHeapCell) {
             nodes.push({
                 data: {
                     id: "S" + i,
-                    label: ("Stack[" + i + "]:" + stackCell.value),
+                    label: "[" + stackCell.value + "]",
                     type: "stack-pointerToHeap",
                 },
             });
@@ -178,14 +181,15 @@ function VisualizationGraph({state}: VisualizationProps) {
             const heapCell = state.heap.get(i);
 
             if (heapCell instanceof UninitializedCell) {
-                nodes.push({data: {id: ("H" + i), label: "Heap[" + i + "]", type: "heap-uninitialized"}});
+                nodes.push({data: {id: ("H" + i), label: "H[" + i + "]", type: "heap-uninitialized"}});
             } else if (heapCell instanceof AtomCell) {
                 nodes.push({
-                    data: {id: ("H" + i), label: "Heap[" + i + "]", type: "heap-atom"},
+                    data: {id: ("H" + i), label: "A " + heapCell.value, type: "heap-atom"},
                 });
-            } else if (heapCell instanceof VariableCell) {
+            }
+            else if (heapCell instanceof VariableCell) {
                 nodes.push({
-                    data: {id: ("H" + i), label: "Heap[" + i + "]", type: "heap-variable"},
+                    data: {id: ("H" + i), label: heapCell.tag + " " + heapCell.value, type: "heap-variable"},
                 });
                 edges.push({
                     data: {
@@ -195,23 +199,25 @@ function VisualizationGraph({state}: VisualizationProps) {
                         type: "heap-pointerToHeap",
                     },
                 });
-            } else if (heapCell instanceof StructCell) {
+            }
+            else if (heapCell instanceof StructCell) {
                 nodes.push({
-                    data: {id: "H" + i, label: "Heap[" + i + "]", type: "heap-struct"},
+                    data: {id: "H" + i, label: "S " + heapCell.label, type: "heap-struct"},
                 });
                 for (let j = 0; j < heapCell.size; j++) {
                     edges.push({
                         data: {
                             id: "HP" + i,
-                            source: "H" + i,
+                            source: "H" + (i + j),
                             target: "H" + (i + j + 1),
-                            type: "heap-pointerToHeap",
+                            type: "heap-short",
                         },
                     });
                 }
-            } else if (heapCell instanceof PointerToHeapCell) {
+            }
+            else if (heapCell instanceof PointerToHeapCell) {
                 nodes.push({
-                    data: {id: "H" + i, label: "Heap[" + i + "]", type: "heap-pointerToHeap"},
+                    data: {id: "H" + i, label: "[" + heapCell.value + "]", type: "heap-pointerToHeap"},
                 });
                 edges.push({
                     data: {
@@ -228,7 +234,7 @@ function VisualizationGraph({state}: VisualizationProps) {
     // TRAIL (if exists)
     for (let i = 0; i < state.trail.trailPointer; ++i) {
         nodes.push({
-            data: {id: "T" + i, label: "Trail[" + i + "]", type: "trail-value"},
+            data: {id: "T" + i, label: state.trail.get(i), type: "trail-value"},
         });
     }
 
@@ -245,8 +251,8 @@ function VisualizationGraph({state}: VisualizationProps) {
             {
                 selector: "node",
                 style: {
-                    width: 30,
-                    height: 9,
+                    width: 14,
+                    height: 7,
                     shape: "rectangle",
                     "text-valign": "center",
                     "font-size": 5,
