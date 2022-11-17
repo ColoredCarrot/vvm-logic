@@ -100,9 +100,9 @@ function VisualizationGraph({state}: VisualizationProps) {
     const edges = [];
 
     // REGISTER
-    const programmCounter = state.programCounter;
+    const programCounter = state.programCounter;
     nodes.push({
-        data: {id: "PC", label: programmCounter, type: "register-value"},
+        data: {id: "PC", label: programCounter, type: "register-value"},
     });
     const framePointer = state.framePointer;
     nodes.push({
@@ -114,7 +114,6 @@ function VisualizationGraph({state}: VisualizationProps) {
                 id: "FP",
                 source: "FP",
                 target: "S" + framePointer,
-                type: "register-pointer",
             },
         });
     }
@@ -128,7 +127,6 @@ function VisualizationGraph({state}: VisualizationProps) {
                 id: "BP",
                 source: "BP",
                 target: "S" + backtrackPointer,
-                type: "register-pointer",
             },
         });
     }
@@ -152,7 +150,6 @@ function VisualizationGraph({state}: VisualizationProps) {
                     id: "SP" + i,
                     source: "S" + i,
                     target: "S" + stackCell.value,
-                    type: "stack-pointerToStack",
                 },
             });
         }
@@ -161,7 +158,6 @@ function VisualizationGraph({state}: VisualizationProps) {
                 data: {
                     id: "S" + i,
                     label: "[" + stackCell.value + "]",
-                    type: "stack-pointerToHeap",
                 },
             });
             edges.push({
@@ -169,7 +165,6 @@ function VisualizationGraph({state}: VisualizationProps) {
                     id: "SP" + i,
                     source: "S" + i,
                     target: "H" + stackCell.value,
-                    type: "stack-pointerToHeap",
                 },
             });
         }
@@ -184,25 +179,24 @@ function VisualizationGraph({state}: VisualizationProps) {
                 nodes.push({data: {id: ("H" + i), label: "H[" + i + "]", type: "heap-uninitialized"}});
             } else if (heapCell instanceof AtomCell) {
                 nodes.push({
-                    data: {id: ("H" + i), label: "A " + heapCell.value, type: "heap-atom"},
+                    data: {id: ("H" + i), label: "A: " + heapCell.value, type: "heap-atom"},
                 });
             }
             else if (heapCell instanceof VariableCell) {
                 nodes.push({
-                    data: {id: ("H" + i), label: heapCell.tag + " " + heapCell.value, type: "heap-variable"},
+                    data: {id: ("H" + i), label: heapCell.tag + ": " + heapCell.value, type: "heap-variable"},
                 });
                 edges.push({
                     data: {
                         id: "HP" + i,
                         source: "H" + i,
                         target: "H" + heapCell.value,
-                        type: "heap-pointerToHeap",
                     },
                 });
             }
             else if (heapCell instanceof StructCell) {
                 nodes.push({
-                    data: {id: "H" + i, label: "S " + heapCell.label, type: "heap-struct"},
+                    data: {id: "H" + i, label: "S: " + heapCell.label, type: "heap-struct"},
                 });
                 for (let j = 0; j < heapCell.size; j++) {
                     edges.push({
@@ -210,7 +204,6 @@ function VisualizationGraph({state}: VisualizationProps) {
                             id: "HP" + i,
                             source: "H" + (i + j),
                             target: "H" + (i + j + 1),
-                            type: "heap-short",
                         },
                     });
                 }
@@ -224,7 +217,6 @@ function VisualizationGraph({state}: VisualizationProps) {
                         id: "HP" + i,
                         source: "H" + i,
                         target: "H" + heapCell.value,
-                        type: "heap-pointerToHeap",
                     },
                 });
             }
@@ -268,7 +260,11 @@ function VisualizationGraph({state}: VisualizationProps) {
             {
                 selector: "edge",
                 style: {
-                    width: 1,
+                    width: 0.5,
+                    "curve-style": "unbundled-bezier",
+                    "target-arrow-shape": "vee",
+                    "target-arrow-fill": "filled",
+                    "arrow-scale": 0.5,
                 },
             },
         ]}
