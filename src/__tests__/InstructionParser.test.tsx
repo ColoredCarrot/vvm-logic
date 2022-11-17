@@ -26,9 +26,8 @@ test("invalid instruction", () => {
 });
 
 test("missing label", () => {
-    expect(
-        () => InstructionParser.parseInstruction("CALL f/4", [new SignLabel(2, "f/5")])
-    ).toThrow(ParseError);
+    expect(InstructionParser.parseInstruction("CALL f/4", [new SignLabel(2, "f/5")]))
+        .toBeInstanceOf(InvalidInstruction);
 });
 
 test("parse pushenv", () => {
