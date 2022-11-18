@@ -40,7 +40,7 @@ export class TryChain {
                 return key.pred.text === pred.text && key.context === "default";
             });
 
-            if (tryDefault) {
+            if (tryDefault !== undefined) {
                 return tryDefault;
             } else {
                 throw new ExecutionError("TryChain does not contain entry for " + pred.text + " " + cont);
