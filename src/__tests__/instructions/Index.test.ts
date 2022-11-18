@@ -30,8 +30,9 @@ test("TryChain Access", () => {
     state = state.modifyStack(s => s.push(new VariableCell(5)));
     
     const index = new Index(new SignLabel(DONT_CARE, SIGN_INPUT));
-    state = index.step(state);
+    const stateActual = index.step(state);
+    const stateExpected = state.modifyStack(s => s.pop()).setProgramCounter(EXPECT_JUMP_TO);
     
-    expect(state.programCounter).toStrictEqual(EXPECT_JUMP_TO);
+    expect(stateActual).toStrictEqual(stateExpected);
     
 });

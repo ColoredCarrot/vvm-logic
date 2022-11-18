@@ -5,7 +5,7 @@ import {Cell} from "../../model/Cell";
 import {AtomCell} from "../../model/AtomCell";
 import {StructCell} from "../../model/StructCell";
 import {VariableCell} from "../../model/VariableCell";
-import {IllegalOperationError} from "../ExecutionError";
+import {ExecutionError, IllegalOperationError} from "../ExecutionError";
 
 export class Getnode extends Instruction {
 
@@ -15,7 +15,11 @@ export class Getnode extends Instruction {
 
     step(state: State): State {
         const SP: number = state.stack.stackPointer;
-        const topOfStack: PointerToHeapCell = <PointerToHeapCell>state.stack.get(SP);
+        const topOfStack: Cell = state.stack.get(SP);
+        if (!(topOfStack instanceof PointerToHeapCell)) {
+            throw new ExecutionError("Cell at top of stack has to point to heap to execute instruction " + super.instruction);
+        }
+
         const ref: Cell = state.heap.get(topOfStack.value);
 
         if (!(ref instanceof StructCell) && !(ref instanceof AtomCell) && !(ref instanceof VariableCell)) {

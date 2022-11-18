@@ -23,6 +23,6 @@ export class Entry extends Instruction {
     }
 
     step(state: State): State {
-        return state.modifyTryChain(t => t.set(this.pred, this.cont.toLowerCase(), this.jumpTo));
+        return state.modifyTryChain(t => t.set(this.pred, this.cont, this.jumpTo));
     }
 }
