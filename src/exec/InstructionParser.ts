@@ -34,6 +34,9 @@ import {Setbtp} from "./instructions/Setbtp";
 import {Try} from "./instructions/Try";
 import {Trim} from "./instructions/Trim";
 import {Setcut} from "./instructions/Setcut";
+import {Index} from "./instructions/Index";
+import {Getnode} from "./instructions/Getnode";
+import {Entry} from "./instructions/Entry";
 
 export class ParseError extends Error {
 }
@@ -86,100 +89,11 @@ export class InstructionParser {
             return this.parse1param(labels, instr, params.pop()!);
         } else if (params.length == 2) {
             return this.parse2params(labels, instr, params[0], params[1]);
-        } else {
-            //TODO: Error for >2 Parameters
+        } else if (params.length == 3) {
+            return this.parse3params(labels, instr, params[0], params[1], params[2]);
         }
 
         return new InvalidInstruction(input);
-    }
-
-    private static parse1param(labels: readonly Label[], instr: string, p0: string): Instruction {
-        let returnInstruction: Instruction = new InvalidInstruction(instr + " " + p0);
-        if (this.isValidSignLabel(p0)) {
-            const signLabel = labels.find(v => { return v.text === p0; });
-            if (!signLabel) {
-                //ERROR
-                returnInstruction = new InvalidInstruction(instr + " " + p0);
-            } else {
-                returnInstruction =  this.parseSignParamInstruction(instr, <SignLabel>signLabel);
-            }
-        }
-        if (returnInstruction instanceof InvalidInstruction && this.isValidLabel(p0)) {
-            const l1 = labels.find(v => { return v.text === p0; });
-            if (l1) {
-                returnInstruction =  this.parseLabelParamInstruction(instr, l1);
-            } else {
-                returnInstruction = new InvalidInstruction(instr + " " + p0);
-            }
-        }
-        if (returnInstruction instanceof InvalidInstruction && this.isValidNumber(p0)) {
-            returnInstruction =  this.parseNumberParamInstruction(instr, Number(p0));
-        }
-        if (returnInstruction instanceof InvalidInstruction && this.isValidAtomName(p0)) {
-            returnInstruction =  this.parseStringParamInstructor(instr, p0);
-        }
-        return returnInstruction;
-    }
-
-    private static parse2params(labels: readonly Label[], instr: string, p0: string, p1: string): Instruction {
-        let returnInstruction: Instruction = new InvalidInstruction(instr);
-        if (this.isValidSignLabel(p0) && this.isValidLabel(p1)) {
-            const l0 = <SignLabel>labels.find(v => { return v.text === p0 && v instanceof SignLabel; });
-            const l1 = labels.find(v => { return v.text === p1; });
-            if (!l0 || !l1) {
-                returnInstruction =  new InvalidInstruction(instr + " " + p0 + " " + p1);
-            } else {
-                returnInstruction =  this.parseSignAndLabelParamInstruction(instr, l0!, l1!);
-            }
-        }
-        if (returnInstruction instanceof InvalidInstruction && this.isValidSignLabel(p0) && this.isValidNumber(p1)) {
-            const l0 = <SignLabel>labels.find(v => { return v.text === p0 && v instanceof SignLabel; });
-            if (!l0) {
-                returnInstruction =  new InvalidInstruction(instr + " " + p0 + " " + p1);
-            } else {
-                returnInstruction =  this.parseSignAndNumberParamInstruction(instr, l0, Number(p1));
-            }
-            if (this.isValidSignLabel(p0) && this.isValidLabel(p1)) {
-                const l0 = <SignLabel>labels.find(v => {
-                    return v.text === p0 && v instanceof SignLabel;
-                });
-                const l1 = labels.find(v => {
-                    return v.text === p0;
-                });
-                if (!l0 || !l1) {
-                    //ERROR
-                    return new InvalidInstruction(input);
-                }
-                return this.parseSignAndLabelParamInstruction(instr, l0!, l1!);
-            } else if (this.isValidSignLabel(p0) && this.isValidNumber(p1)) {
-                const l0 = <SignLabel>labels.find(v => {
-                    return v.text === p0 && v instanceof SignLabel;
-                });
-                if (!l0) {
-                    return new InvalidInstruction(input);
-                }
-                return this.parseSignAndNumberParamInstruction(instr, l0, Number(p1));
-            } else if (this.isValidNumber(p0) && this.isValidNumber(p1)) {
-                return this.parseNumberNumberParamInstruction(instr, Number(p0), Number(p1));
-            }
-        } else if (params.length == 3) {
-            const [p0, p1, p2] = params;
-            if (this.isValidSignLabel(p0) && this.isValidContext(p1) && this.isValidLabel(p2)) {
-                const l0 = new SignLabel(-1, p0);
-                const l2 = labels.find(v => v.text === p2);
-                if (l2) {
-                    return this.parseSignStringLabelParamInstruction(instr, l0, p1, l2);
-                } else {
-                    return new InvalidInstruction(input);
-                }
-            }
-        } else if (params.length > 3) {
-            return new InvalidInstruction(input);
-        }
-        if (returnInstruction instanceof InvalidInstruction && this.isValidNumber(p0) && this.isValidNumber(p1)) {
-            returnInstruction =  this.parseNumberNumberParamInstruction(instr, Number(p0), Number(p1));
-        }
-        return returnInstruction;
     }
 
     static processLabels(inputLines: readonly string[]): Label[] {
@@ -211,6 +125,84 @@ export class InstructionParser {
         }
 
         return labels;
+    }
+
+    private static parse1param(labels: readonly Label[], instr: string, p0: string): Instruction {
+        let returnInstruction: Instruction = new InvalidInstruction(instr + " " + p0);
+        if (this.isValidSignLabel(p0)) {
+            const signLabel = labels.find(v => {
+                return v.text === p0;
+            });
+            if (!signLabel) {
+                //ERROR
+                returnInstruction = new InvalidInstruction(instr + " " + p0);
+            } else {
+                returnInstruction = this.parseSignParamInstruction(instr, <SignLabel>signLabel);
+            }
+        }
+        if (returnInstruction instanceof InvalidInstruction && this.isValidLabel(p0)) {
+            const l1 = labels.find(v => {
+                return v.text === p0;
+            });
+            if (l1) {
+                returnInstruction = this.parseLabelParamInstruction(instr, l1);
+            } else {
+                returnInstruction = new InvalidInstruction(instr + " " + p0);
+            }
+        }
+        if (returnInstruction instanceof InvalidInstruction && this.isValidNumber(p0)) {
+            returnInstruction = this.parseNumberParamInstruction(instr, Number(p0));
+        }
+        if (returnInstruction instanceof InvalidInstruction && this.isValidAtomName(p0)) {
+            returnInstruction = this.parseStringParamInstructor(instr, p0);
+        }
+        return returnInstruction;
+    }
+
+    private static parse2params(labels: readonly Label[], instr: string, p0: string, p1: string): Instruction {
+        const input = instr + " " + p0 + " " + p1;
+        let returnInstruction: Instruction = new InvalidInstruction(input);
+        if (this.isValidSignLabel(p0) && this.isValidLabel(p1)) {
+            const l0 = <SignLabel>labels.find(v => {
+                return v.text === p0 && v instanceof SignLabel;
+            });
+            const l1 = labels.find(v => {
+                return v.text === p1;
+            });
+            if (!l0 || !l1) {
+                returnInstruction = new InvalidInstruction(input);
+            } else {
+                returnInstruction = this.parseSignAndLabelParamInstruction(instr, l0!, l1!);
+            }
+        }
+        if (returnInstruction instanceof InvalidInstruction && this.isValidSignLabel(p0) && this.isValidNumber(p1)) {
+            const l0 = <SignLabel>labels.find(v => {
+                return v.text === p0 && v instanceof SignLabel;
+            });
+            if (!l0) {
+                returnInstruction = new InvalidInstruction(input);
+            } else {
+                returnInstruction = this.parseSignAndNumberParamInstruction(instr, l0, Number(p1));
+            }
+        }
+        if (returnInstruction instanceof InvalidInstruction && this.isValidNumber(p0) && this.isValidNumber(p1)) {
+            returnInstruction = this.parseNumberNumberParamInstruction(instr, Number(p0), Number(p1));
+        }
+        return returnInstruction;
+    }
+
+    private static parse3params(labels: readonly Label[], instr: string, p0: string, p1: string, p2: string): Instruction {
+        const input = instr + " " + p0 + " " + p1 + " " + p2;
+        if (this.isValidSignLabel(p0) && this.isValidContext(p1) && this.isValidLabel(p2)) {
+            const l0 = new SignLabel(-1, p0);
+            const l2 = labels.find(v => v.text === p2);
+            if (l2) {
+                return this.parseSignStringLabelParamInstruction(instr, l0, p1, l2);
+            } else {
+                return new InvalidInstruction(input);
+            }
+        }
+        return new InvalidInstruction(input);
     }
 
     //<editor-fold> parse different Parameter Methods
