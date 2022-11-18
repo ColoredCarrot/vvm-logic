@@ -4,22 +4,10 @@ import {ExecutionError} from "../exec/ExecutionError";
 import {Label} from "../exec/Label";
 
 export class TryChainKey {
-    private readonly _pred: SignLabel;
-    private readonly _context: string;
-
-    constructor(pred: SignLabel, context: string) {
-        this._pred = pred;
-        this._context = context;
-    }
-
-
-    get pred(): SignLabel {
-        return this._pred;
-    }
-
-    get context(): string {
-        return this._context;
-    }
+    constructor(
+        readonly pred: SignLabel,
+        readonly context: string,
+    ) {}
 }
 
 export class TryChain {
