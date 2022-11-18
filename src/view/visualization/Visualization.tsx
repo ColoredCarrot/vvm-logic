@@ -13,11 +13,10 @@ import {createGraph, Graph} from "./VisualizationGraph";
 Cytoscape.use(fcose);
 
 interface VisualizationProps {
-    prevState: State;
     state: State;
 }
 
-export function Visualization({prevState, state}: VisualizationProps) {
+export function Visualization({state}: VisualizationProps) {
 
     /////////////
     // Don't display heap cells whose address is >= heap pointer
@@ -26,7 +25,7 @@ export function Visualization({prevState, state}: VisualizationProps) {
     return <div className="Visualization">
         <h3>Visualization</h3>
 
-        <VisualizationGraph state={state} prevState={prevState}/>
+        <VisualizationGraph state={state}/>
     </div>;
 }
 

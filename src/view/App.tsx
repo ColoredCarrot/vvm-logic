@@ -61,10 +61,7 @@ function App() {
                         />
                     </div>
                     <div className="visualization-container">
-                        <Visualization
-                            prevState={appState.vmState.get(appState.vmState.size - 2) ?? State.new()}
-                            state={vmState}
-                        />
+                        <Visualization state={vmState}/>
                     </div>
                 </div>
             </ProgramTextContext.Provider>

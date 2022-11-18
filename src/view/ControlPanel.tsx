@@ -1,7 +1,7 @@
 import React, {useContext} from "react";
 import {step} from "./util/Step";
 import {State} from "../model/State";
-import {AppStateContext, ProgramTextContext} from "./AppState";
+import {AppState, AppStateContext, ProgramTextContext} from "./AppState";
 import "./ControlPanel.scss";
 import {useGlobalEvent} from "./util/UseGlobalEvent";
 import Immutable from "immutable";
@@ -16,10 +16,10 @@ export function ControlPanel() {
     const nextCodeLine = programText.getNextCodeLine(vmState.programCounter);
     const endOfProgram = nextCodeLine === null;
 
-    function invokeStep(): void {
-        if (nextCodeLine !== null) {
-            step(nextCodeLine, appState, setAppState);
-        }
+    function invokeStep(): AppState {
+        return nextCodeLine !== null
+            ? step(nextCodeLine, appState, setAppState)
+            : appState;
     }
 
     function invokeBack(): void {
@@ -34,7 +34,9 @@ export function ControlPanel() {
 
     function invokeRun() {
         setAppState({
-            ...appState,
+            // We enabled auto-step; useInterval() will perform the first step after the delay has passed once already,
+            // but we want to step immediately:
+            ...(appState.autoStepEnabled ? appState : invokeStep()),
             autoStepEnabled: !appState.autoStepEnabled,
         });
     }
