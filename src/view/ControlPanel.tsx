@@ -22,6 +22,16 @@ export function ControlPanel() {
         }
     }
 
+    function invokeBack(): void {
+        if (!appState.vmState.isEmpty()) {
+            setAppState({
+                ...appState,
+                vmState: appState.vmState.pop(),
+                lastExecutionError: null,
+            });
+        }
+    }
+
     function invokeRun() {
         setAppState({
             ...appState,
@@ -30,9 +40,18 @@ export function ControlPanel() {
     }
 
     useGlobalEvent("keydown", evt => {
-        if (evt.key === "F8") {
+        switch (evt.key) {
+        case "F9":
+            invokeRun();
+            break;
+        case "F8":
             invokeStep();
-        } else {
+            break;
+        case "F7":
+            invokeBack();
+            break;
+        default:
+            // We don't handle this key combination
             return;
         }
 
@@ -68,13 +87,7 @@ export function ControlPanel() {
     const btnBackEnabled = !appState.vmState.isEmpty();
     const btnBack = <a
         className={"ControlPanel__button" + (!btnBackEnabled ? " ControlPanel__button--disabled" : "")}
-        onClick={() => {
-            setAppState({
-                ...appState,
-                vmState: appState.vmState.pop(),
-                lastExecutionError: null,
-            });
-        }}>
+        onClick={() => invokeBack()}>
         <img src="/icons/undo_dark.svg" alt="Undo"/>
     </a>;
 
