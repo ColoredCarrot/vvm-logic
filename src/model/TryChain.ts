@@ -33,7 +33,7 @@ export class TryChain {
         const tryWithContext: number | undefined = this.values.find((value, key) => {
             return key.context === cont && key.pred.text === pred.text; });
 
-        if (tryWithContext) {
+        if (tryWithContext !== undefined) {
             return tryWithContext;
         } else {
             const tryDefault: number | undefined = this.values.find((value, key) => {
