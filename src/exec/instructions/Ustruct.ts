@@ -5,6 +5,7 @@ import {State} from "../../model/State";
 import {PointerToHeapCell} from "../../model/PointerToHeapCell";
 import {StructCell} from "../../model/StructCell";
 import {VariableCell} from "../../model/VariableCell";
+import {ExecutionError} from "../ExecutionError";
 
 export class Ustruct extends Instruction {
     private p0: SignLabel;
@@ -17,7 +18,12 @@ export class Ustruct extends Instruction {
     }
 
     step(state: State): State {
-        const ref = (<PointerToHeapCell>state.stack.get(state.stack.stackPointer)).value;
+        const cell = state.stack.get(state.stack.stackPointer);
+        if (!(cell instanceof PointerToHeapCell)) {
+            throw new ExecutionError("Expected cell at top of stack to be a pointer-to-heap, but is " + cell);
+        }
+
+        const ref = cell.value;
         const heapElem = state.heap.get(ref);
         if (heapElem instanceof StructCell) {
             //DO Nothing

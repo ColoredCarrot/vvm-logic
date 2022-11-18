@@ -99,14 +99,16 @@ export abstract class Instruction {
 
         return state;
     }
-
-    // TODO: Warum nicht schauen ob u < backtrackpointer - 2 ? So wie in Java-Implementierung
     public static trail(state: State, u: number): State {
         const onStack = state.stack.get(state.backtrackPointer - 2);
         if (!(onStack instanceof ValueCell)) {
             throw new IllegalOperationError("Expected Heap Pointer on Stack to be Type ValueCell!");
         } else {
-            return state.setTrail(state.trail.push(u));
+            if (u < onStack.value) {
+                return state.setTrail(state.trail.push(u));
+            } else {
+                return state;
+            }
         }
     }
 

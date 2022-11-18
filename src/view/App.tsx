@@ -1,24 +1,36 @@
 import React, {useState} from "react";
-import "./App.css";
+import "./App.scss";
+import {AppState, AppStateContext} from "./AppState";
 import {LeftColumn} from "./LeftColumn";
-import {Visualization} from "./Visualization";
+import {Visualization} from "./visualization/Visualization";
 import {State} from "../model/State";
+import Immutable from "immutable";
 
 function App() {
-    const [state, setState] = useState<State>(State.new());
+    const [appState, setAppState] = useState<AppState>({
+        vmState: Immutable.List(),
+        lastExecutionError: null,
+    });
 
-    return (
-        <div className="container">
-            <div className="row">
-                <div className="col s4">
-                    <LeftColumn state={state} setState={setState}></LeftColumn>
+    const vmState = appState.vmState.last() ?? State.new();
+
+    return <>
+        <AppStateContext.Provider value={[appState, setAppState]}>
+            <div className="App">
+                <div className="left-column-container">
+                    <LeftColumn
+                        state={vmState}
+                    />
                 </div>
-                <div className="col s8">
+                <div className="visualization-container">
+                    <Visualization
+                        prevState={appState.vmState.get(appState.vmState.size - 2) ?? State.new()}
+                        state={vmState}
+                    />
                 </div>
-                <Visualization state={state}/>
             </div>
-        </div>
-    );
+        </AppStateContext.Provider>
+    </>;
 }
 
 export default App;

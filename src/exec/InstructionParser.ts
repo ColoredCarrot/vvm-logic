@@ -1,48 +1,46 @@
-import {Instruction} from "./instructions/Instruction";
-import {Label} from "./Label";
-import {Pop} from "./instructions/Pop";
 import {Bind} from "./instructions/Bind";
-import {InvalidInstruction} from "./instructions/InvalidInstruction";
 import {Call} from "./instructions/Call";
-import {SignLabel} from "./SignLabel";
-import {Popenv} from "./instructions/Popenv";
-import {Putatom} from "./instructions/Putatom";
-import {Putref} from "./instructions/Putref";
-import {Putvar} from "./instructions/Putvar";
-import {Up} from "./instructions/Up";
-import {Pushenv} from "./instructions/Pushenv";
+import {Check} from "./instructions/Check";
+import {Delbtp} from "./instructions/Delbtp";
+import {Fail} from "./instructions/Fail";
 import {Init} from "./instructions/Init";
+import {Instruction} from "./instructions/Instruction";
+import {InvalidInstruction} from "./instructions/InvalidInstruction";
 import {Jump} from "./instructions/Jump";
 import {Lastcall} from "./instructions/Lastcall";
-import {Putanon} from "./instructions/Putanon";
-import {Putstruct} from "./instructions/Putstruct";
-import {Slide} from "./instructions/Slide";
-import {Uvar} from "./instructions/Uvar";
-import {Check} from "./instructions/Check";
-import {Fail} from "./instructions/Fail";
 import {Lastmark} from "./instructions/Lastmark";
-import {Ustruct} from "./instructions/Ustruct";
-import {Uref} from "./instructions/Uref";
-import {Unify} from "./instructions/Unify";
+import {Mark} from "./instructions/Mark";
+import {No} from "./instructions/No";
+import {Pop} from "./instructions/Pop";
+import {Popenv} from "./instructions/Popenv";
+import {Prune} from "./instructions/Prune";
+import {Pushenv} from "./instructions/Pushenv";
+import {Putanon} from "./instructions/Putanon";
+import {Putatom} from "./instructions/Putatom";
+import {Putref} from "./instructions/Putref";
+import {Putstruct} from "./instructions/Putstruct";
+import {Putvar} from "./instructions/Putvar";
+import {Slide} from "./instructions/Slide";
 import {Son} from "./instructions/Son";
 import {Uatom} from "./instructions/Uatom";
-import {Mark} from "./instructions/Mark";
-import {Delbtp} from "./instructions/Delbtp";
-import {Prune} from "./instructions/Prune";
-import {No} from "./instructions/No";
+import {Unify} from "./instructions/Unify";
+import {Up} from "./instructions/Up";
+import {Uref} from "./instructions/Uref";
+import {Ustruct} from "./instructions/Ustruct";
+import {Uvar} from "./instructions/Uvar";
+import {Label} from "./Label";
+import {SignLabel} from "./SignLabel";
 import {Setbtp} from "./instructions/Setbtp";
-import {Setcut} from "./instructions/Setcut";
+import {Try} from "./instructions/Try";
 import {Trim} from "./instructions/Trim";
-import {Getnode} from "./instructions/Getnode";
-import {Index} from "./instructions/Index";
-import {Entry} from "./instructions/Entry";
+import {Setcut} from "./instructions/Setcut";
 
 export class ParseError extends Error {
 }
 
 export class InstructionParser {
 
-    static parseInput(inputLines: string[]): [Instruction[], Label[]] {
+    static parseInput(inputLines: readonly string[]): [Instruction[], Label[]] {
         const labels: Label[]
             = this.processLabels(inputLines);
 
@@ -52,7 +50,7 @@ export class InstructionParser {
         return [instructions, labels];
     }
 
-    private static parseInstructions(input: string[], labels: Label[]): Instruction[] {
+    private static parseInstructions(input: readonly string[], labels: readonly Label[]): Instruction[] {
         const instrStrings: string[] = input.map(value => {
             return value.trim()
                 .replace("/  +/g", " ")
@@ -67,7 +65,7 @@ export class InstructionParser {
         return instructions;
     }
 
-    static parseInstruction(input: string, labels: Label[]): Instruction {
+    static parseInstruction(input: string, labels: readonly Label[]): Instruction {
         input = input.toLowerCase();
 
         const inputSplit: string[] = input.split(" ");
@@ -86,7 +84,7 @@ export class InstructionParser {
                 });
                 if (!signLabel) {
                     //ERROR
-                    throw new ParseError("Label not found: " + signLabel);
+                    return new InvalidInstruction(input);
                 }
                 return this.parseSignParamInstruction(instr, <SignLabel>signLabel);
             } else if (this.isValidLabel(param) && labels.find(v => {
@@ -96,10 +94,10 @@ export class InstructionParser {
                     return v.text === param;
                 })!;
                 return this.parseLabelParamInstruction(instr, l1);
-            } else if (this.isValidAtomName(param)) {
-                return this.parseStringParamInstructor(instr, param);
             } else if (this.isValidNumber(param)) {
                 return this.parseNumberParamInstruction(instr, Number(param));
+            } else if (this.isValidAtomName(param)) {
+                return this.parseStringParamInstructor(instr, param);
             }
         } else if (params.length == 2) {
             const p1 = params.pop()!;
@@ -114,7 +112,7 @@ export class InstructionParser {
                 });
                 if (!l0 || !l1) {
                     //ERROR
-                    throw new ParseError("Label not found: " + p0);
+                    return new InvalidInstruction(input);
                 }
                 return this.parseSignAndLabelParamInstruction(instr, l0!, l1!);
             } else if (this.isValidSignLabel(p0) && this.isValidNumber(p1)) {
@@ -122,33 +120,21 @@ export class InstructionParser {
                     return v.text === p0 && v instanceof SignLabel;
                 });
                 if (!l0) {
-                    throw new ParseError("Label not found!");
+                    return new InvalidInstruction(input);
                 }
                 return this.parseSignAndNumberParamInstruction(instr, l0, Number(p1));
             } else if (this.isValidNumber(p0) && this.isValidNumber(p1)) {
                 return this.parseNumberNumberParamInstruction(instr, Number(p0), Number(p1));
             }
-        } else if (params.length == 3) {
-            if (this.isValidSignLabel(params[0])
-                && this.isValidContex(params[1])
-                && this.isValidNumber(params[2])) {
-                const p0 = <SignLabel>labels.find(v => {
-                    return v.text === params[0] && v instanceof SignLabel;
-                });
-                const p1 = <string>params[1];
-                const p2 = Number(params[2]);
-                return this.parseSignStringNumberParamInstruction(instr, p0, p1, p2);
-            }
-
-        } else if (params.length > 3) {
-            throw new ParseError("No Instructions for >3 parameters");
+        } else {
+            //TODO: Error for >2 Parameters
         }
 
 
         return new InvalidInstruction(input);
     }
 
-    private static processLabels(inputLines: string[]): Label[] {
+    static processLabels(inputLines: readonly string[]): Label[] {
         const labels: Label[] = [];
 
         for (let i = 0; i < inputLines.length; i++) {
@@ -170,7 +156,7 @@ export class InstructionParser {
                 }
 
                 labels.push(l);
-                inputLines[i] = lblSplit.at(1)!;
+                // inputLines[i] = lblSplit.at(1)!;
             } else {
                 //Line has no label
             }
@@ -196,7 +182,7 @@ export class InstructionParser {
         case "mark":
             return new Mark(param);
         case "try":
-            return new InvalidInstruction(instr + " " + param.text); //TODO: Replace with actual implementation
+            return new Try(param);
         case "up":
             return new Up(param);
         case "jump":
@@ -243,31 +229,19 @@ export class InstructionParser {
 
     private static parseSignAndLabelParamInstruction(instr: string, sign: SignLabel, label: Label): Instruction {
         switch (instr) {
-            case "ustruct":
-                return new Ustruct(sign, label);
-            default:
-                return new InvalidInstruction(instr + " " + sign + " " + label);
-        }
-    }
-
-    private static parseSignStringNumberParamInstruction(instr: string,
-                                                         p0: SignLabel,
-                                                         p1: string,
-                                                         p2: number): Instruction {
-        switch (instr) {
-            case "entry":
-                return new Entry(p0, p1, p2);
-            default:
-                return new InvalidInstruction(instr + " " + p0 + " " + p1 + " " + p2);
+        case "ustruct":
+            return new Ustruct(sign, label);
+        default:
+            return new InvalidInstruction(instr + " " + sign + " " + label);
         }
     }
 
     private static parseSignAndNumberParamInstruction(instr: string, sign: SignLabel, secondParam: number): Instruction {
         switch (instr) {
-            case "lastcall":
-                return new Lastcall(sign, secondParam);
-            default:
-                return new InvalidInstruction(instr + " " + sign + " " + secondParam);
+        case "lastcall":
+            return new Lastcall(sign, secondParam);
+        default:
+            return new InvalidInstruction(instr + " " + sign + " " + secondParam);
         }
     }
 
@@ -276,7 +250,7 @@ export class InstructionParser {
         case "call":
             return new Call(sign);
         case "index":
-            return new Index(sign);
+            return new Pop(); //TODO: Change to actual Constructor
         case "jump":
             return new Jump(sign);
         case "putstruct":
@@ -295,7 +269,7 @@ export class InstructionParser {
         case "fail":
             return new Fail();
         case "getnode":
-            return new Getnode();
+            return new InvalidInstruction(input); //TODO: Replace once implemented
         case "lastmark":
             return new Lastmark();
         case "no":
@@ -340,11 +314,6 @@ export class InstructionParser {
 
     private static isValidNumber(arg: string): boolean {
         const regex = new RegExp("[0-9]+");
-        return regex.test(arg);
-    }
-
-    private static isValidContex(arg: string): boolean {
-        const regex = new RegExp("default|S|R");
         return regex.test(arg);
     }
 

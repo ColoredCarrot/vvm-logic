@@ -1,9 +1,7 @@
 import {State} from "../../model/State";
 import {UninitializedCell} from "../../model/UninitializedCell";
 import {Stack} from "../../model/Stack";
-import {Popenv} from "../../exec/instructions/Popenv";
 import {PointerToStackCell} from "../../model/PointerToStackCell";
-import {ValueCell} from "../../model/ValueCell";
 import {Prune} from "../../exec/instructions/Prune";
 
 test("Instruction: PRUNE", () => {

@@ -5,7 +5,7 @@ import {Cell} from "../../model/Cell";
 
 export class Pushenv extends Instruction {
 
-    private readonly mVar: number;
+    readonly mVar: number;
     private readonly cell: Cell = new UninitializedCell();
 
     constructor(mVar: number) {
@@ -16,10 +16,10 @@ export class Pushenv extends Instruction {
     step(state: State): State {
 
         const n = state.stack.stackPointer - state.framePointer;
-        const allocVar = n - this.mVar;
+        const allocVar = this.mVar - n;
 
         let stack = state.stack;
-        for (let i = 0; i < allocVar - 1; i++) {
+        for (let i = 0; i < allocVar; i++) {
             stack = stack.push(this.cell);
         }
 

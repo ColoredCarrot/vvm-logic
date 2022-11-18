@@ -4,10 +4,10 @@ import {PointerToHeapCell} from "../../model/PointerToHeapCell";
 import {Cell} from "../../model/Cell";
 import {AtomCell} from "../../model/AtomCell";
 import {VariableCell} from "../../model/VariableCell";
-import {Heap} from "../../model/Heap";
+import {ExecutionError} from "../ExecutionError";
 
 export class Uatom extends Instruction {
-    private name: string;
+    private readonly name: string;
 
     constructor(param: string) {
         super("UATOM");
@@ -15,21 +15,25 @@ export class Uatom extends Instruction {
     }
 
     step(state: State): State {
-        const h: number = (<PointerToHeapCell>state.stack.get(state.stack.stackPointer)).value;
-        const temp = state.modifyStack(s => s.pop());
+        const cell = state.stack.get(state.stack.stackPointer);
+        if (!(cell instanceof PointerToHeapCell)) {
+            throw new ExecutionError("Expected cell at top of stack to be a pointer-to-heap, but is " + cell);
+        }
+
+        const h: number = cell.value;
         const heapElem: Cell = state.heap.get(h);
 
         if (heapElem instanceof AtomCell) {
             //Do Nothing
-            return temp;
+            return state.modifyStack(s => s.pop());
         } else if (heapElem instanceof VariableCell) {
-            const tempHeap = state.heap;
-            const newAtom: [Heap, number] = tempHeap.alloc([new AtomCell(this.name)]);
+            const [newHeap, address] = state.heap.alloc([new AtomCell(this.name)]);
 
-            return state.modifyTrail(t => t.push(h))
-                .setHeap(newAtom[0])
-                .modifyHeap(mh => mh.set(h, new VariableCell(newAtom[1])));
-
+            return state
+                .modifyStack(s => s.pop())
+                .setHeap(newHeap)
+                .modifyHeap(mh => mh.set(h, new VariableCell(address)))
+                .modify(s => Instruction.trail(s, h));
         } else {
             return Instruction.backtrack(state);
         }

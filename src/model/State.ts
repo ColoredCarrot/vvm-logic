@@ -3,13 +3,11 @@ import {Stack} from "./Stack";
 import {GarbageCollector} from "./GarbageCollector";
 import {Trail} from "./Trail";
 import {Cell} from "./Cell";
-import {TryChain} from "./TryChain";
 
 interface StateVars {
     readonly heap: Heap;
     readonly stack: Stack;
     readonly trail: Trail;
-    readonly tryChain: TryChain;
     readonly garbageCollector: GarbageCollector;
     readonly framePointer: number;
     readonly backtrackPointer: number;
@@ -23,8 +21,16 @@ export class State implements StateVars {
     private constructor(private readonly vars: StateVars) {
     }
 
-    get tryChain(): TryChain {
-        return this.vars.tryChain;
+    static new(): State {
+        return new State({
+            heap: Heap.empty(),
+            stack: Stack.empty(),
+            trail: Trail.empty(),
+            garbageCollector: new GarbageCollector(),
+            framePointer: -1,
+            backtrackPointer: -1,
+            programCounter: -1,
+        });
     }
 
     get heap(): Heap {
@@ -35,7 +41,7 @@ export class State implements StateVars {
         return new State({...this.vars, heap: heap});
     }
 
-    modifyHeap(f: (_: Heap)=> Heap): State {
+    modifyHeap(f: (_: Heap) => Heap): State {
         return this.setHeap(f(this.heap));
     }
 
@@ -56,19 +62,6 @@ export class State implements StateVars {
         return this.setStack(newStack);
     }
 
-    static new(): State {
-        return new State({
-            heap: Heap.empty(),
-            stack: Stack.empty(),
-            trail: Trail.empty(),
-            tryChain: TryChain.empty(),
-            garbageCollector: new GarbageCollector(),
-            framePointer: -1,
-            backtrackPointer: -1,
-            programCounter: 0
-        });
-    }
-
     /**
      * Enables this class to be used in a fluent interface (see example below).
      *
@@ -85,14 +78,6 @@ export class State implements StateVars {
      */
     modifyStack(f: (_: Stack) => Stack): State {
         return this.setStack(f(this.stack));
-    }
-
-    modifyTryChain(f: (_: TryChain) => TryChain): State {
-        return this.setTryChain(f(this.tryChain));
-    }
-
-    setTryChain(tryChain: TryChain): State {
-        return new State({...this.vars, tryChain: tryChain});
     }
 
     get trail(): Trail {
@@ -135,7 +120,11 @@ export class State implements StateVars {
         return new State({...this.vars, programCounter: pc});
     }
 
-    modify(f: (_: State)=> State): State {
+    modify(f: (_: State) => State): State {
         return f(this);
+    }
+
+    equals(that: State): boolean {
+        return JSON.stringify(this) === JSON.stringify(that);
     }
 }

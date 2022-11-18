@@ -8,8 +8,9 @@ export class Fail extends Instruction {
     }
 
     step(state: State): State {
+
         state = Instruction.backtrack(state);
-        state = state.garbageCollector.run(state);
-        return state;
+        return state.garbageCollector.run(state);
+
     }
 }

@@ -4,6 +4,7 @@ import {Cell} from "../../model/Cell";
 import {StructCell} from "../../model/StructCell";
 import {SignLabel} from "../SignLabel";
 import {PointerToHeapCell} from "../../model/PointerToHeapCell";
+import {ExecutionError} from "../ExecutionError";
 
 export class Putstruct extends Instruction {
 
@@ -27,7 +28,11 @@ export class Putstruct extends Instruction {
         heap = heap.set(address, new StructCell(this.param.text, size));
 
         for (let i = 1; i <= size; i++) {
-            heap = heap.set(address + i, state.stack.get(newStackPointer + i - 1) as PointerToHeapCell);
+            const cell = state.stack.get(newStackPointer + i - 1);
+            if (!(cell instanceof PointerToHeapCell)) {
+                throw new ExecutionError("Expected cell on stack at " + (newStackPointer + i - 1) + " to be a pointer-to-heap, but is " + cell);
+            }
+            heap = heap.set(address + i, cell);
         }
 
         return state

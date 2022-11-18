@@ -1,0 +1,34 @@
+@use "colors";
+
+html {
+    height: 100%;
+}
+
+body {
+    height: 100%;
+    background-color: colors.$background-darkest;
+}
+
+.App {
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+}
+
+.left-column-container {
+    flex: 1;
+
+    padding: 10px
+}
+
+.visualization-container {
+    flex: 3;  // Visualization should take up 3 times as much horizontal space as the left column
+
+    font-size: 18px;
+    background-color: #4f8b86;
+
+    padding: 10px;
+
+    display: flex;
+}

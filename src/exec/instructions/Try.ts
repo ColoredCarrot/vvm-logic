@@ -8,6 +8,7 @@ export class Try extends Instruction {
     value: Label;
 
     constructor(value: Label) {
+
         super("TRY");
         this.value = value;
 
@@ -15,8 +16,7 @@ export class Try extends Instruction {
 
     step(state: State): State {
 
-        state.stack.set(state.framePointer - 5, new ValueCell(state.programCounter));
-        state.setProgramCounter(this.value.line);
-        return state;
+        return state.setStack(state.stack.set(state.framePointer - 5, new ValueCell(state.programCounter))).setProgramCounter(this.value.line);
+
     }
 }

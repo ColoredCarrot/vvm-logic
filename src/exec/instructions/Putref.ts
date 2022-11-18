@@ -1,6 +1,7 @@
 import {Instruction} from "./Instruction";
 import {State} from "../../model/State";
 import {PointerToHeapCell} from "../../model/PointerToHeapCell";
+import {ExecutionError} from "../ExecutionError";
 
 export class Putref extends Instruction {
 
@@ -13,7 +14,11 @@ export class Putref extends Instruction {
 
     step(state: State): State {
 
-        const stackCell: PointerToHeapCell = state.stack.get(state.framePointer + this.reference) as PointerToHeapCell;
+        const stackCell = state.stack.get(state.framePointer + this.reference);
+        if (!(stackCell instanceof PointerToHeapCell)) {
+            throw new ExecutionError("Expected cell at FP + " + this.reference + " to be a pointer-to-heap, but is " + stackCell);
+        }
+
         const address: number = Instruction.deref(state, stackCell.value);
 
         return state
