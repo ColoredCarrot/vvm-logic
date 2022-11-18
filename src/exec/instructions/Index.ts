@@ -2,9 +2,12 @@ import {Instruction} from "./Instruction";
 import {SignLabel} from "../SignLabel";
 import {State} from "../../model/State";
 import {Cell} from "../../model/Cell";
+import {VariableCell} from "../../model/VariableCell";
+import {AtomCell} from "../../model/AtomCell";
+import {StructCell} from "../../model/StructCell";
 
 export class Index extends Instruction {
-    private pred: SignLabel;
+    private readonly pred: SignLabel;
 
     constructor(p: SignLabel) {
         super("INDEX " + p);
@@ -13,10 +16,16 @@ export class Index extends Instruction {
 
     step(state: State): State {
         const topOfStack: Cell = state.stack.get(state.stack.stackPointer);
-        const cont = "";
-        const newPC = state.tryChain.get(this.pred, cont);
+        state = state.modifyStack(s => s.pop());
+        let newPC = -1;
+        if (topOfStack instanceof VariableCell) {
+            newPC = state.tryChain.get(this.pred, "r");
+        } else if (topOfStack instanceof AtomCell) {
+            newPC = state.tryChain.get(this.pred, topOfStack.value);
+        } else if (topOfStack instanceof StructCell) {
+            newPC = state.tryChain.get(this.pred, topOfStack.label);
+        }
 
-        return state.modifyStack(s => s.pop())
-            .setProgramCounter(newPC);
+        return state.setProgramCounter(newPC);
     }
 }

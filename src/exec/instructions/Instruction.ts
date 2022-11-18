@@ -9,8 +9,7 @@ import {AtomCell} from "../../model/AtomCell";
 import {IllegalOperationError} from "../ExecutionError";
 
 export abstract class Instruction {
-    protected constructor(public instruction: string) {
-    }
+    protected constructor(public instruction: string) {}
 
     abstract step(state: State): State;
 
@@ -88,7 +87,7 @@ export abstract class Instruction {
         state = state.setHeap(state.heap.setHeapPointer(oldHeapPointer.value));
 
         //Reset Trail Pointer and reset()
-        const oldTrailPointer = <ValueCell>state.stack.get(state.framePointer - 3);
+        const oldTrailPointer = <ValueCell> state.stack.get(state.framePointer - 3);
         state = this.reset(state, oldTrailPointer.value, state.trail.trailPointer);
 
         state = state.setTrail(state.trail.setTrailPointer(oldTrailPointer.value));
@@ -141,7 +140,7 @@ export abstract class Instruction {
                 if (!(cellInStruct instanceof PointerToHeapCell)) {
                     throw new Error("Heap Cell in Struct is not os type PointerToHeapCell!");
                 }
-                if (!this.check(state, u, this.deref(state, cellInStruct.value))) {
+                if (!this.check(state, u,  this.deref(state, cellInStruct.value))) {
                     return false;
                 }
             }
