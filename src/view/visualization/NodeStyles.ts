@@ -3,22 +3,44 @@ import {EdgeType, NodeType} from "./VisualizationGraph";
 
 export const DEFAULT_EDGE_STYLE: cytoscape.Css.Edge = {
     width: 5,
-    "curve-style": "unbundled-bezier",
+    "curve-style": "bezier",
     "target-arrow-shape": "triangle",
     "target-arrow-fill": "filled",
     "arrow-scale": 4,
+    "line-color": "#ACACAC",
+    "target-arrow-color": "#ACACAC",
 };
 
 export const EDGE_STYLES: { [T in EdgeType]: cytoscape.Css.Edge } = {
     registerToStack: {
+        "curve-style": "taxi",
+        "taxi-direction": "horizontal",
+        "taxi-turn": e => 300 - (0.8 * Math.abs(e.sourceEndpoint().y)),
         "source-endpoint": "90deg",
         "target-endpoint": "270deg",
+        "line-color": "#4A4A4A",
+        "target-arrow-color": "#4A4A4A",
     },
-    inHeap: {},
-    inStack: {},
-    stackToHeap: {
-        "source-endpoint": "90deg",
+    inHeap: {
+        "curve-style": "taxi",
+        "taxi-direction": "vertical",
+    },
+    inStack: {
+        "curve-style": "unbundled-bezier",
+        // To avoid placing arrows all on the same vertical line,
+        // the distance between the left stack boundary and the highpoint of the arrow depends on
+        // the vertical distance of the connected nodes; arrows that travel farther are placed higher.
+        "control-point-distances": e => [400 + 0.4 * Math.abs(e.sourceEndpoint().y - e.targetEndpoint().y)],
+        "control-point-weights": [0.5],
+        "source-endpoint": "270deg",
         "target-endpoint": "270deg",
+        "line-color": "#828282",
+        "target-arrow-color": "#828282",
+    },
+    stackToHeap: {
+        "curve-style": "taxi",
+        "taxi-direction": "horizontal",
+        "source-endpoint": "90deg",
     },
 };
 

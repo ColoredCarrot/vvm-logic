@@ -54,13 +54,14 @@ function generateLayout(state: State, graph: Graph): FcoseLayoutOptions {
         // Stack:
         ...state.stack.toArray().map((_, i) => ({
             nodeId: "S" + i,
-            position: {x: 1000, y: -100 * i},
+            position: {x: 1200, y: -100 * i},
         })),
     ];
 
     return {
         name: "fcose",
         animate: true,
+        animationDuration: 800,
         randomize: false,
         quality: "proof",
         // alignmentConstraint: alignConstraints,
