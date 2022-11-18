@@ -67,6 +67,13 @@ export class InstructionParser {
 
     static parseInstruction(input: string, labels: readonly Label[]): Instruction {
         input = input.toLowerCase();
+        //Has Label in front?
+        const labelSplit = input.split(":");
+        if (labelSplit.length == 2) {
+            input = labelSplit[1].trim();
+        } else if (labelSplit.length > 2) {
+            return new InvalidInstruction(input);
+        }
 
         const inputSplit: string[] = input.split(" ");
         const instr: string = inputSplit.at(0)!;
@@ -132,6 +139,42 @@ export class InstructionParser {
             } else {
                 returnInstruction =  this.parseSignAndNumberParamInstruction(instr, l0, Number(p1));
             }
+            if (this.isValidSignLabel(p0) && this.isValidLabel(p1)) {
+                const l0 = <SignLabel>labels.find(v => {
+                    return v.text === p0 && v instanceof SignLabel;
+                });
+                const l1 = labels.find(v => {
+                    return v.text === p0;
+                });
+                if (!l0 || !l1) {
+                    //ERROR
+                    return new InvalidInstruction(input);
+                }
+                return this.parseSignAndLabelParamInstruction(instr, l0!, l1!);
+            } else if (this.isValidSignLabel(p0) && this.isValidNumber(p1)) {
+                const l0 = <SignLabel>labels.find(v => {
+                    return v.text === p0 && v instanceof SignLabel;
+                });
+                if (!l0) {
+                    return new InvalidInstruction(input);
+                }
+                return this.parseSignAndNumberParamInstruction(instr, l0, Number(p1));
+            } else if (this.isValidNumber(p0) && this.isValidNumber(p1)) {
+                return this.parseNumberNumberParamInstruction(instr, Number(p0), Number(p1));
+            }
+        } else if (params.length == 3) {
+            const [p0, p1, p2] = params;
+            if (this.isValidSignLabel(p0) && this.isValidContext(p1) && this.isValidLabel(p2)) {
+                const l0 = new SignLabel(-1, p0);
+                const l2 = labels.find(v => v.text === p2);
+                if (l2) {
+                    return this.parseSignStringLabelParamInstruction(instr, l0, p1, l2);
+                } else {
+                    return new InvalidInstruction(input);
+                }
+            }
+        } else if (params.length > 3) {
+            return new InvalidInstruction(input);
         }
         if (returnInstruction instanceof InvalidInstruction && this.isValidNumber(p0) && this.isValidNumber(p1)) {
             returnInstruction =  this.parseNumberNumberParamInstruction(instr, Number(p0), Number(p1));
@@ -255,7 +298,7 @@ export class InstructionParser {
         case "call":
             return new Call(sign);
         case "index":
-            return new Pop(); //TODO: Change to actual Constructor
+            return new Index(sign);
         case "jump":
             return new Jump(sign);
         case "putstruct":
@@ -274,7 +317,7 @@ export class InstructionParser {
         case "fail":
             return new Fail();
         case "getnode":
-            return new InvalidInstruction(input); //TODO: Replace once implemented
+            return new Getnode();
         case "lastmark":
             return new Lastmark();
         case "no":
@@ -298,12 +341,21 @@ export class InstructionParser {
         }
     }
 
+    private static parseSignStringLabelParamInstruction(instr: string, p0: SignLabel, p1: string, p2: Label): Instruction {
+        switch (instr) {
+        case "entry":
+            return new Entry(p0, p1, p2);
+        default:
+            return new InvalidInstruction(instr + " " + p0 + " " + p1 + " " + p2);
+        }
+    }
+
     //</editor-fold>
 
     //<editor-fold> Validation Methods
-    //TODO: Actually Implement with regex??
+
     private static isValidLabel(label: string): boolean {
-        const regex = new RegExp(".");
+        const regex = new RegExp(".+");
         return regex.test(label);
     }
 
@@ -313,13 +365,22 @@ export class InstructionParser {
     }
 
     private static isValidSignLabel(label: string): boolean {
-        const regex = new RegExp(".+/[0-9]+");
-        return regex.test(label);
+        const split = label.split("/");
+        if (split.length != 2) {
+            return false;
+        } else {
+            return this.isValidLabel(split[0]) &&   //First part is valid label
+                new RegExp("[0-9]+").test(split[1]); //Second part is number
+        }
     }
 
     private static isValidNumber(arg: string): boolean {
         const regex = new RegExp("[0-9]+");
         return regex.test(arg);
+    }
+
+    private static isValidContext(arg: string): boolean {
+        return (this.isValidSignLabel(arg) || this.isValidAtomName(arg));
     }
 
     //</editor-fold>

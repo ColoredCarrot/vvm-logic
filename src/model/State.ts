@@ -3,12 +3,14 @@ import {Stack} from "./Stack";
 import {GarbageCollector} from "./GarbageCollector";
 import {Trail} from "./Trail";
 import {Cell} from "./Cell";
+import {TryChain} from "./TryChain";
 
 interface StateVars {
     readonly heap: Heap;
     readonly stack: Stack;
     readonly trail: Trail;
     readonly garbageCollector: GarbageCollector;
+    readonly tryChain: TryChain;
     readonly framePointer: number;
     readonly backtrackPointer: number;
     readonly programCounter: number;
@@ -27,6 +29,7 @@ export class State implements StateVars {
             stack: Stack.empty(),
             trail: Trail.empty(),
             garbageCollector: new GarbageCollector(),
+            tryChain: TryChain.empty(),
             framePointer: -1,
             backtrackPointer: -1,
             programCounter: -1,
@@ -94,6 +97,18 @@ export class State implements StateVars {
 
     get garbageCollector(): GarbageCollector {
         return this.vars.garbageCollector;
+    }
+
+    get tryChain(): TryChain {
+        return this.vars.tryChain;
+    }
+
+    setTryChain(tryChain: TryChain): State {
+        return new State({...this.vars, tryChain: tryChain});
+    }
+
+    modifyTryChain(f: (_: TryChain) => TryChain): State {
+        return this.setTryChain(f(this.tryChain));
     }
 
     get framePointer(): number {
