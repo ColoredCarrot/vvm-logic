@@ -1,20 +1,15 @@
 import React, {useContext} from "react";
-import {ExecutionError} from "../exec/ExecutionError";
-import {step} from "../exec/step";
-import * as ProgramText from "../model/ProgramText";
+import {step} from "./util/Step";
 import {State} from "../model/State";
-import {AppStateContext} from "./AppState";
+import {AppStateContext, ProgramTextContext} from "./AppState";
 import "./ControlPanel.scss";
 import {useGlobalEvent} from "./util/UseGlobalEvent";
 import Immutable from "immutable";
 
-interface ControlPanelProps {
-    programText: ProgramText.Text;
-}
-
-export function ControlPanel({programText}: ControlPanelProps) {
+export function ControlPanel() {
 
     const [appState, setAppState] = useContext(AppStateContext);
+    const {programText, setProgramTextFromExternal} = useContext(ProgramTextContext);
 
     const vmState = appState.vmState.last() ?? State.new();
 
@@ -22,38 +17,16 @@ export function ControlPanel({programText}: ControlPanelProps) {
     const endOfProgram = nextCodeLine === null;
 
     function invokeStep(): void {
-        if (nextCodeLine === null) {
-            return;
+        if (nextCodeLine !== null) {
+            step(nextCodeLine, appState, setAppState);
         }
+    }
 
-        let newState: State | null = null;
-        try {
-            newState = step(vmState.setProgramCounter(nextCodeLine.num - 1), nextCodeLine.instruction);
-
-            for (const oldState of appState.vmState) {
-                if (oldState.equals(newState)) {
-                    throw new ExecutionError(
-                        "Looks like you're stuck in an infinite loop. We stopped the execution for you.",
-                        "Executing this instruction yields a state that has already been seen. "
-                    );
-                }
-            }
-
-            setAppState({
-                ...appState,
-                vmState: appState.vmState.push(newState),
-                lastExecutionError: null,
-            });
-        } catch (ex) {
-            if (!(ex instanceof ExecutionError)) {
-                console.error("Internal error!", ex);
-            }
-            const message = ex instanceof Error ? ex.message : JSON.stringify(ex);
-            setAppState({
-                ...appState,
-                lastExecutionError: (ex instanceof ExecutionError ? ex : message),
-            });
-        }
+    function invokeRun() {
+        setAppState({
+            ...appState,
+            autoStepEnabled: !appState.autoStepEnabled,
+        });
     }
 
     useGlobalEvent("keydown", evt => {
@@ -71,14 +44,26 @@ export function ControlPanel({programText}: ControlPanelProps) {
     const btnStep = <a
         className={"ControlPanel__button" + (endOfProgram && " ControlPanel__button--disabled" || "")}
         onClick={() => invokeStep()}
-    >Step (F8)</a>;
+    >
+        <img src="/icons/nextStep_dark.svg" alt="Step"/>
+    </a>;
+
+    const btnRun = <a
+        className="ControlPanel__button"
+        onClick={() => invokeRun()}
+    >
+        {appState.autoStepEnabled ? <img src="/icons/pause_dark.svg" alt="Stop"/> : <img src="/icons/execute_dark.svg" alt="Run"/>}
+    </a>;
 
     const btnRestart = <a className="ControlPanel__button" onClick={() => {
         setAppState({
+            ...appState,
             vmState: Immutable.List(),
             lastExecutionError: null,
         });
-    }}>Restart</a>;
+    }}>
+        <img src="/icons/restart_dark.svg" alt="Restart"/>
+    </a>;
 
     const btnBackEnabled = !appState.vmState.isEmpty();
     const btnBack = <a
@@ -89,11 +74,39 @@ export function ControlPanel({programText}: ControlPanelProps) {
                 vmState: appState.vmState.pop(),
                 lastExecutionError: null,
             });
-        }}>Back</a>;
+        }}>
+        <img src="/icons/undo_dark.svg" alt="Undo"/>
+    </a>;
+
+    const btnOpen = <a className="ControlPanel__button">
+        <input
+            id="open-file-input"
+            type="file"
+            accept=".txt,.wim"
+            onChange={evt => {
+                evt.preventDefault();
+                evt.stopPropagation();
+                const file = evt.target.files?.[0];
+                if (file) {
+                    const fileReader = new FileReader();
+                    fileReader.onload = (loadEvt => {
+                        const src = loadEvt.target!.result as string;
+                        setProgramTextFromExternal(src);
+                    });
+                    fileReader.readAsText(file);
+                }
+            }}
+        />
+        <label htmlFor="open-file-input">
+            <img src="/icons/menu-open_dark.svg" alt="Open..."/>
+        </label>
+    </a>;
 
     return <div className="ControlPanel">
+        {btnOpen}
+        {btnRun}
         {btnStep}
-        {btnRestart}
         {btnBack}
+        {btnRestart}
     </div>;
 }

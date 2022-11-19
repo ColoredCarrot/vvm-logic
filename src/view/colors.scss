@@ -11,7 +11,10 @@ $text-highlight: #e7db52;
 $text-code: #ffffffde;
 $text-error: #cf6679;
 
-$btn: #03dac6;
+$btn-group: $background-code;
+
+$btn: $background-code;
+$btn-highlighted: #4f4f4f;
 $btn-text: white;
-$btn-disabled: #01695e;
+$btn-disabled: $btn;
 $btn-disabled-text: #ffffff26;
