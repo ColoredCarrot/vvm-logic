@@ -2,37 +2,27 @@ import React, {useContext, useState} from "react";
 import {ExecutionError} from "../exec/ExecutionError";
 import {InvalidInstruction} from "../exec/instructions/InvalidInstruction";
 import * as ProgramText from "../model/ProgramText";
-import {CodeLine, LabelLine} from "../model/ProgramText";
+import {Caret, CodeLine, LabelLine} from "../model/ProgramText";
 import {State} from "../model/State";
-import {AppStateContext} from "./AppState";
+import {AppStateContext, ProgramTextContext, ProgramTextFacade} from "./AppState";
 import "./ProgramTextEditor.scss";
 import {useGlobalEvent} from "./util/UseGlobalEvent";
 
 interface ProgramTextEditorProps {
-
     vmState: State;
-
-    programText: ProgramText.Text;
-
-    setProgramText(rawLines: string[]): void;
+    caret: Caret;
+    setCaret(newCaret: Caret): void;
 }
 
-type Cursor = readonly [number, number];
-
-export function ProgramTextEditor({vmState, programText, setProgramText}: ProgramTextEditorProps) {
-
-    const [cursor, setCursor] = useState([0, 0] as Cursor);
+export function ProgramTextEditor({vmState, caret, setCaret}: ProgramTextEditorProps) {
 
     const [isDraggingInto, setIsDraggingInto] = useState(false);
 
-    // Set up global listeners
-    useGlobalEvent("keydown", evt => handleKeyDown(evt, cursor, setCursor, programText, setProgramText));
-    useGlobalEvent("paste", evt => handlePaste(evt));
+    const programTextFacade = useContext(ProgramTextContext);
 
-    function setProgramTextFromExternalSource(text: string) {
-        setProgramText(text.split("\n").map(ln => ln.replaceAll(/[^0-9a-z/: ]/ig, "")));
-        setCursor([0, 0]);
-    }
+    // Set up global listeners
+    useGlobalEvent("keydown", evt => handleKeyDown(evt, caret, setCaret, programTextFacade));
+    useGlobalEvent("paste", evt => handlePaste(evt));
 
     function handlePaste(evt: ClipboardEvent): void {
         const toPaste = evt.clipboardData?.getData("text/plain");
@@ -41,7 +31,7 @@ export function ProgramTextEditor({vmState, programText, setProgramText}: Progra
         }
 
         // TODO: Don't replace, but insert
-        setProgramTextFromExternalSource(toPaste);
+        programTextFacade.setProgramTextFromExternal(toPaste);
     }
 
     function handleDrop(evt: React.DragEvent): void {
@@ -55,7 +45,7 @@ export function ProgramTextEditor({vmState, programText, setProgramText}: Progra
 
         file.text().then(
             text => {
-                setProgramTextFromExternalSource(text);
+                programTextFacade.setProgramTextFromExternal(text);
                 setIsDraggingInto(false);
             },
             err => {
@@ -69,16 +59,16 @@ export function ProgramTextEditor({vmState, programText, setProgramText}: Progra
         className={"ProgramTextEditor" + (isDraggingInto ? " ProgramTextEditor--dragging-into" : "")}
         onDrop={evt => handleDrop(evt)}
         onDragOver={evt => evt.preventDefault()}
-        onDragEnter={evt => setIsDraggingInto(true)}
-        onDragLeave={evt => setIsDraggingInto(false)}
+        onDragEnter={_ => setIsDraggingInto(true)}
+        onDragLeave={_ => setIsDraggingInto(false)}
     >
-        {programText.lines.map(line =>
+        {programTextFacade.programText.lines.map(line =>
             <ProgramTextLine
                 key={line.num}
-                text={programText}
+                text={programTextFacade.programText}
                 line={line}
-                cursor={cursor}
-                setCursor={setCursor}
+                caret={caret}
+                setCaret={setCaret}
                 vmState={vmState}
             />,
         )}
@@ -88,12 +78,12 @@ export function ProgramTextEditor({vmState, programText, setProgramText}: Progra
 interface ProgramTextLineProps {
     text: ProgramText.Text;
     line: ProgramText.Line;
-    cursor: Cursor;
-    setCursor(_: Cursor): void;
+    caret: Caret;
+    setCaret(_: Caret): void;
     vmState: State;
 }
 
-function ProgramTextLine({text, line, cursor, setCursor, vmState}: ProgramTextLineProps) {
+function ProgramTextLine({text, line, caret, setCaret, vmState}: ProgramTextLineProps) {
     const NON_BREAKING_SPACE = "\u00A0";
     const ZERO_WIDTH_SPACE = "\u200B";
 
@@ -120,15 +110,15 @@ function ProgramTextLine({text, line, cursor, setCursor, vmState}: ProgramTextLi
     }
 
     let innerCssClass = "ProgramTextEditor__Line__Inner";
-    if (cursor[0] === line.num) {
+    if (caret[0] === line.num) {
         innerCssClass += " ProgramTextEditor__Line__Inner--caret";
     }
 
-    if (cursor[0] === line.num) {
+    if (caret[0] === line.num) {
         // Caret is on our line
         content = <span>
             <span style={{zIndex: 10, position: "absolute"}}>
-                <span>{NON_BREAKING_SPACE.repeat(cursor[1])}</span>
+                <span>{NON_BREAKING_SPACE.repeat(caret[1])}</span>
                 <span className="ProgramTextEditor__Caret"></span>
             </span>
             <span>{raw}</span>
@@ -148,7 +138,7 @@ function ProgramTextLine({text, line, cursor, setCursor, vmState}: ProgramTextLi
                 const charWidth = lineContentElemBounds.width / line.raw.length;
                 const clickedChar = Math.round(clickedX / charWidth);
 
-                setCursor([line.num, Math.max(0, Math.min(line.raw.length, clickedChar))]);
+                setCaret([line.num, Math.max(0, Math.min(line.raw.length, clickedChar))]);
             }}>
                 {content}
             </span>
@@ -176,17 +166,16 @@ function ProgramTextLine({text, line, cursor, setCursor, vmState}: ProgramTextLi
 
 function handleKeyDown(
     evt: KeyboardEvent,
-    cursor: Cursor,
-    setCursor: (_: Cursor) => void,
-    programText: ProgramText.Text,
-    setProgramText: (rawLines: string[]) => void,
+    caret: Caret,
+    setCaret: (_: Caret) => void,
+    {programText, setProgramText}: ProgramTextFacade,
 ) {
     // We don't handle any keyboard commands (yet)
     if (evt.altKey || evt.ctrlKey || evt.metaKey) {
         return;
     }
 
-    const [row, col] = cursor;
+    const [row, col] = caret;
 
     // Collect some values that we'll likely use further down
     const untouchedLinesBefore = programText.lines.slice(0, row).map(l => l.raw);
@@ -198,7 +187,7 @@ function handleKeyDown(
     case "ArrowRight":
     case "ArrowUp":
     case "ArrowDown": {
-        setCursor(moveCursor(cursor, evt.key, programText.rawLines));
+        setCaret(moveCaret(caret, evt.key, programText.rawLines));
         break;
     }
 
@@ -211,7 +200,7 @@ function handleKeyDown(
             ...untouchedLinesAfter,
         ];
         setProgramText(updatedLines);
-        setCursor([row + 1, 0]);
+        setCaret([row + 1, 0]);
 
         break;
     }
@@ -231,7 +220,7 @@ function handleKeyDown(
             ];
 
             setProgramText(updatedLines);
-            setCursor([row - 1, programText.rawLines[row - 1].length]);
+            setCaret([row - 1, programText.rawLines[row - 1].length]);
 
             break;
         }
@@ -240,7 +229,7 @@ function handleKeyDown(
         const updatedLines = untouchedLinesBefore.concat(updatedLine, untouchedLinesAfter);
 
         setProgramText(updatedLines);
-        setCursor(moveCursor(cursor, "ArrowLeft", updatedLines));
+        setCaret(moveCaret(caret, "ArrowLeft", updatedLines));
 
         break;
     }
@@ -260,7 +249,7 @@ function handleKeyDown(
             ];
 
             setProgramText(updatedLines);
-            // cursor isn't moved
+            // caret isn't moved
 
             break;
         }
@@ -268,7 +257,7 @@ function handleKeyDown(
         const updatedLine = touchedLine.slice(0, col) + touchedLine.slice(col + 1);
         const updatedLines = untouchedLinesBefore.concat(updatedLine, untouchedLinesAfter);
         setProgramText(updatedLines);
-        // cursor isn't moved
+        // caret isn't moved
 
         break;
     }
@@ -292,7 +281,7 @@ function handleKeyDown(
             const updatedLines = untouchedLinesBefore.concat(updatedLine, untouchedLinesAfter);
 
             setProgramText(updatedLines);
-            setCursor(moveCursor(cursor, "ArrowRight", updatedLines));
+            setCaret(moveCaret(caret, "ArrowRight", updatedLines));
 
             break;
         }
@@ -306,7 +295,7 @@ function handleKeyDown(
     evt.stopPropagation();
 }
 
-function moveCursor([row, col]: Cursor, direction: "ArrowLeft" | "ArrowRight" | "ArrowUp" | "ArrowDown", rawLines: readonly string[]): Cursor {
+function moveCaret([row, col]: Caret, direction: "ArrowLeft" | "ArrowRight" | "ArrowUp" | "ArrowDown", rawLines: readonly string[]): Caret {
     switch (direction) {
     case "ArrowLeft":
         if (col === 0) {

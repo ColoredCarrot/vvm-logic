@@ -94,3 +94,5 @@ export function parseProgramText(rawLines: readonly string[]): Text {
             ),
     );
 }
+
+export type Caret = readonly [number, number];
