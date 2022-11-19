@@ -12,8 +12,8 @@ export class Setbtp extends Instruction {
     step(state: State): State {
 
         return state.setStack(state.stack
-            .set(state.framePointer - 2, new ValueCell(state.heap.getHeapPointer()))
-            .set(state.framePointer - 3, new ValueCell(state.trail.trailPointer))
+            .set(state.framePointer - 2, new ValueCell(state.heap.getHeapPointer(), "HP"))
+            .set(state.framePointer - 3, new ValueCell(state.trail.trailPointer, "TP"))
             .set(state.framePointer - 4, new PointerToStackCell(state.backtrackPointer)))
             .setBacktrackPointer(state.framePointer);
 
