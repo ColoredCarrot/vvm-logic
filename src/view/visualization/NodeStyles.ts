@@ -1,6 +1,7 @@
 import cytoscape from "cytoscape";
 import {EdgeType, NodeType} from "./VisualizationGraph";
 
+export const NODE_WIDTH = 600;
 export const NODE_PADDING = 30;
 export const NODE_BORDER = 8;
 export const NODE_HEIGHT = 100;
@@ -61,14 +62,14 @@ export const EDGE_STYLES: { [T in EdgeType]: cytoscape.Css.Edge } = {
 };
 
 export const DEFAULT_NODE_STYLE = {
-    width: 600,
-    height: 100,
+    width: NODE_WIDTH,
+    height: NODE_HEIGHT,
     backgroundColor: "#bb86fc",
     color: "black",
 
     shape: "roundrectangle",
     "text-valign": "center",
-    "font-size": 100,
+    "font-size": NODE_HEIGHT,
     "font-family": "DIN Alternate",
     "font-style": "normal",
     "label": "data(label)",
