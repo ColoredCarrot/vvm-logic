@@ -14,6 +14,7 @@ export const NodeTypes = [
     "heap-atom",
     "heap-struct",
     "heap-variable",
+    "heap-unbounded-variable",
     "register-value",
     "trail-value",
     "stack-uninitialized",
@@ -33,6 +34,7 @@ export const EdgeTypes = [
     "stackToHeap",
     "inStack",
     "inHeap",
+    "loopInHeap",
 ] as const;
 
 export type EdgeType = typeof EdgeTypes[number];
@@ -104,7 +106,7 @@ export function createGraph(state: State): Graph {
 
         if (stackCell instanceof UninitializedCell) {
             nodes.push({
-                data: {id: "S" + i, label: "uninit S[" + i + "]", type: "stack-uninitialized"},
+                data: {id: "S" + i, label: "S[" + i + "]", type: "stack-uninitialized"},
                 grabbable: false,
                 pannable: true,
             });
@@ -158,13 +160,14 @@ export function createGraph(state: State): Graph {
                 data: {id: "H" + i, label: "A: " + heapCell.value, type: "heap-atom"},
             });
         } else if (heapCell instanceof VariableCell) {
+            const isUnbounded = heapCell.value === i;
             nodes.push({
-                data: {id: "H" + i, label: heapCell.tag + ": " + heapCell.value, type: "heap-variable"},
+                data: {id: "H" + i, label: heapCell.tag + ": " + heapCell.value, type: isUnbounded ? "heap-unbounded-variable" : "heap-variable"},
             });
             edges.push({
                 from: {kind: "heap", address: i},
                 to: {kind: "heap", address: heapCell.value},
-                type: "inHeap",
+                type: isUnbounded ? "loopInHeap" : "inHeap",
             });
         } else if (heapCell instanceof StructCell) {
             nodes.push({

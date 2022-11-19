@@ -6,7 +6,7 @@ import React, {useRef} from "react";
 import CytoscapeComponent from "react-cytoscapejs";
 import "springy/springy";
 import {State} from "../../model/State";
-import {STYLESHEET} from "./NodeStyles";
+import {STYLESHEET, TOTAL_NODE_HEIGHT} from "./NodeStyles";
 import "./Visualization.scss";
 import {createGraph, Graph} from "./VisualizationGraph";
 
@@ -49,12 +49,12 @@ function generateLayout(state: State, graph: Graph): FcoseLayoutOptions {
         // Registers:
         ...regs.map((reg, i) => ({
             nodeId: reg,
-            position: {x: 0, y: -100 * i},
+            position: {x: 0, y: -TOTAL_NODE_HEIGHT * i},
         })),
         // Stack:
         ...state.stack.toArray().map((_, i) => ({
             nodeId: "S" + i,
-            position: {x: 1200, y: -100 * i},
+            position: {x: 1400, y: -TOTAL_NODE_HEIGHT * i},
         })),
     ];
 

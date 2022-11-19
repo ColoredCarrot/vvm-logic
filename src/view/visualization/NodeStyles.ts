@@ -1,6 +1,11 @@
 import cytoscape from "cytoscape";
 import {EdgeType, NodeType} from "./VisualizationGraph";
 
+export const NODE_PADDING = 30;
+export const NODE_BORDER = 8;
+export const NODE_HEIGHT = 100;
+export const TOTAL_NODE_HEIGHT = NODE_HEIGHT + 2 * NODE_PADDING + NODE_BORDER; // border does NOT need to be doubled
+
 export const DEFAULT_EDGE_STYLE: cytoscape.Css.Edge = {
     width: 5,
     "curve-style": "bezier",
@@ -15,7 +20,7 @@ export const EDGE_STYLES: { [T in EdgeType]: cytoscape.Css.Edge } = {
     registerToStack: {
         "curve-style": "taxi",
         "taxi-direction": "horizontal",
-        "taxi-turn": e => 300 - (0.8 * Math.abs(e.sourceEndpoint().y)),
+        "taxi-turn": e => 500 - (0.8 * Math.abs(e.sourceEndpoint().y)),
         "source-endpoint": "90deg",
         "target-endpoint": "270deg",
         "line-color": "#4A4A4A",
@@ -24,6 +29,17 @@ export const EDGE_STYLES: { [T in EdgeType]: cytoscape.Css.Edge } = {
     inHeap: {
         "curve-style": "taxi",
         "taxi-direction": "vertical",
+    },
+    loopInHeap: {
+        // FIXME
+        "curve-style": "bezier",
+        "loop-direction": "45deg",
+        "loop-sweep": "90deg",
+        // "curve-style": "unbundled-bezier",
+        // "control-point-distances": [300, 700, 1000],
+        // "control-point-weights": [0.25, 0.5, 0.75],
+        // "source-endpoint": "90deg",
+        // "target-endpoint": "180deg",
     },
     inStack: {
         "curve-style": "unbundled-bezier",
@@ -47,7 +63,8 @@ export const EDGE_STYLES: { [T in EdgeType]: cytoscape.Css.Edge } = {
 export const DEFAULT_NODE_STYLE = {
     width: 600,
     height: 100,
-    backgroundColor: "cadetblue",
+    backgroundColor: "#bb86fc",
+    color: "black",
 
     shape: "roundrectangle",
     "text-valign": "center",
@@ -55,26 +72,36 @@ export const DEFAULT_NODE_STYLE = {
     "font-family": "DIN Alternate",
     "font-style": "normal",
     "label": "data(label)",
+    padding: NODE_PADDING,
+    "border-width": NODE_BORDER,
+    "border-color": "#121212",
 } as const;
 
 export const NODE_STYLES: { [T in NodeType]: cytoscape.Css.Node } = {
     "heap-atom": {},
     "heap-pointerToHeap": {
-        backgroundColor: "#0074D9",
+        backgroundColor: "#3700b3",
+        color: "white",
     },
     "heap-struct": {},
     "heap-uninitialized": {
         backgroundColor: "#03dac6",
-        //labelColor : "grey",
     },
-    "heap-variable": {},
+    "heap-variable": {
+        backgroundColor: "#5eaa50",
+    },
+    "heap-unbounded-variable": {
+        backgroundColor: "#1E5128",
+        color: "white",
+    },
     "register-value": {},
     "stack-pointerToStack": {},
     "stack-uninitialized": {
-        backgroundColor: "#03dac6",
+        backgroundColor: "#5c5c5c",
+        color: "white",
     },
     "stack-value": {
-        backgroundColor: "#ecbfb0",
+        backgroundColor: "#e7ab79",
     },
     "trail-value": {},
 };
