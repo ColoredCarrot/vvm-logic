@@ -4,7 +4,6 @@ import cytoscapeFcose from "cytoscape-fcose";
 import fcose, {FcoseLayoutOptions} from "cytoscape-fcose";
 import React, {useRef} from "react";
 import CytoscapeComponent from "react-cytoscapejs";
-import "springy/springy";
 import {State} from "../../model/State";
 import {STYLESHEET, TOTAL_NODE_HEIGHT} from "./NodeStyles";
 import "./Visualization.scss";
