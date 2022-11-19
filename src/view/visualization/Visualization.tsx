@@ -4,7 +4,6 @@ import Cytoscape from "cytoscape";
 import cytoscape from "cytoscape";
 import CytoscapeComponent from "react-cytoscapejs";
 import "./Visualization.scss";
-import "springy/springy";
 import fcose from "cytoscape-fcose";
 import {UninitializedCell} from "../../model/UninitializedCell";
 import {ValueCell} from "../../model/ValueCell";
