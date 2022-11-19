@@ -307,7 +307,8 @@ var prol = (function () {
                 lstack.length = lstack.length - n;
             }
 
-            _token_stack:
+            //FIXME: error
+            //_token_stack:
                 var lex = function () {
                     var token;
                     token = lexer.lex() || EOF;

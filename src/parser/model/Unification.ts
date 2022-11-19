@@ -5,6 +5,7 @@ export class Unification{
 
     variable: Variable;
     term: Term;
+    kind: string = "Unification";
 
     constructor(variable: Variable, term: Term) {
         this.variable = variable;
