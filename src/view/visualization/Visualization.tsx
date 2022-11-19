@@ -39,6 +39,8 @@ function generateLayout(state: State, cy: React.MutableRefObject<Cytoscape.Core 
     const stack_x = 20;
     const stack_y_bottom = 0;
     const stack_y_step = 10;
+    cy.current?.$id("S0_DUMMY").position({y: stack_y_bottom, x: stack_x}).lock();
+
     if (state.stack.size > 0) {
         for (let i = 0; i < state.stack.size; i++) {
             cy.current?.$id("S" + i).position({y: stack_y_bottom - i * stack_y_step, x: stack_x}).lock();
@@ -143,6 +145,10 @@ function VisualizationGraph({state}: VisualizationProps) {
             },
         });
     }
+
+    nodes.push({
+        data: {id: "S0_DUMMY", label: "SHOULD NOT BE VISIBLE", type: "invisible"},
+    });
 
     // STACK
     for (let i = 0; i < state.stack.size; ++i) {
@@ -299,6 +305,12 @@ function VisualizationGraph({state}: VisualizationProps) {
 
                     backgroundColor: "#549254",
 
+                },
+            },
+            {
+                selector: "[type= 'invisible']",
+                style: {
+                    visibility: "hidden",
                 },
             },
 
