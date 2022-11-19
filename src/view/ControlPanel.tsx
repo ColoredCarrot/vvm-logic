@@ -42,7 +42,7 @@ export function ControlPanel() {
     });
 
     const btnStep = <a
-        className={"ControlPanel__button" + (endOfProgram && " ControlPanel__button--disabled" || "")}
+        className={"ControlPanel__button" + (endOfProgram ? " ControlPanel__button--disabled" : "")}
         onClick={() => invokeStep()}
     >
         <img src="/icons/nextStep_dark.svg" alt="Step"/>
@@ -86,8 +86,8 @@ export function ControlPanel() {
             onChange={evt => {
                 evt.preventDefault();
                 evt.stopPropagation();
-                const file = evt.target.files?.[0];
-                if (file) {
+                const file = evt.target.files?.[0] ?? null;
+                if (file !== null) {
                     const fileReader = new FileReader();
                     fileReader.onload = (loadEvt => {
                         const src = loadEvt.target!.result as string;

@@ -4,7 +4,7 @@ import Cytoscape from "cytoscape";
 import cytoscape from "cytoscape";
 import CytoscapeComponent from "react-cytoscapejs";
 import "./Visualization.scss";
-import fcose from "cytoscape-fcose";
+import fcose, {FcoseLayoutOptions} from "cytoscape-fcose";
 import {UninitializedCell} from "../../model/UninitializedCell";
 import {ValueCell} from "../../model/ValueCell";
 import {PointerToStackCell} from "../../model/PointerToStackCell";
@@ -33,7 +33,7 @@ export function Visualization({prevState, state}: VisualizationProps) {
     </div>;
 }
 
-function generateLayout(state: State, cy: React.MutableRefObject<Cytoscape.Core | undefined>): cytoscape.LayoutOptions {
+function generateLayout(state: State, cy: React.MutableRefObject<Cytoscape.Core | undefined>): FcoseLayoutOptions {
     cytoscape.use(fcose);
 
     const stack_x = 20;
@@ -58,8 +58,8 @@ function generateLayout(state: State, cy: React.MutableRefObject<Cytoscape.Core 
     const regs_x = -30;
     const regs_y_bottom = -50;
     const regs_y_step = stack_y_step;
-    const registers = cy.current?.elements("[type='register-value']");
-    if (registers) {
+    const registers = cy.current?.elements("[type='register-value']") ?? null;
+    if (registers !== null) {
         registers.forEach((ele, i) => {
             ele.position({x: regs_x, y: regs_y_bottom - i * regs_y_step}).lock();
         });
@@ -87,7 +87,6 @@ function generateLayout(state: State, cy: React.MutableRefObject<Cytoscape.Core 
 
     return {
         name: "fcose",
-        // @ts-ignore
         animate: true,
         randomize: false,
         // alignmentConstraint: alignmentJson,
@@ -121,7 +120,7 @@ function VisualizationGraph({state}: VisualizationProps) {
     nodes.push({
         data: {id: "FP", label: framePointer, type: "register-value"},
     });
-    if (framePointer != -1) {
+    if (framePointer !== -1) {
         edges.push({
             data: {
                 id: "FP",
@@ -134,7 +133,7 @@ function VisualizationGraph({state}: VisualizationProps) {
     nodes.push({
         data: {id: "BP", label: backtrackPointer, type: "register-value"},
     });
-    if (backtrackPointer != -1) {
+    if (backtrackPointer !== -1) {
         edges.push({
             data: {
                 id: "BP",
@@ -183,56 +182,48 @@ function VisualizationGraph({state}: VisualizationProps) {
         }
     }
 
-    for (const i of state.heap.getKeySet()) {
-        if (state.heap.get(i)) {
-
-            const heapCell = state.heap.get(i);
-
-            if (heapCell instanceof UninitializedCell) {
-                nodes.push({data: {id: ("H" + i), label: "H[" + i + "]", type: "heap-uninitialized"}});
-            } else if (heapCell instanceof AtomCell) {
-                nodes.push({
-                    data: {id: ("H" + i), label: "A: " + heapCell.value, type: "heap-atom"},
-                });
-            }
-            else if (heapCell instanceof VariableCell) {
-                nodes.push({
-                    data: {id: ("H" + i), label: heapCell.tag + ": " + heapCell.value, type: "heap-variable"},
-                });
+    for (const [addr, heapCell] of state.heap) {
+        if (heapCell instanceof UninitializedCell) {
+            nodes.push({data: {id: ("H" + addr), label: "H[" + addr + "]", type: "heap-uninitialized"}});
+        } else if (heapCell instanceof AtomCell) {
+            nodes.push({
+                data: {id: ("H" + addr), label: "A: " + heapCell.value, type: "heap-atom"},
+            });
+        } else if (heapCell instanceof VariableCell) {
+            nodes.push({
+                data: {id: ("H" + addr), label: heapCell.tag + ": " + heapCell.value, type: "heap-variable"},
+            });
+            edges.push({
+                data: {
+                    id: "HP" + addr,
+                    source: "H" + addr,
+                    target: "H" + heapCell.value,
+                },
+            });
+        } else if (heapCell instanceof StructCell) {
+            nodes.push({
+                data: {id: "H" + addr, label: "S: " + heapCell.label, type: "heap-struct"},
+            });
+            for (let j = 0; j < heapCell.size; j++) {
                 edges.push({
                     data: {
-                        id: "HP" + i,
-                        source: "H" + i,
-                        target: "H" + heapCell.value,
+                        id: "HP" + addr,
+                        source: "H" + (addr + j),
+                        target: "H" + (addr + j + 1),
                     },
                 });
             }
-            else if (heapCell instanceof StructCell) {
-                nodes.push({
-                    data: {id: "H" + i, label: "S: " + heapCell.label, type: "heap-struct"},
-                });
-                for (let j = 0; j < heapCell.size; j++) {
-                    edges.push({
-                        data: {
-                            id: "HP" + i,
-                            source: "H" + (i + j),
-                            target: "H" + (i + j + 1),
-                        },
-                    });
-                }
-            }
-            else if (heapCell instanceof PointerToHeapCell) {
-                nodes.push({
-                    data: {id: "H" + i, label: "[" + heapCell.value + "]", type: "heap-pointerToHeap"},
-                });
-                edges.push({
-                    data: {
-                        id: "HP" + i,
-                        source: "H" + i,
-                        target: "H" + heapCell.value,
-                    },
-                });
-            }
+        } else if (heapCell instanceof PointerToHeapCell) {
+            nodes.push({
+                data: {id: "H" + addr, label: "[" + heapCell.value + "]", type: "heap-pointerToHeap"},
+            });
+            edges.push({
+                data: {
+                    id: "HP" + addr,
+                    source: "H" + addr,
+                    target: "H" + heapCell.value,
+                },
+            });
         }
     }
 

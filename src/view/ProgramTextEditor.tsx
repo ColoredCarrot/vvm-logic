@@ -25,8 +25,8 @@ export function ProgramTextEditor({vmState, caret, setCaret}: ProgramTextEditorP
     useGlobalEvent("paste", evt => handlePaste(evt));
 
     function handlePaste(evt: ClipboardEvent): void {
-        const toPaste = evt.clipboardData?.getData("text/plain");
-        if (!toPaste) {
+        const toPaste = evt.clipboardData?.getData("text/plain") ?? null;
+        if (toPaste === null || toPaste.length === 0) {
             return;
         }
 
@@ -36,7 +36,7 @@ export function ProgramTextEditor({vmState, caret, setCaret}: ProgramTextEditorP
 
     function handleDrop(evt: React.DragEvent): void {
         const file = evt.dataTransfer.files.item(0);
-        if (!file) {
+        if (file === null) {
             return;
         }
 

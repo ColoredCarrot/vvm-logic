@@ -72,7 +72,7 @@ export class InstructionParser {
         input = input.toLowerCase();
         //Has Label in front?
         const labelSplit = input.split(":");
-        if (labelSplit.length == 2) {
+        if (labelSplit.length === 2) {
             input = labelSplit[1].trim();
         } else if (labelSplit.length > 2) {
             return new InvalidInstruction(input);
@@ -83,23 +83,23 @@ export class InstructionParser {
 
         const params: string[] = inputSplit.slice(1);
 
-        if (params.length == 0) {
+        if (params.length === 0) {
             return this.parseNoParamInstruction(instr);
-        } else if (params.length == 1) {
+        } else if (params.length === 1) {
             const param: string = params.pop()!;
 
             if (this.isValidSignLabel(param)) {
                 const signLabel = labels.find(v => {
                     return v.text === param;
                 });
-                if (!signLabel) {
+                if (signLabel === undefined) {
                     //ERROR
                     return new InvalidInstruction(input);
                 }
                 return this.parseSignParamInstruction(instr, <SignLabel>signLabel);
-            } else if (this.isValidLabel(param) && labels.find(v => {
+            } else if (this.isValidLabel(param) && (labels.find(v => {
                 return v.text === param;
-            })) {
+            }) !== undefined)) {
                 const l1: Label = labels.find(v => {
                     return v.text === param;
                 })!;
@@ -109,39 +109,38 @@ export class InstructionParser {
             } else if (this.isValidAtomName(param)) {
                 return this.parseStringParamInstructor(instr, param);
             }
-        } else if (params.length == 2) {
+        } else if (params.length === 2) {
             const p1 = params.pop()!;
             const p0 = params.pop()!;
 
             if (this.isValidSignLabel(p0) && this.isValidLabel(p1)) {
-                const l0 = <SignLabel>labels.find(v => {
+                const l0 = <SignLabel | undefined>labels.find(v => {
                     return v.text === p0 && v instanceof SignLabel;
                 });
                 const l1 = labels.find(v => {
                     return v.text === p0;
                 });
-                if (!l0 || !l1) {
-                    //ERROR
+                if (l0 === undefined || l1 === undefined) {
                     return new InvalidInstruction(input);
                 }
                 return this.parseSignAndLabelParamInstruction(instr, l0!, l1!);
             } else if (this.isValidSignLabel(p0) && this.isValidNumber(p1)) {
-                const l0 = <SignLabel>labels.find(v => {
+                const l0 = <SignLabel | undefined>labels.find(v => {
                     return v.text === p0 && v instanceof SignLabel;
                 });
-                if (!l0) {
+                if (l0 === undefined) {
                     return new InvalidInstruction(input);
                 }
                 return this.parseSignAndNumberParamInstruction(instr, l0, Number(p1));
             } else if (this.isValidNumber(p0) && this.isValidNumber(p1)) {
                 return this.parseNumberNumberParamInstruction(instr, Number(p0), Number(p1));
             }
-        } else if (params.length == 3) {
+        } else if (params.length === 3) {
             const [p0, p1, p2] = params;
             if (this.isValidSignLabel(p0) && this.isValidContext(p1) && this.isValidLabel(p2)) {
                 const l0 = new SignLabel(-1, p0);
                 const l2 = labels.find(v => v.text === p2);
-                if (l2) {
+                if (l2 !== undefined) {
                     return this.parseSignStringLabelParamInstruction(instr, l0, p1, l2);
                 } else {
                     return new InvalidInstruction(input);
@@ -339,7 +338,7 @@ export class InstructionParser {
 
     private static isValidSignLabel(label: string): boolean {
         const split = label.split("/");
-        if (split.length != 2) {
+        if (split.length !== 2) {
             return false;
         } else {
             return this.isValidLabel(split[0]) &&   //First part is valid label

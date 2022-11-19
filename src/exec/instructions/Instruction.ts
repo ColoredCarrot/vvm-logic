@@ -152,7 +152,7 @@ export abstract class Instruction {
     public static deref(state: State, v: number): number {
         const other: Cell = state.heap.get(v)!;
 
-        if (other instanceof VariableCell && other.value != v) {
+        if (other instanceof VariableCell && other.value !== v) {
             return this.deref(state, other.value);
         } else {
             return v;
