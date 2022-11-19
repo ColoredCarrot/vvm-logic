@@ -20,8 +20,8 @@ test("Instruction: MARK", () => {
             // 4 new uninitialized cells
             new UninitializedCell(), new UninitializedCell(), new UninitializedCell(), new UninitializedCell(),
             // 2 more with concrete values
-            new ValueCell(10),
-            new PointerToStackCell(4),
+            new PointerToStackCell(10),
+            new ValueCell(4, "PC"),
         ))
         .setFramePointer(10);
 
