@@ -7,6 +7,7 @@ import {Literal} from "./model/Literal";
 import {Goal} from "./model/Goal";
 import {Unification} from "./model/Unification";
 import {Clause} from "./model/Clause";
+import {Query} from "./model/Query";
 
 
 export class CodeGenerator {
@@ -58,16 +59,29 @@ export class CodeGenerator {
 
             return `mark B` + "\n" + result.join("\n") + "\n" + `call ${literal.name}/${k}` + "\nB:\n";
 
+
         case "Unification":
-            // FIXME: seite 129
-            let unification = goal.value as Unification;
-            return `putref p(${unification.variable.name})` + "\n" + this.code_A(unification.term, rho) + "\n"
+            // FIXME: seite 129, pho
+
+            /*if Variable uninitialisiert:
+
+            let unification_notinit = goal.value as Unification;
+            return `putvar p(${unification.variable.name})` + "\n" + this.code_A(unification.term, rho) + "\n"
+                + "bind";
+
+             */
+            //if Variable initialisiert:
+
+            let unification_init = goal.value as Unification;
+            return `putref p(${unification_init.variable.name})` + "\n" + this.code_A(unification_init.term, rho) + "\n"
                 + "unify";
 
         default:
             throw `Error while parsing: Unknown goal kind: ${goal.value.kind}`;
         }
     }
+
+    //TODO: optimierte Unifikationsbehandloung
 
     private code_U(unification: Unification, rho: void): string {
         //FIXME:
@@ -85,10 +99,11 @@ export class CodeGenerator {
 
     }
 
-    private code_P(clauses: Clause[], rho: void): string {
-        if(clauses.length == 1){
-            return this.code_C(clauses[0], rho);
-        }
-        return ""
+    private code_P(clauses: Clause[], query: Query,  rho: void): string {
+
+        //FIXME
+        let result1: string[] = [];
+        return `init A` + "\n" + `pushenv d`+ "\n" + result1.join("\n") + "\n" + "halt d" + "\n" + "A: no" ;
+
     }
 }
