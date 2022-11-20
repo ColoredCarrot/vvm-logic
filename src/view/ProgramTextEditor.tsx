@@ -2,26 +2,26 @@ import React, {useContext, useEffect, useState} from "react";
 import {ExecutionError} from "../exec/ExecutionError";
 import {InvalidInstruction} from "../exec/instructions/InvalidInstruction";
 import * as ProgramText from "../model/ProgramText";
-import {Caret, CodeLine, LabelLine} from "../model/ProgramText";
+import {CodeLine, LabelLine} from "../model/ProgramText";
 import {State} from "../model/State";
+import {Caret, MovementMode, TextEditor} from "../model/text/TextEditor";
 import {AppStateContext, ProgramTextContext, ProgramTextFacade} from "./AppState";
 import "./ProgramTextEditor.scss";
 import {useGlobalEvent} from "./util/UseGlobalEvent";
 
 interface ProgramTextEditorProps {
     vmState: State;
-    caret: Caret;
-    setCaret(newCaret: Caret): void;
 }
 
-export function ProgramTextEditor({vmState, caret, setCaret}: ProgramTextEditorProps) {
+export function ProgramTextEditor({vmState}: ProgramTextEditorProps) {
 
     const [isDraggingInto, setIsDraggingInto] = useState(false);
 
     const programTextFacade = useContext(ProgramTextContext);
+    const {programText, editor, setEditor} = programTextFacade;
 
     // Set up global listeners
-    useGlobalEvent("keydown", evt => handleKeyDown(evt, caret, setCaret, programTextFacade));
+    useGlobalEvent("keydown", evt => handleKeyDown(evt, programTextFacade));
     useGlobalEvent("paste", evt => handlePaste(evt));
 
     function handlePaste(evt: ClipboardEvent): void {
@@ -30,8 +30,7 @@ export function ProgramTextEditor({vmState, caret, setCaret}: ProgramTextEditorP
             return;
         }
 
-        // TODO: Don't replace, but insert
-        programTextFacade.setProgramTextFromExternal(toPaste);
+        setEditor(editor.insert(toPaste));
     }
 
     function handleDrop(evt: React.DragEvent): void {
@@ -45,7 +44,7 @@ export function ProgramTextEditor({vmState, caret, setCaret}: ProgramTextEditorP
 
         file.text().then(
             text => {
-                programTextFacade.setProgramTextFromExternal(text);
+                setEditor(TextEditor.forText(text));
                 setIsDraggingInto(false);
             },
             err => {
@@ -55,7 +54,7 @@ export function ProgramTextEditor({vmState, caret, setCaret}: ProgramTextEditorP
         );
     }
 
-    const activeLine = programTextFacade.programText.getNextCodeLine(vmState.programCounter);
+    const activeLine = programText.getNextCodeLine(vmState.programCounter);
 
     // Scroll active line into view, but only when it changes (not on every rerender)
     useEffect(
@@ -75,13 +74,13 @@ export function ProgramTextEditor({vmState, caret, setCaret}: ProgramTextEditorP
         onDragEnter={_ => setIsDraggingInto(true)}
         onDragLeave={_ => setIsDraggingInto(false)}
     >
-        {programTextFacade.programText.lines.map(line =>
+        {programText.lines.map(line =>
             <ProgramTextLine
                 key={line.num}
-                text={programTextFacade.programText}
+                text={programText}
                 line={line}
-                caret={caret}
-                setCaret={setCaret}
+                caretsOnLine={editor.carets.filter(({row}) => row === line.num)}
+                setCaret={(caret, add) => setEditor(add ? editor.addCaret(caret) : editor.setCaret(caret))}
                 isActiveLine={line.num === activeLine?.num}
             />,
         )}
@@ -91,12 +90,12 @@ export function ProgramTextEditor({vmState, caret, setCaret}: ProgramTextEditorP
 interface ProgramTextLineProps {
     text: ProgramText.Text;
     line: ProgramText.Line;
-    caret: Caret;
-    setCaret(_: Caret): void;
+    caretsOnLine: readonly Caret[];
+    setCaret(_: Caret, add: boolean): void;
     isActiveLine: boolean;
 }
 
-function ProgramTextLine({text, line, caret, setCaret, isActiveLine}: ProgramTextLineProps) {
+function ProgramTextLine({text, line, caretsOnLine, setCaret, isActiveLine}: ProgramTextLineProps) {
     const NON_BREAKING_SPACE = "\u00A0";
     const ZERO_WIDTH_SPACE = "\u200B";
 
@@ -122,17 +121,18 @@ function ProgramTextLine({text, line, caret, setCaret, isActiveLine}: ProgramTex
     }
 
     let innerCssClass = "ProgramTextEditor__Line__Inner";
-    if (caret[0] === line.num) {
+    if (caretsOnLine.length > 0) {
         innerCssClass += " ProgramTextEditor__Line__Inner--caret";
     }
 
-    if (caret[0] === line.num) {
-        // Caret is on our line
+    if (caretsOnLine.length > 0) {
         content = <span>
-            <span style={{zIndex: 10, position: "absolute"}}>
-                <span>{NON_BREAKING_SPACE.repeat(caret[1])}</span>
-                <span className="ProgramTextEditor__Caret"></span>
-            </span>
+            {caretsOnLine.map(({col}) =>
+                <span key={col} style={{zIndex: 10, position: "absolute"}}>
+                    <span>{NON_BREAKING_SPACE.repeat(col)}</span>
+                    <span className="ProgramTextEditor__Caret"></span>
+                </span>,
+            )}
             <span>{raw}</span>
         </span>;
     } else {
@@ -150,7 +150,10 @@ function ProgramTextLine({text, line, caret, setCaret, isActiveLine}: ProgramTex
                 const charWidth = lineContentElemBounds.width / line.raw.length;
                 const clickedChar = Math.round(clickedX / charWidth);
 
-                setCaret([line.num, Math.max(0, Math.min(line.raw.length, clickedChar))]);
+                setCaret({
+                    row: line.num,
+                    col: Math.max(0, Math.min(line.raw.length, clickedChar)),
+                }, evt.altKey);
             }}>
                 {content}
             </span>
@@ -178,123 +181,58 @@ function ProgramTextLine({text, line, caret, setCaret, isActiveLine}: ProgramTex
 
 function handleKeyDown(
     evt: KeyboardEvent,
-    caret: Caret,
-    setCaret: (_: Caret) => void,
-    {programText, setProgramText}: ProgramTextFacade,
+    {editor, setEditor}: ProgramTextFacade,
 ) {
-    // We don't handle any keyboard commands (yet)
-    if (evt.altKey || evt.ctrlKey || evt.metaKey) {
+    if (evt.altKey || evt.metaKey) {
         return;
     }
 
-    const [row, col] = caret;
-
-    // Collect some values that we'll likely use further down
-    const untouchedLinesBefore = programText.lines.slice(0, row).map(l => l.raw);
-    const untouchedLinesAfter = programText.lines.slice(row + 1).map(l => l.raw);
-    const touchedLine = programText.lines[row].raw;
+    const mvMode = evt.ctrlKey ? MovementMode.Word : MovementMode.One;
 
     switch (evt.key) {
     case "ArrowLeft":
-    case "ArrowRight":
-    case "ArrowUp":
-    case "ArrowDown": {
-        setCaret(moveCaret(caret, evt.key, programText.rawLines));
+        setEditor(editor.move("left", mvMode));
         break;
-    }
+    case "ArrowRight":
+        setEditor(editor.move("right", mvMode));
+        break;
+    case "ArrowUp":
+        setEditor(editor.move("up", mvMode));
+        break;
+    case "ArrowDown":
+        setEditor(editor.move("down", mvMode));
+        break;
 
     case "Enter": {
-        // No special cases; always split current line into two
-        const updatedLines = [
-            ...untouchedLinesBefore,
-            touchedLine.slice(0, col),
-            touchedLine.slice(col),
-            ...untouchedLinesAfter,
-        ];
-        setProgramText(updatedLines);
-        setCaret([row + 1, 0]);
-
+        if (!evt.ctrlKey) {
+            setEditor(editor.insert("\n"));
+        }
         break;
     }
 
     case "Backspace": {
-        // Special case: At the very beginning of the text, do nothing
-        if (row === 0 && col === 0) {
-            break;
-        }
-
-        // Special case: At the beginning of a line, merge that line into the previous one
-        if (col === 0) {
-            const updatedLines = [
-                ...programText.rawLines.slice(0, row - 1),
-                programText.rawLines[row - 1] + programText.rawLines[row],
-                ...programText.rawLines.slice(row + 1),
-            ];
-
-            setProgramText(updatedLines);
-            setCaret([row - 1, programText.rawLines[row - 1].length]);
-
-            break;
-        }
-
-        const updatedLine = touchedLine.slice(0, col - 1) + touchedLine.slice(col);
-        const updatedLines = untouchedLinesBefore.concat(updatedLine, untouchedLinesAfter);
-
-        setProgramText(updatedLines);
-        setCaret(moveCaret(caret, "ArrowLeft", updatedLines));
-
+        setEditor(editor.backspace(mvMode));
         break;
     }
 
     case "Delete": {
-        // Special case: At the very end of the text, do nothing
-        if (row === programText.rawLines.length - 1 && col === programText.rawLines[row].length) {
-            break;
-        }
-
-        // Special case: At the end of a line, merge the next line into the current one
-        if (col === programText.rawLines[row].length) {
-            const updatedLines = [
-                ...programText.rawLines.slice(0, row),
-                programText.rawLines[row] + programText.rawLines[row + 1],
-                ...programText.rawLines.slice(row + 2),
-            ];
-
-            setProgramText(updatedLines);
-            // caret isn't moved
-
-            break;
-        }
-
-        const updatedLine = touchedLine.slice(0, col) + touchedLine.slice(col + 1);
-        const updatedLines = untouchedLinesBefore.concat(updatedLine, untouchedLinesAfter);
-        setProgramText(updatedLines);
-        // caret isn't moved
-
+        setEditor(editor.delete(mvMode));
         break;
     }
 
     default:
         // Handle simple directly-typable characters
-        if (evt.key.length === 1 && (
+        if (!evt.ctrlKey && evt.key.length === 1 && (
             evt.key >= "a" && evt.key <= "z" ||
             evt.key >= "A" && evt.key <= "Z" ||
             evt.key >= "0" && evt.key <= "9" ||
-            [" ", ":", "/"].includes(evt.key)
+            [" ", ":", "/", "[", "]", "_", "|"].includes(evt.key)
         )) {
             const char = evt.key;
 
             // TODO: Maybe, if we're in the first word of the line, automatically write in uppercase
 
-            const touchedLineBefore = touchedLine.slice(0, col);
-            const touchedLineAfter = touchedLine.slice(col);
-            const updatedLine = touchedLineBefore + char + touchedLineAfter;
-
-            const updatedLines = untouchedLinesBefore.concat(updatedLine, untouchedLinesAfter);
-
-            setProgramText(updatedLines);
-            setCaret(moveCaret(caret, "ArrowRight", updatedLines));
-
+            setEditor(editor.insert(char));
             break;
         }
 
@@ -305,38 +243,4 @@ function handleKeyDown(
     // At this point, it's certain that we've handled the event ourselves
     evt.preventDefault();
     evt.stopPropagation();
-}
-
-function moveCaret([row, col]: Caret, direction: "ArrowLeft" | "ArrowRight" | "ArrowUp" | "ArrowDown", rawLines: readonly string[]): Caret {
-    switch (direction) {
-    case "ArrowLeft":
-        if (col === 0) {
-            if (row === 0) {
-                return [row, col];
-            }
-            return [row - 1, rawLines[row - 1].length];
-        }
-        return [row, col - 1];
-
-    case "ArrowRight":
-        if (col === rawLines[row].length) {
-            if (row === rawLines.length - 1) {
-                return [row, col];
-            }
-            return [row + 1, 0];
-        }
-        return [row, col + 1];
-
-    case "ArrowUp":
-        if (row === 0) {
-            return [0, 0];
-        }
-        return [row - 1, Math.min(col, rawLines[row - 1].length)];
-
-    case "ArrowDown":
-        if (row === rawLines.length - 1) {
-            return [row, rawLines[row].length];
-        }
-        return [row + 1, Math.min(col, rawLines[row + 1].length)];
-    }
 }
