@@ -46,6 +46,10 @@ export class TextEditor {
         return this.setCaret(...this.carets, caret);
     }
 
+    private setPrimaryCaret(idx: number): TextEditor {
+        return new TextEditor(this.lines, this.carets, idx);
+    }
+
     move(direction: "left" | "right" | "up" | "down", mode: MovementMode = MovementMode.One): TextEditor {
         const carets = this.carets.map(({row, col}) => {
             switch (direction) {
@@ -145,6 +149,25 @@ export class TextEditor {
     }
 
     delete(mode = MovementMode.One): TextEditor {
+        // Caret at very end of document requires special treatment
+        if (this.isCaretAtEnd()) {
+            // Delete at end of document is a no-op
+            if (this.carets.length === 1) {
+                return this;
+            }
+
+            const res = new TextEditor(this.lines, this.carets.slice(1), 0)
+                .move("right", mode)
+                .backspace(mode);
+
+            // Resulting editor might have an additional (duplicate) caret at document end now,
+            // in the case  "fo|o|" -> delete -> "fo||".
+            // We removed the last caret for processing the delete, so we need to re-add it iff that wouldn't cause a duplicate.
+            return res.isCaretAtEnd()
+                ? res.setPrimaryCaret(Math.min(res.carets.length - 1, res.primaryCaretIdx))
+                : res.addCaret({row: res.lines.length - 1, col: res.lines[res.lines.length - 1].length});
+        }
+
         return this.move("right", mode).backspace(mode);
     }
 
@@ -233,6 +256,10 @@ export class TextEditor {
         return s
             .replaceAll(/\t/g, "  ")
             .replaceAll(/[^a-z0-9_:/[\]| ]/ig, "");
+    }
+
+    private isCaretAtEnd({row, col}: Caret = this.carets[0]): boolean {
+        return row === this.lines.length - 1 && col === this.lines[row].length;
     }
 }
 

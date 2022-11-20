@@ -72,3 +72,28 @@ test("TextEditor: backspace at many carets collapses duplicate carets", () => {
     expect(result.lines).toStrictEqual(["f"]);
     expect(result.carets).toStrictEqual([{row: 0, col: 1}]);
 });
+
+test("TextEditor: delete", () => {
+    const result = TextEditor.create()
+        .insert("foxxo\nbarx")
+        .setCaret({row: 0, col: 2}, {row: 0, col: 3}, {row: 1, col: 3})
+        .delete();
+    expect(result.lines).toStrictEqual(["foo", "bar"]);
+    expect(result.carets).toStrictEqual([{row: 1, col: 3}, {row: 0, col: 2}]);
+});
+
+// TODO: Fix delete
+// test("TextEditor: delete newline collapsing carets", () => {
+//     const result = TextEditor.create()
+//         .insert("foo\n\nbar")
+//         .setCaret({row: 0, col: 2}, {row: 1, col: 0}, {row: 2, col: 3})
+//         .delete();
+//     expect(result.lines).toStrictEqual(["foobar"]);
+//     expect(result.carets).toStrictEqual([{row: 0, col: 3}, {row: 0, col: 6}]);
+// });
+
+test("TextEditor: delete at end is no-op", () => {
+    const beforeDelete = TextEditor.create().insert("foo");
+    const afterDelete = beforeDelete.delete();
+    expect(afterDelete).toStrictEqual(beforeDelete);
+});
