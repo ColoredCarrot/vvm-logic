@@ -51,6 +51,16 @@ function nodeIdToString(nodeId: NodeId): string {
     }
 }
 
+function nodeExists(nodeId: NodeId, state: State): boolean {
+    if (typeof nodeId === "string") {
+        return true;
+    }
+    if (nodeId.kind === "stack") {
+        return nodeId.index >= 0 && nodeId.index < state.stack.size;
+    }
+    return true;
+}
+
 export type NodeDataDefinition = cytoscape.NodeDataDefinition & {
     label: string | number,
     type: NodeType,
@@ -162,7 +172,11 @@ export function createGraph(state: State): Graph {
         } else if (heapCell instanceof VariableCell) {
             const isUnbounded = heapCell.value === i;
             nodes.push({
-                data: {id: "H" + i, label: heapCell.tag + ": " + heapCell.value, type: isUnbounded ? "heap-unbounded-variable" : "heap-variable"},
+                data: {
+                    id: "H" + i,
+                    label: heapCell.tag + ": " + heapCell.value,
+                    type: isUnbounded ? "heap-unbounded-variable" : "heap-variable",
+                },
             });
             edges.push({
                 from: {kind: "heap", address: i},
@@ -202,15 +216,17 @@ export function createGraph(state: State): Graph {
 
     return {
         nodes: nodes,
-        edges: edges.map(e => ({
-            data: {
-                // id: "E" + nodeIdToString(e.from) + nodeIdToString(e.to),
-                source: nodeIdToString(e.from),
-                target: nodeIdToString(e.to),
-                type: e.type,
-            },
-            selectable: false,
-            pannable: true,
-        })),
+        edges: edges
+            .filter(e => nodeExists(e.from, state) && nodeExists(e.to, state))
+            .map(e => ({
+                data: {
+                    // id: "E" + nodeIdToString(e.from) + nodeIdToString(e.to),
+                    source: nodeIdToString(e.from),
+                    target: nodeIdToString(e.to),
+                    type: e.type,
+                },
+                selectable: false,
+                pannable: true,
+            })),
     };
 }
