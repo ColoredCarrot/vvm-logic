@@ -188,19 +188,24 @@ export function createGraph(state: State): Graph {
         }
     }
 
+    // HEAP
     for (const i of state.heap.getKeySet()) {
-        if (!state.heap.get(i)) {
-            continue;
-        }
-
         const heapCell = state.heap.get(i);
+        const parent = isPartOfStruct(state, i);
         if (heapCell instanceof UninitializedCell) {
             nodes.push({
-                data: {id: "H" + i, label: "H[" + i + "]", type: "heap-uninitialized"},
+                data: {id: "H" + i,
+                    label: "H[" + i + "]",
+                    type: "heap-uninitialized",
+                    parent: parent},
             });
         } else if (heapCell instanceof AtomCell) {
             nodes.push({
-                data: {id: "H" + i, label: "A: " + heapCell.value, type: "heap-atom"},
+                data: {id: "H" + i,
+                    label: "A: " + heapCell.value,
+                    type: "heap-atom",
+                    parent: parent,
+                },
             });
         } else if (heapCell instanceof VariableCell) {
             const isUnbounded = heapCell.value === i;
@@ -209,6 +214,7 @@ export function createGraph(state: State): Graph {
                     id: "H" + i,
                     label: heapCell.tag + ": " + heapCell.value,
                     type: isUnbounded ? "heap-unbounded-variable" : "heap-variable",
+                    parent: parent,
                 },
             });
             edges.push({
@@ -218,7 +224,11 @@ export function createGraph(state: State): Graph {
             });
         } else if (heapCell instanceof StructCell) {
             nodes.push({
-                data: {id: "H" + i, label: "S: " + heapCell.label, type: "heap-struct"},
+                data: {id: "H" + i, 
+                    label: "S: " + heapCell.label, 
+                    type: "heap-struct",
+                    parent: parent,
+                },
             });
             for (let j = 0; j < heapCell.size; j++) {
                 edges.push({
@@ -229,8 +239,11 @@ export function createGraph(state: State): Graph {
             }
         } else if (heapCell instanceof PointerToHeapCell) {
             nodes.push({
-                data: {id: "H" + i, label: "[" + heapCell.value + "]", type: "heap-pointerToHeap"},
-            });
+                data: {id: "H" + i, 
+                    label: "[" + heapCell.value + "]", 
+                    type: "heap-pointerToHeap",
+                    parent: parent,
+                }});
             edges.push({
                 from: {kind: "heap", address: i},
                 to: {kind: "heap", address: heapCell.value},
@@ -264,4 +277,24 @@ export function createGraph(state: State): Graph {
                 pannable: true,
             })),
     };
+}
+
+export function isPartOfStruct(state: State, addr: number): string | undefined {
+    let iter = addr - 1;
+    const minHeap = state.heap.getKeySet().min();
+    if (minHeap === undefined)
+        return undefined;
+
+    for (;iter >= minHeap; iter--) {
+        const heapCell = state.heap.get(iter);
+        if (heapCell instanceof StructCell) {
+            if ((iter + heapCell.size) >= addr) {
+                return "H" + iter;
+            } else {
+                return undefined;
+            }
+        }
+    }
+
+    return undefined;
 }

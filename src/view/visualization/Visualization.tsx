@@ -7,7 +7,8 @@ import CytoscapeComponent from "react-cytoscapejs";
 import {State} from "../../model/State";
 import {STYLESHEET, TOTAL_NODE_HEIGHT} from "./NodeStyles";
 import "./Visualization.scss";
-import {createGraph, Graph} from "./VisualizationGraph";
+import {createGraph, Graph, isPartOfStruct} from "./VisualizationGraph";
+import {Cell} from "../../model/Cell";
 
 Cytoscape.use(fcose);
 
@@ -44,6 +45,20 @@ function generateLayout(state: State, graph: Graph): FcoseLayoutOptions {
         })),
     ];
 
+    const structGroups: Map<string, Cell[]> = new Map<string, Cell[]>();
+    for (const c of state.heap) {
+        const addr = c[0];
+        const cell = c[1];
+        const parent = isPartOfStruct(state, addr);
+        if (parent) {
+            let old = structGroups.get(parent);
+            if (!old)
+                old = [];
+
+            structGroups.set(parent, old.concat(cell));
+        }
+    }
+
     const fixedConstraints: cytoscapeFcose.FcoseFixedNodeConstraint[] = [
         // Registers:
         ...regs.map((reg, i) => ({
@@ -67,6 +82,15 @@ function generateLayout(state: State, graph: Graph): FcoseLayoutOptions {
         relativePlacementConstraint: relPlacementConstraints,
         fixedNodeConstraint: fixedConstraints,
         uniformNodeDimensions: true,
+        //initialEnergyOnIncremental: 0.5,
+        // Gravity force (constant) (0.25)
+        gravity: 0.25,
+        // Gravity range (constant) for compounds (1.5)
+        gravityRangeCompound: 1.5,
+        // Gravity force (constant) for compounds (1.0)
+        gravityCompound: 1.0,
+        // Gravity range (constant)
+        gravityRange: 3.8,
     };
 }
 
