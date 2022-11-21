@@ -1,5 +1,6 @@
 import {Instruction} from "./Instruction";
 import {State} from "../../model/State";
+import {NoDialog} from "../../model/dialog/NoDialog";
 
 export class No extends Instruction {
 
@@ -8,7 +9,6 @@ export class No extends Instruction {
     }
 
     step(state: State): State {
-        //TODO: HALT AUFRUF
-        return state;
+        return state.setActiveDialog(new NoDialog());
     }
 }
