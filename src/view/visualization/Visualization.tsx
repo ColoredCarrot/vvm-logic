@@ -108,6 +108,10 @@ function generateLayout(state: State, graph: Graph): FcoseLayoutOptions {
             nodeId: "S" + i,
             position: {x: 1400, y: -TOTAL_NODE_HEIGHT * i},
         })),
+        // Stack Dummy:
+        {nodeId: "S0_DUMMY",
+            position: {x: 1400, y: -TOTAL_NODE_HEIGHT},
+        },
     ];
 
     return {

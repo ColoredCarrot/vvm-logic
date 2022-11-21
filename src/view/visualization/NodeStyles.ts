@@ -104,6 +104,9 @@ export const NODE_STYLES: { [T in NodeType]: cytoscape.Css.Node } = {
     "stack-value": {
         backgroundColor: "#e7ab79",
     },
+    "invisible": {
+        visibility: "hidden",
+    },
     "trail-value": {},
 };
 
