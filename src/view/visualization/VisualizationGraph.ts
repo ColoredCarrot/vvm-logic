@@ -7,6 +7,7 @@ import {StructCell} from "../../model/StructCell";
 import {UninitializedCell} from "../../model/UninitializedCell";
 import {ValueCell} from "../../model/ValueCell";
 import {VariableCell} from "../../model/VariableCell";
+import {ExecutionError} from "../../exec/ExecutionError";
 
 export const NodeTypes = [
     "heap-uninitialized",
@@ -152,6 +153,38 @@ export function createGraph(state: State): Graph {
                 to: {kind: "heap", address: stackCell.value},
                 type: "stackToHeap",
             });
+        } else if (stackCell instanceof StructCell) {
+            nodes.push({
+                data: {
+                    id: "S" + i,
+                    label: stackCell.label,
+                    type: "stack-value",
+                },
+                grabbable: false,
+                pannable: true,
+            });
+        } else if (stackCell instanceof AtomCell) {
+            nodes.push({
+                data: {
+                    id: "S" + i,
+                    label: stackCell.value,
+                    type: "stack-value",
+                },
+                grabbable: false,
+                pannable: true,
+            });
+        } else if (stackCell instanceof VariableCell) {
+            nodes.push({
+                data: {
+                    id: "S" + i,
+                    label: "R",
+                    type: "stack-value",
+                },
+                grabbable: false,
+                pannable: true,
+            });
+        } else {
+            throw new ExecutionError("Unexpected Cell Type on Stack: " + JSON.stringify(stackCell));
         }
     }
 
@@ -203,6 +236,8 @@ export function createGraph(state: State): Graph {
                 to: {kind: "heap", address: heapCell.value},
                 type: "inHeap",
             });
+        } else {
+            throw new ExecutionError("Unexpected Cell Type on Heap: " + JSON.stringify(heapCell));
         }
     }
 
