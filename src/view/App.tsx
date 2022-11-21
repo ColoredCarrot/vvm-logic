@@ -60,7 +60,7 @@ function App() {
                         />
                     </div>
                     <div className="visualization-container">
-                        <Visualization state={vmState}/>
+                        <Visualization/>
                     </div>
                 </div>
             </ProgramTextContext.Provider>
