@@ -37,6 +37,7 @@ import {Setcut} from "./instructions/Setcut";
 import {Index} from "./instructions/Index";
 import {Getnode} from "./instructions/Getnode";
 import {Entry} from "./instructions/Entry";
+import {Halt} from "./instructions/Halt";
 
 export class ParseError extends Error {
 }
@@ -234,8 +235,6 @@ export class InstructionParser {
 
     private static parseStringParamInstructor(instr: string, param: string): Instruction {
         switch (instr) {
-        case "halt":
-            return new InvalidInstruction(instr + " " + param); //TODO: Replace with actual Implementation
         case "putatom":
             return new Putatom(param);
         case "uatom":
@@ -247,6 +246,8 @@ export class InstructionParser {
 
     private static parseNumberParamInstruction(instr: string, param: number): Instruction {
         switch (instr) {
+        case "halt":
+            return new Halt(param);
         case "check":
             return new Check(param);
         case "pushenv":
