@@ -9,6 +9,7 @@ export class Program{
     constructor(clauses: Clause[], query: Query) {
         this.clauses = clauses;
         this.query = query;
+
     }
 
 }

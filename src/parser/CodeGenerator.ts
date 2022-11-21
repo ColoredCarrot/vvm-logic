@@ -9,10 +9,14 @@ import {Unification} from "./model/Unification";
 import {Clause} from "./model/Clause";
 import {Query} from "./model/Query";
 import {Program} from "./model/Program";
+import {Predicate} from "./model/Predicate";
 
 
 export class CodeGenerator {
-    private code_A(term: Term, rho: void): string {
+
+    private label: string = "A";
+
+    private code_A(term: Term, rho: Map<string, number>): string {
 
         switch (term.value.kind) {
         case "Atom":
@@ -21,8 +25,20 @@ export class CodeGenerator {
 
         case "Variable":
             let variable = term.value as Variable;
-            // TODO
-            return "";
+
+            //size = 0 abchecken?
+            if (!rho.has(variable.name)) {
+                return "putvar" + rho.get(variable.name);
+            }
+
+            if (rho.size == 1) {
+                rho.clear();
+                rho.set(variable.name, 1);
+            }
+
+            rho.set(variable.name, rho.size + 1);
+
+            return "putref" + rho.get(variable.name);
 
         case "Anon":
             let anon = term.value as Anon;
@@ -44,86 +60,148 @@ export class CodeGenerator {
         }
     }
 
-    private code_G(goal: Goal, rho: void): string {
+    private labelGenerator(): void {
+
+        const alphabet = "ABCDEFGHIJKLMNOPQRSTUVW";
+        this.label = alphabet[Math.floor(Math.random() * alphabet.length)];
+
+    }
+
+
+    private code_G(goal: Goal, rho: Map<string, number>): string {
         switch (goal.value.kind) {
         case "Literal":
 
             let literal = goal.value as Literal;
 
-            // FIXME: replace B with actual label
             let result: string[] = [];
             for (let term of literal.terms) {
                 result.push(this.code_A(term, rho));
             }
 
+            this.labelGenerator();
+
             let k = literal.terms.length;
 
-            return `mark B` + "\n" + result.join("\n") + "\n" + `call ${literal.name}/${k}` + "\nB:\n";
+            return "mark " + this.label + "\n" + result.join("\n") + "\n" + `call ${literal.name}/${k}` + "\nB:\n";
 
 
         case "Unification":
-            // FIXME: seite 129, pho
+            let unification = goal.value as Unification;
 
-            /*if Variable uninitialisiert:
+            //size = 0 abchecken?
 
-            let unification_notinit = goal.value as Unification;
-            return `putvar p(${unification.variable.name})` + "\n" + this.code_A(unification.term, rho) + "\n"
-                + "bind";
+            if(!rho.has(unification.variable.name)){
+                if(rho.size == 1){
+                    rho.clear();
+                    rho.set(unification.variable.name, 1);
+                }
+                rho.set(unification.variable.name, rho.size + 1);
 
-             */
-            //if Variable initialisiert:
+                return "putvar " + rho.size + "\n" + this.code_A(unification.term, rho) + "\n"
+                    + "bind";
 
-            let unification_init = goal.value as Unification;
-            return `putref p(${unification_init.variable.name})` + "\n" + this.code_A(unification_init.term, rho) + "\n"
-                + "unify";
+            }else {
+
+                return "putref " + rho.get(unification.variable.name) + "\n" + this.code_A(unification.term, rho) + "\n"
+                    + "unify";
+            }
 
         default:
             throw `Error while parsing: Unknown goal kind: ${goal.value.kind}`;
         }
     }
 
-    //TODO: optimierte Unifikationsbehandloung
 
-    private code_U(unification: Unification, rho: void): string {
+
+
+
+    private code_U(unification: Unification, rho: Map<string, number>): string {
         //FIXME:
         return "";
     }
 
-    private code_C(clause: Clause, rho: void): string {
+    private code_C(clause: Clause, rho: Map<string, number>): string {
 
         let result: string[] = [];
         for (let goal of clause.goals) {
             result.push(this.code_G(goal, rho));
         }
-        //FIXME: m unbekannt
-        return `pushenv m` + "\n" + result.join("\n") + "\n"+ "popenv";
+
+        return `pushenv`+ rho.size + "\n" + result.join("\n") + "\n"+ "popenv";
 
     }
 
-    /*private code_P(clause: Clause  rho: void): string {
+    private code_P(clauses: Clause[], label: string,  rho: Map<string, number>): string {
 
         if(clauses.length == 1){
-            this.code_C(clauses[0]);
+            return this.code_C(clauses[0], rho);
+        }else{
+
+            let result: string[] = [];
+            let result2: string[] = [];
+
+            for(let clause of clauses){
+                this.labelGenerator();
+                result.push(label + ":");
+                result.push(this.code_C(clause, rho));
+
+            }
+
+
+            return label + "setbtp" + "\n" + "try" + label ;
         }
 
 
 
     }
 
-     */
 
-    private code_Program(program: Program, rho: void){
-        /*let result1: string[] = [];
-        for (let goal of program.query.goals) {
-            result1.push(this.code_G(goal, rho));
-        }
 
-        let result2: string[] = [];
-        for (let clause of program.clauses) {
-            result2.push(this.code_P(clause));
-        }
-        return `init A` + "\n" + `pushenv d`+ "\n" + result1.join("\n") + "\n" + "halt d" + "\n" + "A: no"
+    private code_Program(program: Program){
 
-         */
+        //bei erster variable value " " auf variable setzen
+        let rho: Map<string, number> = new Map([["variable1", 1]]);
+
+        let name: string = program.clauses[0].head.name;
+        let number: string = program.clauses[0].head.variables.length.toString();
+        let s1: string = "(" + name + "/" + number + ")";
+
+        const mapClauses: Map<string, Clause[]> = new Map([[s1, [program.clauses[0]]]]);
+
+        for(let i = 1; i < program.clauses.length; i++) {
+
+            name = program.clauses[i].head.name;
+            number= program.clauses[i].head.variables.length.toString();
+            let predicateNew: string = "(" + name + "/" + number + ")";
+
+            name = program.clauses[i - 1].head.name;
+            number= program.clauses[i - 1].head.variables.length.toString();
+            let predicateOld: string = "(" + name + "/" + number + ")";
+
+            if(predicateNew == predicateOld){
+                let list: Clause[] = mapClauses.get(predicateOld) as Clause[];
+                list.push(program.clauses[i]);
+                mapClauses.set(predicateOld, list );
+
+            }else{
+                mapClauses.set(predicateNew, [program.clauses[i]]);
+            }
+
+            let result1: string[] = [];
+            for (let goal of program.query.goals){
+                result1.push(this.code_G(goal, rho));
+            }
+
+            let result2: string[] = [];
+            for (let clauses of mapClauses.values()){
+                for(let keys of mapClauses.keys()) {
+                    result2.push(this.code_P(clauses, keys, rho));
+                }
+            }
+
+            return "init A" + "\n" + "pushenv" + "rho.length" + "\n" + result1.join("\n")
+                + result1.join("\n");
+      }
     }
 }

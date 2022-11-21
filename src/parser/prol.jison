@@ -125,10 +125,6 @@ t   : at
     ;
 
 /*
-NOTE: ich glaub die grammatik vom seidl ist falsch
-das a in der produktion t -> a, soll ein atom sein und keine
-anfrage. Was ein atom ist, weiß i ned aber ich nehm mal an es 
-ist entweder eine zahl oder ein string
 */
 at  : INT_CONSTANT
         {
