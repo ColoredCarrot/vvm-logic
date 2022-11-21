@@ -7,8 +7,9 @@ import CytoscapeComponent from "react-cytoscapejs";
 import {State} from "../../model/State";
 import {STYLESHEET, TOTAL_NODE_HEIGHT} from "./NodeStyles";
 import "./Visualization.scss";
-import {createGraph, Graph, isPartOfStruct} from "./VisualizationGraph";
-import {Cell} from "../../model/Cell";
+import {createGraph, Graph} from "./VisualizationGraph";
+import {StructCell} from "../../model/StructCell";
+import {Range} from "immutable";
 
 Cytoscape.use(fcose);
 
@@ -36,6 +37,17 @@ function generateLayout(state: State, graph: Graph): FcoseLayoutOptions {
     const regs = ["SP", "PC", "FP", "BP", "HP"]
         .filter(reg => graph.nodes.some(n => n.data.id === reg));
 
+    const addrsInStructs = state.heap.all().entrySeq()
+        // For each struct on the heap...
+        .filter(([_, cell]) => cell instanceof StructCell)
+        // ...generate [struct addr, struct addr + 1, ..., struct addr + struct size]
+        .map(([addr, cell]) =>
+            Range(0, (cell as StructCell).size + 1)
+                .map(off => addr + off)
+                .toArray()
+        )
+        .toArray();
+
     // All heap nodes are to the right of the stack
     const relPlacementConstraints: cytoscapeFcose.FcoseRelativePlacementConstraint[] = [
         ...state.heap.all().keySeq().toArray().map(address => ({
@@ -43,21 +55,25 @@ function generateLayout(state: State, graph: Graph): FcoseLayoutOptions {
             right: "H" + address,
             gap: 1000,
         })),
+
+        // Within structs, cells should be ordered by address
+        ...addrsInStructs.flatMap(addrs =>
+            addrs.slice(2).map((addr, i) => ({
+                top: "H" + addrs[i + 1],
+                bottom: "H" + addr,
+                gap: TOTAL_NODE_HEIGHT,
+            }))
+        ),
     ];
 
-    const structGroups: Map<string, Cell[]> = new Map<string, Cell[]>();
-    for (const c of state.heap) {
-        const addr = c[0];
-        const cell = c[1];
-        const parent = isPartOfStruct(state, addr);
-        if (parent) {
-            let old = structGroups.get(parent);
-            if (!old)
-                old = [];
-
-            structGroups.set(parent, old.concat(cell));
-        }
-    }
+    const alignConstraints: cytoscapeFcose.FcoseAlignmentConstraint = {
+        // @ts-expect-error: The type annotations for FcoseAlignmentConstraint are incorrect;
+        //                   we need vertical: string[][] instead of [string, string][]
+        vertical: [
+            ...addrsInStructs.map(addrs => addrs.map(addr => "H" + addr)),
+        ],
+        horizontal: [],
+    };
 
     const fixedConstraints: cytoscapeFcose.FcoseFixedNodeConstraint[] = [
         // Registers:
@@ -78,10 +94,11 @@ function generateLayout(state: State, graph: Graph): FcoseLayoutOptions {
         animationDuration: 800,
         randomize: false,
         quality: "proof",
-        // alignmentConstraint: alignConstraints,
+        alignmentConstraint: alignConstraints,
         relativePlacementConstraint: relPlacementConstraints,
         fixedNodeConstraint: fixedConstraints,
         uniformNodeDimensions: true,
+        nodeRepulsion: 1_000_000,
         //initialEnergyOnIncremental: 0.5,
         // Gravity force (constant) (0.25)
         gravity: 0.25,
