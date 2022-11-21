@@ -51,4 +51,8 @@ export class Stack {
     get stackPointer(): number {
         return this.size - 1;
     }
+
+    toArray(): Cell[] {
+        return this.values.toArray();
+    }
 }

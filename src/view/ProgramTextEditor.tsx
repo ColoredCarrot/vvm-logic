@@ -1,4 +1,4 @@
-import React, {useContext, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {ExecutionError} from "../exec/ExecutionError";
 import {InvalidInstruction} from "../exec/instructions/InvalidInstruction";
 import * as ProgramText from "../model/ProgramText";
@@ -55,6 +55,19 @@ export function ProgramTextEditor({vmState, caret, setCaret}: ProgramTextEditorP
         );
     }
 
+    const activeLine = programTextFacade.programText.getNextCodeLine(vmState.programCounter);
+
+    // Scroll active line into view, but only when it changes (not on every rerender)
+    useEffect(
+        () => {
+            if (activeLine !== null) {
+                document.getElementById("program-text-line-" + activeLine.num)
+                    ?.scrollIntoView({behavior: "smooth", block: "nearest"});
+            }
+        },
+        [activeLine]
+    );
+
     return <div
         className={"ProgramTextEditor" + (isDraggingInto ? " ProgramTextEditor--dragging-into" : "")}
         onDrop={evt => handleDrop(evt)}
@@ -69,7 +82,7 @@ export function ProgramTextEditor({vmState, caret, setCaret}: ProgramTextEditorP
                 line={line}
                 caret={caret}
                 setCaret={setCaret}
-                vmState={vmState}
+                isActiveLine={line.num === activeLine?.num}
             />,
         )}
     </div>;
@@ -80,15 +93,14 @@ interface ProgramTextLineProps {
     line: ProgramText.Line;
     caret: Caret;
     setCaret(_: Caret): void;
-    vmState: State;
+    isActiveLine: boolean;
 }
 
-function ProgramTextLine({text, line, caret, setCaret, vmState}: ProgramTextLineProps) {
+function ProgramTextLine({text, line, caret, setCaret, isActiveLine}: ProgramTextLineProps) {
     const NON_BREAKING_SPACE = "\u00A0";
     const ZERO_WIDTH_SPACE = "\u200B";
 
     const raw = line.raw.replaceAll(" ", NON_BREAKING_SPACE) || ZERO_WIDTH_SPACE;
-    const isActiveLine = line instanceof CodeLine && line.num === text.getNextCodeLine(vmState.programCounter)?.num;
 
     const [appState, setAppState] = useContext(AppStateContext);
 
@@ -127,7 +139,7 @@ function ProgramTextLine({text, line, caret, setCaret, vmState}: ProgramTextLine
         content = <span>{raw}</span>;
     }
 
-    const textLineElem = <div className={cssClass} data-label-line={(line instanceof LabelLine)}>
+    const textLineElem = <div className={cssClass} id={"program-text-line-" + line.num}>
         <div className={innerCssClass}>
             <span
                 className="ProgramTextEditor__Line__Num">{(line.num + 1).toString().padStart(3, NON_BREAKING_SPACE)}

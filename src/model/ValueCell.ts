@@ -1,16 +1,14 @@
 import {Cell} from "./Cell";
 
+export type ValueCellTag = "HP" | "TP" | "PC";
+
 export class ValueCell extends Cell {
-    value: number;
 
-    constructor(value: number) {
+    constructor(
+        readonly value: number,
+        readonly tag?: ValueCellTag,
+    ) {
         super();
-        this.value = value;
     }
-
-    getValue(): number {
-        return this.value;
-    }
-
 }
 

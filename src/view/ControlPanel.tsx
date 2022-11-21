@@ -1,7 +1,7 @@
 import React, {useContext} from "react";
 import {step} from "./util/Step";
 import {State} from "../model/State";
-import {AppStateContext, ProgramTextContext} from "./AppState";
+import {AppState, AppStateContext, ProgramTextContext} from "./AppState";
 import "./ControlPanel.scss";
 import {useGlobalEvent} from "./util/UseGlobalEvent";
 import Immutable from "immutable";
@@ -16,23 +16,44 @@ export function ControlPanel() {
     const nextCodeLine = programText.getNextCodeLine(vmState.programCounter);
     const endOfProgram = nextCodeLine === null;
 
-    function invokeStep(): void {
-        if (nextCodeLine !== null) {
-            step(nextCodeLine, appState, setAppState);
+    function invokeStep(): AppState {
+        return nextCodeLine !== null
+            ? step(nextCodeLine, appState, setAppState)
+            : appState;
+    }
+
+    function invokeBack(): void {
+        if (!appState.vmState.isEmpty()) {
+            setAppState({
+                ...appState,
+                vmState: appState.vmState.pop(),
+                lastExecutionError: null,
+            });
         }
     }
 
     function invokeRun() {
         setAppState({
-            ...appState,
+            // We enabled auto-step; useInterval() will perform the first step after the delay has passed once already,
+            // but we want to step immediately:
+            ...(appState.autoStepEnabled ? appState : invokeStep()),
             autoStepEnabled: !appState.autoStepEnabled,
         });
     }
 
     useGlobalEvent("keydown", evt => {
-        if (evt.key === "F8") {
+        switch (evt.key) {
+        case "F9":
+            invokeRun();
+            break;
+        case "F8":
             invokeStep();
-        } else {
+            break;
+        case "F7":
+            invokeBack();
+            break;
+        default:
+            // We don't handle this key combination
             return;
         }
 
@@ -68,13 +89,7 @@ export function ControlPanel() {
     const btnBackEnabled = !appState.vmState.isEmpty();
     const btnBack = <a
         className={"ControlPanel__button" + (!btnBackEnabled ? " ControlPanel__button--disabled" : "")}
-        onClick={() => {
-            setAppState({
-                ...appState,
-                vmState: appState.vmState.pop(),
-                lastExecutionError: null,
-            });
-        }}>
+        onClick={() => invokeBack()}>
         <img src="/icons/undo_dark.svg" alt="Undo"/>
     </a>;
 

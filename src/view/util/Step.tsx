@@ -4,11 +4,12 @@ import {ExecutionError} from "../../exec/ExecutionError";
 import {AppState} from "../AppState";
 import * as ProgramText from "../../model/ProgramText";
 
-export function step(codeLine: ProgramText.CodeLine, appState: AppState, setAppState: (_: AppState) => void) {
+export function step(codeLine: ProgramText.CodeLine, appState: AppState, setAppState: (_: AppState) => void): AppState {
 
     const vmState = appState.vmState.last() ?? State.new();
 
     let newState: State | null = null;
+    let newAppState: AppState;
     try {
         newState = computeStep(vmState.setProgramCounter(codeLine.num - 1), codeLine.instruction);
 
@@ -21,19 +22,23 @@ export function step(codeLine: ProgramText.CodeLine, appState: AppState, setAppS
             }
         }
 
-        setAppState({
+        newAppState = {
             ...appState,
             vmState: appState.vmState.push(newState),
             lastExecutionError: null,
-        });
+        };
     } catch (ex) {
         if (!(ex instanceof ExecutionError)) {
             console.error("Internal error!", ex);
         }
         const message = ex instanceof Error ? ex.message : JSON.stringify(ex);
-        setAppState({
+
+        newAppState = {
             ...appState,
             lastExecutionError: (ex instanceof ExecutionError ? ex : message),
-        });
+        };
     }
+
+    setAppState(newAppState);
+    return newAppState;
 }
