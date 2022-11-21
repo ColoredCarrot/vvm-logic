@@ -18,3 +18,7 @@ $btn-highlighted: #4f4f4f;
 $btn-text: white;
 $btn-disabled: $btn;
 $btn-disabled-text: #ffffff26;
+$btn-primary: #bb86fc;//#03dac5;
+$btn-primary-highlighted: adjust-color($btn-primary, $whiteness: +15%);
+
+$modal-dialog-background: $background-code;

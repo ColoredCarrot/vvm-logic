@@ -22,6 +22,7 @@ export const NodeTypes = [
     "stack-uninitialized",
     "stack-value",
     "stack-pointerToStack",
+    "invisible",
 ] as const;
 
 export type NodeType = typeof NodeTypes[number];
@@ -79,6 +80,10 @@ export type Graph = { nodes: NodeDefinition[], edges: EdgeDefinition[] };
 export function createGraph(state: State): Graph {
     const nodes: (NodeDefinition & { pannable?: boolean })[] = [];
     const edges: Edge[] = [];
+
+    nodes.push({
+        data: {id: "S0_DUMMY", label: "I SHOULD NOT BE VISIBLE", type: "invisible"},
+    });
 
     // REGISTER
     const programCounter = state.programCounter;

@@ -4,6 +4,7 @@ import {GarbageCollector} from "./GarbageCollector";
 import {Trail} from "./Trail";
 import {Cell} from "./Cell";
 import {TryChain} from "./TryChain";
+import {Dialog} from "./dialog/Dialog";
 
 interface StateVars {
     readonly heap: Heap;
@@ -14,6 +15,7 @@ interface StateVars {
     readonly framePointer: number;
     readonly backtrackPointer: number;
     readonly programCounter: number;
+    readonly activeDialog: Dialog<readonly string[]> | null;
 }
 
 /**
@@ -33,6 +35,7 @@ export class State implements StateVars {
             framePointer: -1,
             backtrackPointer: -1,
             programCounter: -1,
+            activeDialog: null,
         });
     }
 
@@ -133,6 +136,14 @@ export class State implements StateVars {
 
     setProgramCounter(pc: number): State {
         return new State({...this.vars, programCounter: pc});
+    }
+
+    get activeDialog(): Dialog<readonly string[]> | null {
+        return this.vars.activeDialog;
+    }
+
+    setActiveDialog(dialog: Dialog<readonly string[]> | null): State {
+        return new State({...this.vars, activeDialog: dialog});
     }
 
     modify(f: (_: State) => State): State {
