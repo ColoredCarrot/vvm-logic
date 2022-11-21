@@ -1,4 +1,5 @@
 import React, {useContext} from "react";
+import {TextEditor} from "../model/text/TextEditor";
 import {step} from "./util/Step";
 import {State} from "../model/State";
 import {AppState, AppStateContext, ProgramTextContext} from "./AppState";
@@ -9,7 +10,7 @@ import Immutable from "immutable";
 export function ControlPanel() {
 
     const [appState, setAppState] = useContext(AppStateContext);
-    const {programText, setProgramTextFromExternal} = useContext(ProgramTextContext);
+    const {programText, setEditor} = useContext(ProgramTextContext);
 
     const vmState = appState.vmState.last() ?? State.new();
 
@@ -106,7 +107,7 @@ export function ControlPanel() {
                     const fileReader = new FileReader();
                     fileReader.onload = (loadEvt => {
                         const src = loadEvt.target!.result as string;
-                        setProgramTextFromExternal(src);
+                        setEditor(TextEditor.forText(src));
                     });
                     fileReader.readAsText(file);
                 }

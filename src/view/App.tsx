@@ -1,14 +1,15 @@
+import Immutable from "immutable";
 import React, {useMemo, useState} from "react";
+import {useInterval} from "usehooks-ts";
+import * as ProgText from "../model/ProgramText";
+import {State} from "../model/State";
+import {TextEditor} from "../model/text/TextEditor";
 import "./App.scss";
 import {AppState, AppStateContext, ProgramTextContext} from "./AppState";
 import {LeftColumn} from "./LeftColumn";
-import {Visualization} from "./visualization/Visualization";
-import {State} from "../model/State";
-import Immutable from "immutable";
-import {useInterval} from "usehooks-ts";
 import {step} from "./util/Step";
 import {useLocallyStoredState} from "./util/UseLocallyStoredState";
-import * as ProgText from "../model/ProgramText";
+import {Visualization} from "./visualization/Visualization";
 
 function App() {
     const [appState, setAppState] = useState<AppState>({
@@ -17,12 +18,17 @@ function App() {
         autoStepEnabled: false,
     });
 
-    const [rawProgramText, setRawProgramText] = useLocallyStoredState([""], "program-text");
+    const [programTextEditor, setProgramTextEditor] = useLocallyStoredState(
+        TextEditor.create,
+        "program-text",
+        {
+            serializer: ed => ed.text,
+            deserializer: text => TextEditor.forText(text),
+        },
+    );
 
     // Parsing the program text is expensive, so only do it when it is actually changed
-    const programText = useMemo(() => ProgText.parseProgramText(rawProgramText), [rawProgramText]);
-
-    const [caret, setCaret] = useState<ProgText.Caret>([0, 0]);
+    const programText = useMemo(() => ProgText.parseProgramText(programTextEditor.lines), [programTextEditor.lines]);
 
     const vmState = appState.vmState.last() ?? State.new();
 
@@ -42,16 +48,9 @@ function App() {
         <AppStateContext.Provider value={[appState, setAppState]}>
             <ProgramTextContext.Provider value={{
                 programText: programText,
-                setProgramText(lines: string[]): void {
-                    setRawProgramText(lines);
-                },
-                setProgramTextFromExternal(raw: string): void {
-                    setRawProgramText(raw.split("\n").map(ln => ln.replaceAll(/[^0-9a-z/: ]/ig, "")));
-                    setCaret([0, 0]);
-                },
-                caret: caret,
-                setCaret(caret: ProgText.Caret): void {
-                    setCaret(caret);
+                editor: programTextEditor,
+                setEditor(editor: TextEditor): void {
+                    setProgramTextEditor(editor);
                 },
             }}>
                 <div className="App">

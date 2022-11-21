@@ -3,6 +3,7 @@ import {ExecutionError} from "../exec/ExecutionError";
 import Immutable from "immutable";
 import {State} from "../model/State";
 import * as ProgramText from "../model/ProgramText";
+import {TextEditor} from "../model/text/TextEditor";
 
 /**
  * Global application state, _excluding_ the state of the Virtual Machine.
@@ -33,13 +34,9 @@ export interface ProgramTextFacade {
 
     readonly programText: ProgramText.Text;
 
-    setProgramText(lines: string[]): void;
+    readonly editor: TextEditor;
 
-    setProgramTextFromExternal(raw: string): void;
-
-    readonly caret: ProgramText.Caret;
-
-    setCaret(caret: ProgramText.Caret): void;
+    setEditor(editor: TextEditor): void;
 
 }
 
@@ -47,18 +44,9 @@ export const ProgramTextContext = React.createContext<ProgramTextFacade>({
 
     programText: ProgramText.parseProgramText([""]),
 
-    setProgramText(_): void {
+    editor: TextEditor.create(),
+
+    setEditor(_: TextEditor): void {
         // Do nothing
     },
-
-    setProgramTextFromExternal(_): void {
-        // Do nothing
-    },
-
-    caret: [0, 0],
-
-    setCaret(_): void {
-        // Do nothing
-    },
-
 });
