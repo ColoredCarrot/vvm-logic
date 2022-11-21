@@ -8,6 +8,7 @@ import {Goal} from "./model/Goal";
 import {Unification} from "./model/Unification";
 import {Clause} from "./model/Clause";
 import {Query} from "./model/Query";
+import {Program} from "./model/Program";
 
 
 export class CodeGenerator {
@@ -99,11 +100,30 @@ export class CodeGenerator {
 
     }
 
-    private code_P(clauses: Clause[], query: Query,  rho: void): string {
+    /*private code_P(clause: Clause  rho: void): string {
 
-        //FIXME
-        let result1: string[] = [];
-        return `init A` + "\n" + `pushenv d`+ "\n" + result1.join("\n") + "\n" + "halt d" + "\n" + "A: no" ;
+        if(clauses.length == 1){
+            this.code_C(clauses[0]);
+        }
 
+
+
+    }
+
+     */
+
+    private code_Program(program: Program, rho: void){
+        /*let result1: string[] = [];
+        for (let goal of program.query.goals) {
+            result1.push(this.code_G(goal, rho));
+        }
+
+        let result2: string[] = [];
+        for (let clause of program.clauses) {
+            result2.push(this.code_P(clause));
+        }
+        return `init A` + "\n" + `pushenv d`+ "\n" + result1.join("\n") + "\n" + "halt d" + "\n" + "A: no"
+
+         */
     }
 }
