@@ -66,6 +66,7 @@ function generateLayout(state: State, graph: Graph): FcoseLayoutOptions {
         // alignmentConstraint: alignConstraints,
         relativePlacementConstraint: relPlacementConstraints,
         fixedNodeConstraint: fixedConstraints,
+        uniformNodeDimensions: true,
     };
 }
 
