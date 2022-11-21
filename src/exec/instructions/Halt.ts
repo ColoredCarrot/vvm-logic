@@ -5,13 +5,12 @@ import {ExecutionError} from "../ExecutionError";
 import {AtomCell} from "../../model/AtomCell";
 import {VariableCell} from "../../model/VariableCell";
 import {StructCell} from "../../model/StructCell";
+import {HaltDialog} from "../../model/dialog/HaltDialog";
 
 export class Halt extends Instruction {
-    readonly d: number;
-    
-    constructor(d: number) {
+
+    constructor(readonly d: number) {
         super("HALT " + d);
-        this.d = d;
     }
 
     step(state: State): State {
@@ -28,7 +27,7 @@ export class Halt extends Instruction {
             }
         }
 
-        return state;
+        return state.setActiveDialog(new HaltDialog(bindings));
     }
 
     private bindingsFor(state: State, addr: number): string {

@@ -11,37 +11,23 @@ export class Popenv extends Instruction {
     }
 
     step(state: State): State {
-
-        const currentFP = state.framePointer;
-        const fPCell = state.stack.get(currentFP);
-        if (!(fPCell instanceof ValueCell)) {
-            throw new ExecutionError("Cell on stack at FP (" + currentFP + ") should be a value, but is " + fPCell);
+        const pcCell = state.stack.get(state.framePointer);
+        if (!(pcCell instanceof ValueCell)) {
+            throw new ExecutionError("Cell on stack at FP (" + state.framePointer + ") should be a value, but is " + pcCell);
         }
 
-        const paramPC = fPCell.value;
-        const savedCell = state.stack.get(state.stack.stackPointer);
-        const newFPCell = state.stack.get(state.stack.stackPointer - 2);
-        if (!(newFPCell instanceof PointerToStackCell)) {
-            throw new ExecutionError("Cell on stack at SP - 2 (" + (state.stack.stackPointer - 2) +
-                ") should be a pointer-to-stack, but is " + newFPCell);
-        }
-        const valueFP = newFPCell.value;
-
-
-        if (state.backtrackPointer < state.framePointer) {
-            for (let i = 0; i < 8; i++) {
-                state = state.modifyStack(stack => stack.pop());
-            }
-            state = state.pushStack(savedCell);
+        const fpCell = state.stack.get(state.framePointer - 1);
+        if (!(fpCell instanceof PointerToStackCell)) {
+            throw new ExecutionError("Cell on stack at FP - 1 (" + (state.framePointer - 1) + ") should be a pointer-to-stack, but is " + fpCell);
         }
 
-        state = state.setFramePointer(valueFP);
-        state = state.setProgramCounter(paramPC);
-        state = state.garbageCollector.run(state);
+        if (state.framePointer > state.backtrackPointer) {
+            state = state.modifyStack(s => s.setStackPointer(state.framePointer - 6));
+        }
 
-        return state;
+        return state
+            .setProgramCounter(pcCell.value)
+            .setFramePointer(fpCell.value)
+            .modify(state.garbageCollector.run);
     }
-
-    //TODO: else case testen
-
 }

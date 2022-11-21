@@ -6,6 +6,7 @@ import {AppState, AppStateContext, ProgramTextContext} from "./AppState";
 import "./ControlPanel.scss";
 import {useGlobalEvent} from "./util/UseGlobalEvent";
 import Immutable from "immutable";
+import ReactTooltip from "react-tooltip";
 
 export function ControlPanel() {
 
@@ -64,6 +65,7 @@ export function ControlPanel() {
     });
 
     const btnStep = <a
+        data-tip={"Step"}
         className={"ControlPanel__button" + (endOfProgram && " ControlPanel__button--disabled" || "")}
         onClick={() => invokeStep()}
     >
@@ -71,13 +73,14 @@ export function ControlPanel() {
     </a>;
 
     const btnRun = <a
+        data-tip={"Run"}
         className="ControlPanel__button"
         onClick={() => invokeRun()}
     >
         {appState.autoStepEnabled ? <img src="/icons/pause_dark.svg" alt="Stop"/> : <img src="/icons/execute_dark.svg" alt="Run"/>}
     </a>;
 
-    const btnRestart = <a className="ControlPanel__button" onClick={() => {
+    const btnRestart = <a className="ControlPanel__button" data-tip={"Restart"} onClick={() => {
         setAppState({
             ...appState,
             vmState: Immutable.List(),
@@ -89,12 +92,13 @@ export function ControlPanel() {
 
     const btnBackEnabled = !appState.vmState.isEmpty();
     const btnBack = <a
+        data-tip={"Step Back"}
         className={"ControlPanel__button" + (!btnBackEnabled ? " ControlPanel__button--disabled" : "")}
         onClick={() => invokeBack()}>
         <img src="/icons/undo_dark.svg" alt="Undo"/>
     </a>;
 
-    const btnOpen = <a className="ControlPanel__button">
+    const btnOpen = <a className="ControlPanel__button" data-tip={"Open File"}>
         <input
             id="open-file-input"
             type="file"
@@ -119,6 +123,7 @@ export function ControlPanel() {
     </a>;
 
     return <div className="ControlPanel">
+        <ReactTooltip place={"bottom"} effect={"solid"} delayShow={500}/>
         {btnOpen}
         {btnRun}
         {btnStep}

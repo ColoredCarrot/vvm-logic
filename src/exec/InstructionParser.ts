@@ -157,6 +157,9 @@ export class InstructionParser {
         if (returnInstruction instanceof InvalidInstruction && this.isValidAtomName(p0)) {
             returnInstruction = this.parseStringParamInstructor(instr, p0);
         }
+        if (returnInstruction instanceof InvalidInstruction && this.isValidListConstr(p0)) {
+            returnInstruction = this.parseListPramInstruction(instr, p0);
+        }
         return returnInstruction;
     }
 
@@ -174,6 +177,14 @@ export class InstructionParser {
                 returnInstruction = new InvalidInstruction(input);
             } else {
                 returnInstruction = this.parseSignAndLabelParamInstruction(instr, l0!, l1!);
+            }
+        }
+        if (this.isValidListConstr(p0) && this.isValidLabel(p1)) {
+            const l1 = labels.find(v => { return v.text === p1; });
+            if (!l1) {
+                returnInstruction = new InvalidInstruction(input);
+            } else {
+                returnInstruction = this.parseListLabelParamsInstruction(instr, p0, l1);
             }
         }
         if (returnInstruction instanceof InvalidInstruction && this.isValidSignLabel(p0) && this.isValidNumber(p1)) {
@@ -232,6 +243,15 @@ export class InstructionParser {
             return new InvalidInstruction(instr + " " + param.text);
         }
     }
+    
+    private static parseListPramInstruction(instr: string, param: string): Instruction {
+        switch (instr) {
+        case "putstruct":
+            return new Putstruct(new SignLabel(-1, param));
+        default:
+            return new InvalidInstruction(instr + " " + param);
+        }
+    }
 
     private static parseStringParamInstructor(instr: string, param: string): Instruction {
         switch (instr) {
@@ -266,6 +286,15 @@ export class InstructionParser {
             return new Uvar(param);
         }
         return new InvalidInstruction(instr + param);
+    }
+    
+    private static parseListLabelParamsInstruction(instr: string, list: string, label: Label): Instruction {
+        switch (instr) {
+        case "ustruct":
+            return new Ustruct(new SignLabel(-1, list), label);
+        default:
+            return new InvalidInstruction(instr + " " + list + " " + label.text);
+        }
     }
 
     private static parseSignAndLabelParamInstruction(instr: string, sign: SignLabel, label: Label): Instruction {
@@ -374,6 +403,11 @@ export class InstructionParser {
 
     private static isValidContext(arg: string): boolean {
         return (this.isValidSignLabel(arg) || this.isValidAtomName(arg));
+    }
+
+    private static isValidListConstr(arg: string): boolean {
+        const regex = new RegExp("\\[]|(\\[\\|]\\/[0-9]+)");
+        return regex.test(arg);
     }
 
     //</editor-fold>
