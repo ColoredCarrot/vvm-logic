@@ -7,6 +7,7 @@ import {State} from "../../model/State";
 import {Putstruct} from "../../exec/instructions/Putstruct";
 import {SignLabel} from "../../exec/SignLabel";
 import {StructCell} from "../../model/StructCell";
+import {InstructionParser} from "../../exec/InstructionParser";
 
 
 test("Instruction: PUTSTRUCT", () => {
@@ -31,4 +32,13 @@ test("Instruction: PUTSTRUCT", () => {
         ));
 
     expect(instr.step(prevState)).toStrictEqual(expectedState);
+});
+
+test("Parse PUTSTRUCT", () => {
+    const validInput = ["PUTSTRUCT [|]/2"];
+    const expected = new Putstruct(new SignLabel(-1, "[|]/2"));
+
+    const actual = InstructionParser.parseInstruction(validInput[0], []);
+
+    expect(actual).toBeInstanceOf(Putstruct);
 });
