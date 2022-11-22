@@ -84,7 +84,11 @@ export const NODE_STYLES: { [T in NodeType]: cytoscape.Css.Node } = {
         backgroundColor: "#3700b3",
         color: "white",
     },
-    "heap-struct": {},
+    "heap-struct": {
+        "background-opacity": 0.3,
+        "text-valign": "bottom",
+        color: "white",
+    },
     "heap-uninitialized": {
         backgroundColor: "#03dac6",
     },
