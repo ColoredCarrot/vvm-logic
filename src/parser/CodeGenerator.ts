@@ -62,8 +62,7 @@ export class CodeGenerator {
 
     private labelGenerator(): void {
 
-        const alphabet = "ABCDEFGHIJKLMNOPQRSTUVW";
-        this.label = alphabet[Math.floor(Math.random() * alphabet.length)];
+        this.label = this.label + 1 as string;
 
     }
 
