@@ -88,7 +88,7 @@ export class CodeGenerator {
 
         case "Unification":
             let unification = goal.value as Unification;
-
+            un
 
             //size = 0 abchecken?
 
