@@ -122,6 +122,13 @@ export function ControlPanel() {
         </label>
     </a>;
 
+    const btnClear = <a
+        data-tip={"Clear Text"}
+        className="ControlPanel__button"
+        onClick={() => setEditor(TextEditor.create())}>
+        <img src="/icons/cwmTerminate_dark.svg" alt="Clear"/>
+    </a>;
+
     return <div className="ControlPanel">
         <ReactTooltip place={"bottom"} effect={"solid"} delayShow={500}/>
         {btnOpen}
@@ -129,5 +136,6 @@ export function ControlPanel() {
         {btnStep}
         {btnBack}
         {btnRestart}
+        {btnClear}
     </div>;
 }
