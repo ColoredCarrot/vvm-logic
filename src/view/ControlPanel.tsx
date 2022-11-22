@@ -64,9 +64,10 @@ export function ControlPanel() {
         evt.preventDefault();
     });
 
+    const btnStepDisabled = endOfProgram || vmState.activeDialog !== null;
     const btnStep = <a
         data-tip={"Step"}
-        className={"ControlPanel__button" + (endOfProgram && " ControlPanel__button--disabled" || "")}
+        className={"ControlPanel__button" + (btnStepDisabled ? " ControlPanel__button--disabled" : "")}
         onClick={() => invokeStep()}
     >
         <img src="/icons/nextStep_dark.svg" alt="Step"/>

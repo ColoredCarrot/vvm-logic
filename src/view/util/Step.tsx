@@ -8,6 +8,11 @@ export function step(codeLine: ProgramText.CodeLine, appState: AppState, setAppS
 
     const vmState = appState.vmState.last() ?? State.new();
 
+    if (vmState.activeDialog !== null) {
+        // Cannot step while there is a modal dialog
+        return appState;
+    }
+
     let newState: State | null = null;
     let newAppState: AppState;
     try {
