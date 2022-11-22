@@ -151,6 +151,6 @@ export class State implements StateVars {
     }
 
     equals(that: State): boolean {
-        return JSON.stringify(this) === JSON.stringify(that);
+        return this === that || JSON.stringify(this) === JSON.stringify(that);
     }
 }
