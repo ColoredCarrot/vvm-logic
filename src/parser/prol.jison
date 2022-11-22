@@ -3,7 +3,6 @@
 
 /* prologue */
 %{
-//import {Anon, Application, Atom, Clause, Goal, Head, Literal, Program, Query, Term, Unification, Variable} from "./model/*";
 import {Anon} from "./model/Anon";
 import {Application} from "./model/Application";
 import {Atom} from "./model/Atom";
@@ -75,7 +74,7 @@ a   : IMPLICATION gr
 
 gr  : g
         {
-            $$ = [new Goal($1)]
+            $$ = [$1]
         }
     | gr ',' g
         {
@@ -86,6 +85,10 @@ gr  : g
 c   : STR_CONSTANT '(' xr ')' IMPLICATION gr
         {
             $$ = new Clause(new Head($1, $3), $6)
+        }
+    | STR_CONSTANT '(' ')' IMPLICATION gr
+        {
+            $$ = new Clause(new Head($1, []), $5)
         }
     ;
 
@@ -101,31 +104,40 @@ xr  : VARIABLE
 
 g   : STR_CONSTANT '(' tr ')'
         {
-            $$ = new Literal($1, $3)
+            $$ = new Goal(new Literal($1, $3))
+        }
+    | STR_CONSTANT '(' ')'
+        {
+            $$ = new Goal(new Literal($1, []))
         }
     | VARIABLE '=' t
         {
-            $$ = new Unification($1, $3)
+            $$ = new Goal(new Unification(new Variable($1), $3))
         }
     ;
 
 t   : at
+        {
+            $$ = new Term($1)
+        }
     | VARIABLE
         {
-            $$ = new Variable($1)
+            $$ = new Term(new Variable($1))
         }
     | '_'
         {
-            $$ = new Anon()
+            $$ = new Term(new Anon())
         }
     | STR_CONSTANT '(' tr ')'
         {
-            $$ = new Application($1, $3)
+            $$ = new Term(new Application($1, $3))
+        }
+    | STR_CONSTANT '(' ')'
+        {
+            $$ = new Term(new Application($1, []))
         }
     ;
 
-/*
-*/
 at  : INT_CONSTANT
         {
             $$ = new Atom($1)
@@ -138,7 +150,7 @@ at  : INT_CONSTANT
 
 tr  : t
         {
-            $$ = [new Term($1)]
+            $$ = [$1]
         }
     | tr ',' t
         {

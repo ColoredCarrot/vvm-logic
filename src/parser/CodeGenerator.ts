@@ -13,13 +13,12 @@ import {Predicate} from "./model/Predicate";
 
 
 export class CodeGenerator {
-
-    private label: string = "A";
+    private labelCounter = 0;
 
     private code_A(term: Term, rho: Map<string, number>): string {
 
 
-        switch (term.kind) {
+        switch (term.value.kind) {
         case "Atom":
             let atom = term.value as Atom;
             return `putatom ${atom.value}`;
@@ -27,19 +26,13 @@ export class CodeGenerator {
         case "Variable":
             let variable = term.value as Variable;
 
-            //size = 0 abchecken?
             if (!rho.has(variable.name)) {
-                return "putvar" + rho.get(variable.name);
+                const n = rho.size;
+                rho.set(variable.name, n + 1)
+                return "putvar " + rho.size;
+            }else{
+                return "putref " + rho.get(variable.name);
             }
-
-            if (rho.size == 1) {
-                rho.clear();
-                rho.set(variable.name, 1);
-            }
-
-            rho.set(variable.name, rho.size + 1);
-
-            return "putref" + rho.get(variable.name);
 
         case "Anon":
             let anon = term.value as Anon;
@@ -61,10 +54,8 @@ export class CodeGenerator {
         }
     }
 
-    private labelGenerator(): void {
-
-        this.label = this.label + 1 as string;
-
+    private getNextLabel(): string {
+        return "A" + (++this.labelCounter);
     }
 
 
@@ -79,36 +70,29 @@ export class CodeGenerator {
                 result.push(this.code_A(term, rho));
             }
 
-            this.labelGenerator();
-
             let k = literal.terms.length;
+            let label = this.getNextLabel();
 
-            return "mark " + this.label + "\n" + result.join("\n") + "\n" + `call ${literal.name}/${k}` + "\nB:\n";
+            return "mark " + label + "\n" + result.join("\n") + "\n" + `call ${literal.name}/${k}` + "\n" + label + ":";
 
 
         case "Unification":
+
             let unification = goal.value as Unification;
-            un
 
-            //size = 0 abchecken?
+            //unification.variable.name undefined :====0
 
-            if (!rho.has(unification.variable)) {
-                if (rho.size == 1) {
-                    rho.clear();
-                    rho.set(unification.variable.name, 1);
-                }
+            if(!rho.has(unification.variable.name)){
+
                 rho.set(unification.variable.name, rho.size + 1);
 
-                return "putvar " + rho.size + "\n" + this.code_A(unification.term, rho) + "\n"
+                return "putvar " + rho.get(unification.variable.name) + "\n" + this.code_A(unification.term, rho) + "\n"
                     + "bind";
 
-                //FIXME: optimierte Unifikation fehlt
-
+            }else{
+                return "putref " + rho.get(unification.variable.name) + "\n" + this.code_A(unification.term, rho) + "\n"
+                    + "unify";
             }
-
-            return "putref " + rho.get(unification.variable.name) + "\n" + this.code_A(unification.term, rho) + "\n"
-                + "unify";
-
 
         default:
             throw `Error while parsing: Unknown goal kind: ${goal.value.kind}`;
@@ -123,28 +107,33 @@ export class CodeGenerator {
             result.push(this.code_G(goal, rho));
         }
 
-        return `pushenv` + rho.size + "\n" + result.join("\n") + "\n" + "popenv";
+        return `pushenv ` + rho.size + "\n" + result.join("\n") + "\n" + "popenv";
 
     }
 
     private code_P(clauses: Clause[], label: string, rho: Map<string, number>): string {
 
         if (clauses.length == 1) {
-            return this.code_C(clauses[0], rho);
+            return `${label}:\n` + this.code_C(clauses[0], rho);
         } else {
 
-            let result: string[] = [];
+            let result1: string[] = [];
             let result2: string[] = [];
 
             for (let clause of clauses) {
-                this.labelGenerator();
-                result.push(label + ":");
-                result.push(this.code_C(clause, rho));
-
+                let label = this.getNextLabel();
+                result1.push("try " + label);
+                result2.push(label + ":");
+                result2.push(this.code_C(clause, rho));
             }
+            result1.pop();
 
-
-            return label + "setbtp" + "\n" + "try" + label;
+            return `${label}:\n` +
+                "setbtp\n" +
+                result1.join("\n") + "\n" +
+                "delbtp\n" +
+                `jump ${label}\n` +
+                result1.join("\n");
         }
 
     }
@@ -152,12 +141,9 @@ export class CodeGenerator {
 
     public code_Program(program: Program) {
 
+        //Rho Initialize:
+
         let rho: Map<string, number> = new Map();
-
-
-
-
-
 
         //Goals aufrufen
 
@@ -169,11 +155,12 @@ export class CodeGenerator {
 
         //Erstellung von Predicates
 
+        /*
         let name: string = program.clauses[0].head.name;
         let number: string = program.clauses[0].head.variables.length.toString();
         let s1: string = "(" + name + "/" + number + ")";
 
-        const mapClauses: Map<string, Clause[]> = new Map([[s1, [program.clauses[0]]]]);
+        const mapClauses_: Map<string, Clause[]> = new Map([[s1, [program.clauses[0]]]]);
 
         for (let i = 1; i < program.clauses.length; i++) {
 
@@ -186,22 +173,42 @@ export class CodeGenerator {
             let predicateOld: string = "(" + name + "/" + number + ")";
 
             if (predicateNew == predicateOld) {
-                let list: Clause[] = mapClauses.get(predicateOld) as Clause[];
+                let list: Clause[] = mapClauses_.get(predicateOld) as Clause[];
                 list.push(program.clauses[i]);
-                mapClauses.set(predicateOld, list);
+                mapClauses_.set(predicateOld, list);
 
             } else {
-                console.log(mapClauses.set(predicateNew, [program.clauses[i]]));
+                console.log(mapClauses_.set(predicateNew, [program.clauses[i]]));
+            }
+        }
+        */
+
+        const map: Map<string, Clause[]> = new Map();
+        for (let clause of program.clauses) {
+            let name = clause.head.name;
+            let k = clause.head.variables.length;
+            let label = `${name}/${k}`;
+
+            if (map.has(label)) {
+                // @ts-ignore
+                map.get(label).push(clause);
+            } else {
+                map.set(label, [clause]);
             }
         }
 
         let result2: string[] = [];
-        for (let keys of mapClauses.keys()){
-                this.code_P(mapClauses.get(keys)!, keys, rho);
-            }
+        for (let keys of map.keys()){
+            result2.push(this.code_P(map.get(keys)!, keys, rho));
+        }
 
-        return "init A" + "\n" + "pushenv " + rho.size + "\n" + result1.join("\n")
-                + result2.join("\n");
+        return "init A0\n" +
+            `pushenv ${rho.size}\n` +
+            result1.join("\n") + "\n" +
+            `halt ${rho.size}\n` +
+            "A0:\n" +
+            "no\n" +
+            result2.join("\n");
   }
 
 
