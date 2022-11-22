@@ -10,7 +10,7 @@ Visualization of the registers: stack pointer, program counter, frame pointer, b
 See output of parsed instructions, or error message, if something went wrong.
 
 ## Usage
-After you're input is checked, so no instruction is marked red, you can start the visualization and see the stepwise result of the registers, stack and heap.
+After the input is checked, so no instruction is marked red, you can start the visualization and see the stepwise result of the registers, stack and heap.
 You can also click through every instruction on you own, undo a step or restart the whole program.
 
 If the input program finishes, the result will be shown in the end, otherwise you will see at which program instruction an error has occurred and what went wrong.
