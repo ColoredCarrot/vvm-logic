@@ -116,7 +116,7 @@ export class CodeGenerator {
 
 
     private code_U(unification: Unification, rho: Map<string, number>): string {
-        //FIXME:
+        //FIXME
         return "";
     }
 
