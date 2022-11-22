@@ -280,7 +280,7 @@ export function createGraph(state: State): Graph {
             .filter(e => nodeExists(e.from, state) && nodeExists(e.to, state))
             .map(e => ({
                 data: {
-                    // id: "E" + nodeIdToString(e.from) + nodeIdToString(e.to),
+                    id: "E_" + nodeIdToString(e.from) + "_" + nodeIdToString(e.to),
                     source: nodeIdToString(e.from),
                     target: nodeIdToString(e.to),
                     type: e.type,
