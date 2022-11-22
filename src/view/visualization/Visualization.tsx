@@ -10,9 +10,9 @@ import "./Visualization.scss";
 import {createGraph, Graph} from "./VisualizationGraph";
 import {Dialog} from "../../model/dialog/Dialog";
 import {AppState, AppStateContext} from "../AppState";
-import {ExecutionError} from "../../exec/ExecutionError";
 import {StructCell} from "../../model/StructCell";
 import {Range} from "immutable";
+import {changeVmState} from "../util/Step";
 
 Cytoscape.use(fcose);
 
@@ -36,7 +36,7 @@ export function Visualization() {
                     {state.activeDialog?.renderContent()}
                 </div>
                 <div className="Visualization__Modal__Dialog__Buttons">
-                    {(state.activeDialog?.choices as readonly string[] ?? [])?.map(choice =>
+                    {(state.activeDialog?.choices ?? [])?.map(choice =>
                         <ModalDialogButton
                             key={choice}
                             dialog={state.activeDialog!}
@@ -65,20 +65,9 @@ function ModalDialogButton<C extends readonly string[]>({
     setAppState,
 }: ModalDialogButtonProps<C>) {
     return <a
-        //key={choice}
         className="Visualization__Modal__Dialog__Button"
         onClick={_ => {
-            const state = appState.vmState.last() ?? State.new();
-            const prevState = state.setActiveDialog(null);
-            try {
-                setAppState({...appState, vmState: appState.vmState.push(dialog.apply(choice, prevState))});
-            } catch (ex) {
-                if (!(ex instanceof ExecutionError)) {
-                    console.error("Internal error!", ex);
-                }
-                const message = ex instanceof Error ? ex.message : JSON.stringify(ex);
-                setAppState({...appState, lastExecutionError: ex instanceof ExecutionError ? ex : message});
-            }
+            setAppState(changeVmState(appState, vmState => dialog.apply(choice, vmState.setActiveDialog(null))));
         }}
     >{choice}</a>;
 }

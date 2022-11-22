@@ -13,7 +13,7 @@ export class HaltDialog extends Dialog<typeof CHOICES> {
 
     renderContent(): React.ReactElement {
         return <div>
-            {this.values.map((v, i) => <div key={v}>{i + 1}: {v}</div>)}
+            {this.values.length === 0 ? <em>No results</em> : this.values.map((v, i) => <div key={v}>{i + 1}: {v}</div>)}
         </div>;
     }
 

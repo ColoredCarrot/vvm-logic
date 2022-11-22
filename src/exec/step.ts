@@ -6,6 +6,7 @@ import {Instruction} from "./instructions/Instruction";
  */
 export function step(state: State, instruction: Instruction): State {
     return state
+        .setActiveDialog(null)
         .setProgramCounter(state.programCounter + 1)
         .modify(instruction.step.bind(instruction));
 }
