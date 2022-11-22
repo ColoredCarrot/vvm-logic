@@ -9,6 +9,7 @@ import {ValueCell} from "../../model/ValueCell";
 import {VariableCell} from "../../model/VariableCell";
 import {ExecutionError} from "../../exec/ExecutionError";
 import {Heap} from "../../model/Heap";
+import {TOTAL_NODE_HEIGHT} from "./NodeStyles";
 
 export const NodeTypes = [
     "heap-uninitialized",
@@ -67,6 +68,7 @@ function nodeExists(nodeId: NodeId, state: State): boolean {
 export type NodeDataDefinition = cytoscape.NodeDataDefinition & {
     label: string | number,
     type: NodeType,
+    location: "registers" | "stack" | "heap" | "trail",
 };
 
 export type NodeDefinition = cytoscape.NodeDefinition & {
@@ -81,38 +83,43 @@ export function createGraph(state: State): Graph {
     const nodes: (NodeDefinition & { pannable?: boolean })[] = [];
     const edges: Edge[] = [];
 
-    nodes.push({
-        data: {id: "S0_DUMMY", label: "I SHOULD NOT BE VISIBLE", type: "invisible"},
-    });
+    // nodes.push({
+    //     data: {id: "S0_DUMMY", label: "I SHOULD NOT BE VISIBLE", type: "invisible"},
+    // });
+
+    const stackBottom = state.stack.size * TOTAL_NODE_HEIGHT;
 
     // REGISTER
-    const programCounter = state.programCounter;
-    nodes.push({
-        data: {id: "PC", label: "PC: " + programCounter, type: "register-value"},
+    const regs = [
+        ["PC", state.programCounter],
+        ["SP", state.stack.stackPointer],
+        ["FP", state.framePointer],
+        ["BP", state.backtrackPointer],
+        ["TP", state.trail.trailPointer],
+        ["HP", state.heap.heapPointer],
+    ] as const;
+
+    // const regs = allRegs.filter(([_, value]) => value >= 0);
+
+    regs.forEach(([name, value], i) => {
+        nodes.push({
+            data: {id: name, label: name + ": " + value, type: "register-value", location: "registers"},
+            position: {x: 0, y: -(i + 1) * TOTAL_NODE_HEIGHT},
+            locked: true,
+        });
     });
-    const stackPointer = state.stack.stackPointer;
-    nodes.push({
-        data: {id: "SP", label: "SP: " + stackPointer, type: "register-value"},
-    });
-    const framePointer = state.framePointer;
-    nodes.push({
-        data: {id: "FP", label: "FP: " + framePointer, type: "register-value"},
-    });
-    if (framePointer != -1) {
+
+    if (state.framePointer !== -1) {
         edges.push({
             from: "FP",
-            to: {kind: "stack", index: framePointer},
+            to: {kind: "stack", index: state.framePointer},
             type: "registerToStack",
         });
     }
-    const backtrackPointer = state.backtrackPointer;
-    nodes.push({
-        data: {id: "BP", label: "BP: " + backtrackPointer, type: "register-value"},
-    });
-    if (backtrackPointer != -1) {
+    if (state.backtrackPointer !== -1) {
         edges.push({
             from: "BP",
-            to: {kind: "stack", index: backtrackPointer},
+            to: {kind: "stack", index: state.backtrackPointer},
             type: "registerToStack",
         });
     }
@@ -121,141 +128,96 @@ export function createGraph(state: State): Graph {
     for (let i = 0; i < state.stack.size; ++i) {
         const stackCell = state.stack.get(i);
 
+        let label: string;
+        let type: NodeType;
         if (stackCell instanceof UninitializedCell) {
-            nodes.push({
-                data: {id: "S" + i, label: "S[" + i + "]", type: "stack-uninitialized"},
-                grabbable: false,
-                pannable: true,
-            });
+            label = "S[" + i + "]";
+            type = "stack-uninitialized";
         } else if (stackCell instanceof ValueCell) {
-            nodes.push({
-                data: {id: "S" + i, label: stackCell.value, type: "stack-value"},
-                grabbable: false,
-                pannable: true,
-            });
+            label = stackCell.value.toString();
+            type = "stack-value";
         } else if (stackCell instanceof PointerToStackCell) {
-            nodes.push({
-                data: {id: "S" + i, label: "[" + stackCell.value + "]", type: "stack-pointerToStack"},
-                grabbable: false,
-                pannable: true,
-            });
+            label = "[" + stackCell.value + "]";
+            type = "stack-pointerToStack";
             edges.push({
                 from: {kind: "stack", index: i},
                 to: {kind: "stack", index: stackCell.value},
                 type: "inStack",
             });
         } else if (stackCell instanceof PointerToHeapCell) {
-            nodes.push({
-                data: {
-                    id: "S" + i,
-                    label: "[" + stackCell.value + "]",
-                    type: "heap-pointerToHeap",
-                },
-                grabbable: false,
-                pannable: true,
-            });
+            label = "[" + stackCell.value + "]";
+            type = "heap-pointerToHeap";
             edges.push({
                 from: {kind: "stack", index: i},
                 to: {kind: "heap", address: stackCell.value},
                 type: "stackToHeap",
             });
         } else if (stackCell instanceof StructCell) {
-            nodes.push({
-                data: {
-                    id: "S" + i,
-                    label: stackCell.label,
-                    type: "stack-value",
-                },
-                grabbable: false,
-                pannable: true,
-            });
+            label = stackCell.label;
+            type = "stack-value";
         } else if (stackCell instanceof AtomCell) {
-            nodes.push({
-                data: {
-                    id: "S" + i,
-                    label: stackCell.value,
-                    type: "stack-value",
-                },
-                grabbable: false,
-                pannable: true,
-            });
+            label = stackCell.value;
+            type = "stack-value";
         } else if (stackCell instanceof VariableCell) {
-            nodes.push({
-                data: {
-                    id: "S" + i,
-                    label: "R",
-                    type: "stack-value",
-                },
-                grabbable: false,
-                pannable: true,
-            });
+            label = "R";
+            type = "stack-value";
         } else {
             throw new ExecutionError("Unexpected Cell Type on Stack: " + JSON.stringify(stackCell));
         }
+
+        nodes.push({
+            data: {
+                id: "S" + i,
+                label,
+                type,
+                location: "stack",
+            },
+            grabbable: false,
+            pannable: true,
+            position: {
+                x: 1400,
+                y: -(i + 1) * TOTAL_NODE_HEIGHT,
+            },
+            locked: true,
+        });
     }
 
     // HEAP
     for (const i of state.heap.getKeySet()) {
         const heapCell = state.heap.get(i);
         const parent = isPartOfStruct(state.heap, i);
+
+        let label: string;
+        let type: NodeType;
+
         if (heapCell instanceof UninitializedCell) {
-            nodes.push({
-                data: {
-                    id: "H" + i,
-                    label: "H[" + i + "]",
-                    type: "heap-uninitialized",
-                    parent: parent,
-                },
-            });
+            label = "H[" + i + "]";
+            type = "heap-uninitialized";
         } else if (heapCell instanceof AtomCell) {
-            nodes.push({
-                data: {
-                    id: "H" + i,
-                    label: "A: " + heapCell.value,
-                    type: "heap-atom",
-                    parent: parent,
-                },
-            });
+            label = "A: " + heapCell.value;
+            type = "heap-atom";
         } else if (heapCell instanceof VariableCell) {
             const isUnbounded = heapCell.value === i;
-            nodes.push({
-                data: {
-                    id: "H" + i,
-                    label: heapCell.tag + ": " + heapCell.value,
-                    type: isUnbounded ? "heap-unbounded-variable" : "heap-variable",
-                    parent: parent,
-                },
-            });
+            label = heapCell.tag + ": " + heapCell.value;
+            type = isUnbounded ? "heap-unbounded-variable" : "heap-variable";
             edges.push({
                 from: {kind: "heap", address: i},
                 to: {kind: "heap", address: heapCell.value},
                 type: isUnbounded ? "loopInHeap" : "inHeap",
             });
         } else if (heapCell instanceof StructCell) {
-            nodes.push({
-                data: {
-                    id: "H" + i,
-                    label: "S: " + heapCell.label,
-                    type: "heap-struct",
-                    parent: parent,
-                },
-            });
-            for (let j = 0; j < heapCell.size; j++) {
-                edges.push({
-                    from: {kind: "heap", address: i /*+ j*/},
-                    to: {kind: "heap", address: i + j + 1},
-                    type: "inHeap",
-                });
-            }
+            label = "S: " + heapCell.label;
+            type = "heap-struct";
+            // for (let j = 0; j < heapCell.size; j++) {
+            //     edges.push({
+            //         from: {kind: "heap", address: i /*+ j*/},
+            //         to: {kind: "heap", address: i + j + 1},
+            //         type: "inHeap",
+            //     });
+            // }
         } else if (heapCell instanceof PointerToHeapCell) {
-            nodes.push({
-                data: {
-                    id: "H" + i,
-                    label: "[" + heapCell.value + "]",
-                    type: "heap-pointerToHeap",
-                    parent: parent,
-                },
-            });
+            label = "[" + heapCell.value + "]";
+            type = "heap-pointerToHeap";
             edges.push({
                 from: {kind: "heap", address: i},
                 to: {kind: "heap", address: heapCell.value},
@@ -264,12 +226,22 @@ export function createGraph(state: State): Graph {
         } else {
             throw new ExecutionError("Unexpected Cell Type on Heap: " + JSON.stringify(heapCell));
         }
+
+        nodes.push({
+            data: {
+                id: "H" + i,
+                label,
+                type,
+                parent,
+                location: "heap",
+            },
+        });
     }
 
     // TRAIL (if exists)
     for (let i = 0; i < state.trail.trailPointer; ++i) {
         nodes.push({
-            data: {id: "T" + i, label: state.trail.get(i), type: "trail-value"},
+            data: {id: "T" + i, label: state.trail.get(i), type: "trail-value", location: "trail"},
             selectable: false,
         });
     }

@@ -1,8 +1,9 @@
 import Cytoscape from "cytoscape";
 import cytoscape from "cytoscape";
+import {ColaLayoutOptions, GapInequality} from "cytoscape-cola";
+import cola from "cytoscape-cola";
 import cytoscapeFcose from "cytoscape-fcose";
-import fcose, {FcoseLayoutOptions} from "cytoscape-fcose";
-import React, {useContext, useRef} from "react";
+import React, {useContext, useEffect, useLayoutEffect, useRef} from "react";
 import CytoscapeComponent from "react-cytoscapejs";
 import {State} from "../../model/State";
 import {STYLESHEET, TOTAL_NODE_HEIGHT} from "./NodeStyles";
@@ -14,7 +15,7 @@ import {StructCell} from "../../model/StructCell";
 import {Range} from "immutable";
 import {changeVmState} from "../util/Step";
 
-Cytoscape.use(fcose);
+Cytoscape.use(cola);
 
 export function Visualization() {
 
@@ -43,7 +44,7 @@ export function Visualization() {
                             choice={choice}
                             appState={appState}
                             setAppState={setAppState}
-                        />
+                        />,
                     )}
                 </div>
             </div>
@@ -55,6 +56,7 @@ interface ModalDialogButtonProps<C extends readonly string[]> {
     dialog: Dialog<C>,
     choice: C[number],
     appState: AppState,
+
     setAppState(_: AppState): void,
 }
 
@@ -72,12 +74,14 @@ function ModalDialogButton<C extends readonly string[]>({
     >{choice}</a>;
 }
 
-function generateLayout(state: State, graph: Graph): FcoseLayoutOptions {
-    cytoscape.use(fcose);
+function generateLayout(state: State, graph: Graph, cy?: cytoscape.Core): ColaLayoutOptions {
+    cytoscape.use(cola);
 
     // The following is the display order of the registers:
     const regs = ["SP", "PC", "FP", "BP", "HP"]
         .filter(reg => graph.nodes.some(n => n.data.id === reg));
+
+    const stackBottom = state.stack.size * TOTAL_NODE_HEIGHT;
 
     const addrsInStructs = state.heap.all().entrySeq()
         // For each struct on the heap...
@@ -86,9 +90,18 @@ function generateLayout(state: State, graph: Graph): FcoseLayoutOptions {
         .map(([addr, cell]) =>
             Range(0, (cell as StructCell).size + 1)
                 .map(off => addr + off)
-                .toArray()
+                .toArray(),
         )
         .toArray();
+
+    const gapInequalities: readonly GapInequality[] = cy === undefined ? [] : [
+        ...state.heap.all().keySeq().toArray().map(address => ({
+            axis: "x" as const,
+            left: cy.$id("S0"),
+            right: cy.$id("H" + address),
+            gap: 1000,
+        })),
+    ];
 
     // All heap nodes are to the right of the stack
     const relPlacementConstraints: cytoscapeFcose.FcoseRelativePlacementConstraint[] = [
@@ -98,14 +111,14 @@ function generateLayout(state: State, graph: Graph): FcoseLayoutOptions {
             gap: 1000,
         })),
 
-        // Within structs, cells should be ordered by address
-        ...addrsInStructs.flatMap(addrs =>
-            addrs.slice(2).map((addr, i) => ({
-                top: "H" + addrs[i + 1],
-                bottom: "H" + addr,
-                gap: TOTAL_NODE_HEIGHT,
-            }))
-        ),
+        // // Within structs, cells should be ordered by address
+        // ...addrsInStructs.flatMap(addrs =>
+        //     addrs.slice(2).map((addr, i) => ({
+        //         top: "H" + addrs[i + 1],
+        //         bottom: "H" + addr,
+        //         gap: TOTAL_NODE_HEIGHT,
+        //     }))
+        // ),
     ];
 
     const alignConstraints: cytoscapeFcose.FcoseAlignmentConstraint = {
@@ -117,43 +130,21 @@ function generateLayout(state: State, graph: Graph): FcoseLayoutOptions {
         horizontal: [],
     };
 
-    const fixedConstraints: cytoscapeFcose.FcoseFixedNodeConstraint[] = [
-        // Registers:
-        ...regs.map((reg, i) => ({
-            nodeId: reg,
-            position: {x: 0, y: -TOTAL_NODE_HEIGHT * i},
-        })),
-        // Stack:
-        ...state.stack.toArray().map((_, i) => ({
-            nodeId: "S" + i,
-            position: {x: 1400, y: -TOTAL_NODE_HEIGHT * i},
-        })),
-        // Stack Dummy:
-        {nodeId: "S0_DUMMY",
-            position: {x: 1400, y: -TOTAL_NODE_HEIGHT},
-        },
-    ];
-
     return {
-        name: "fcose",
+        name: "cola",
         animate: true,
-        animationDuration: 800,
+        maxSimulationTime: 1000,
+        refresh: 2,
         randomize: false,
-        quality: "proof",
-        alignmentConstraint: alignConstraints,
-        relativePlacementConstraint: relPlacementConstraints,
-        fixedNodeConstraint: fixedConstraints,
-        uniformNodeDimensions: true,
-        nodeRepulsion: 1_000_000,
-        //initialEnergyOnIncremental: 0.5,
-        // Gravity force (constant) (0.25)
-        gravity: 0.25,
-        // Gravity range (constant) for compounds (1.5)
-        gravityRangeCompound: 1.5,
-        // Gravity force (constant) for compounds (1.0)
-        gravityCompound: 1.0,
-        // Gravity range (constant)
-        gravityRange: 3.8,
+        centerGraph: false,
+        fit: true,
+        nodeSpacing(node): number {
+            return node.data("location") === "heap" ? 300 : 0;
+        },
+        edgeLength: 100,
+        gapInequalities,
+        avoidOverlap: true,
+        // boundingBox: {x1: 0, y1: -100, w: 400, h: 400},
     };
 }
 
@@ -168,7 +159,11 @@ function VisualizationGraph({state}: VisualizationGraphProps) {
     const graph = createGraph(state);
 
     return <CytoscapeComponent
-        cy={cy => cyRef.current = cy}
+        cy={cy => {
+            cyRef.current = cy;
+            // cy.nodes("[location='heap']").layout(generateLayout(state, graph, undefined)).run();
+            // cy.nodes("[location='heap']").layout(generateLayout(state, graph, cy)).run();
+        }}
         className="Visualization__Cytoscape"
         stylesheet={STYLESHEET}
         elements={CytoscapeComponent.normalizeElements(graph)}

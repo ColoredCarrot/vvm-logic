@@ -18,7 +18,7 @@ export class Heap implements Iterable<[Address, Cell]> {
     ) {
     }
 
-    getHeapPointer(): Address {
+    get heapPointer(): Address {
         return this._heapPointer;
     }
 
