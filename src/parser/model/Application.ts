@@ -2,7 +2,8 @@ import {Term} from "./Term";
 
 export class Application{
 
-    name: string;
+    //FIXMEL:
+    name: string; // f/n
     terms: Term[];
     kind: string = "Application";
 

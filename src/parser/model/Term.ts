@@ -6,9 +6,11 @@ import {Application} from "./Application";
 export class Term{
 
     value: Atom | Anon | Variable | Application;
+    kind: string;
 
-    constructor(value: Atom | Anon | Variable | Application) {
+    constructor(value: Atom | Anon | Variable | Application, kind: string) {
         this.value = value;
+        this.kind = kind;
     }
 
 }
