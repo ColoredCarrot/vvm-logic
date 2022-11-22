@@ -65,10 +65,9 @@ function ModalDialogButton<C extends readonly string[]>({
     setAppState,
 }: ModalDialogButtonProps<C>) {
     return <a
-        //key={choice}
         className="Visualization__Modal__Dialog__Button"
         onClick={_ => {
-            setAppState(changeVmState(appState, vmState => dialog.apply(choice, vmState)));
+            setAppState(changeVmState(appState, vmState => dialog.apply(choice, vmState.setActiveDialog(null))));
         }}
     >{choice}</a>;
 }

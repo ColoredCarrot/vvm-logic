@@ -10,8 +10,8 @@
     &__button {
         display: inline-block;
         padding: 5px 15px;
-
         height: 1rem;
+        user-select: none;
 
         // Spacing
         margin: 0 0;

@@ -66,7 +66,7 @@ export function ControlPanel() {
 
     const btnStepDisabled = endOfProgram || vmState.activeDialog !== null;
     const btnStep = <a
-        data-tip={"Step"}
+        data-tip={"Step (F8)"}
         className={"ControlPanel__button" + (btnStepDisabled ? " ControlPanel__button--disabled" : "")}
         onClick={() => invokeStep()}
     >
@@ -74,7 +74,7 @@ export function ControlPanel() {
     </a>;
 
     const btnRun = <a
-        data-tip={"Run"}
+        data-tip={"Run (F9)"}
         className="ControlPanel__button"
         onClick={() => invokeRun()}
     >
@@ -93,7 +93,7 @@ export function ControlPanel() {
 
     const btnBackEnabled = !appState.vmState.isEmpty();
     const btnBack = <a
-        data-tip={"Step Back"}
+        data-tip={"Step Back (F7)"}
         className={"ControlPanel__button" + (!btnBackEnabled ? " ControlPanel__button--disabled" : "")}
         onClick={() => invokeBack()}>
         <img src="/icons/undo_dark.svg" alt="Undo"/>
