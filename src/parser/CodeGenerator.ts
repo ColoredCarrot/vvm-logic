@@ -7,24 +7,25 @@ import {Literal} from "./model/Literal";
 import {Goal} from "./model/Goal";
 import {Unification} from "./model/Unification";
 import {Clause} from "./model/Clause";
-import {Query} from "./model/Query";
 import {Program} from "./model/Program";
-import {Predicate} from "./model/Predicate";
-import {set} from "immutable";
 
 
 export class CodeGenerator {
-    private labelCounter = 0;
+
+    private labelCounter: number = 0;
+
 
     private code_A(term: Term, setArg: Set<string>, count: number,  rho: Map<string, number>): string {
 
-
         switch (term.value.kind) {
+
         case "Atom":
+
             let atom = term.value as Atom;
             return `putatom ${atom.value}`;
 
         case "Variable":
+
             let variable = term.value as Variable;
 
             if (setArg.has(variable.name)){
@@ -32,16 +33,13 @@ export class CodeGenerator {
                 if(!rho.has(variable.name)){
                     rho.set(variable.name, rho.size + 1);
                 }
-
                 return "putref " + rho.get(variable.name);
 
             }else {
 
                 if(count > 0){
                     return "putref " + rho.get(variable.name);
-
                 }else {
-
                     if(rho.has(variable.name)){
                         return "putvar " + rho.get(variable.name);
                     }else {
@@ -53,10 +51,11 @@ export class CodeGenerator {
             }
 
         case "Anon":
-            let anon = term.value as Anon;
+
             return "putanon";
 
         case "Application":
+
             let application = term.value as Application;
 
             let result: string[] = [];
@@ -64,21 +63,21 @@ export class CodeGenerator {
                 result.push(this.code_A(term, setArg, count, rho));
             }
 
-            let k = application.terms.length;
+            let k = application.terms.length
 
             return result.join("\n") + "\n" + `putstruct ${application.name}/${k}`;
+
         default:
             throw `Error while parsing: Unknown term kind: ${term.value.kind}`;
         }
     }
 
-    private getNextLabel(): string {
-        return "A" + (++this.labelCounter);
-    }
 
 
     private code_G(goal: Goal, setArg: Set<string>, count: number, rho: Map<string, number>): string {
+
         switch (goal.value.kind) {
+
         case "Literal":
 
             let literal = goal.value as Literal;
@@ -157,21 +156,27 @@ export class CodeGenerator {
 
             let result1: string[] = [];
             let result2: string[] = [];
+            let result3: string[] = [];
 
             for (let clause of clauses) {
-                let label = this.getNextLabel();
-                result1.push("try " + label);
-                result2.push(label + ":");
+                let labelNew = this.getNextLabel();
+                result1.push("try " + labelNew);
+                result3.push(labelNew);
+                result2.push(labelNew + ":");
                 result2.push(this.code_C(clause, rho));
             }
+
+            let labelNew = result3.pop();
+
             result1.pop();
 
             return `${label}:\n` +
                 "setbtp\n" +
                 result1.join("\n") + "\n" +
                 "delbtp\n" +
-                `jump ${label}\n` +
-                result1.join("\n");
+                `jump ${labelNew}\n` +
+                result2.join("\n");
+
         }
 
     }
@@ -214,7 +219,8 @@ export class CodeGenerator {
             result2.push(this.code_P(map.get(keys)!, keys, rho));
         }
 
-        return "init A0\n" +
+
+        return "init A\n" +
             `pushenv ${rho.size}\n` +
             result1.join("\n") + "\n" +
             `halt ${rho.size}\n` +
@@ -222,6 +228,19 @@ export class CodeGenerator {
             "no\n" +
             result2.join("\n");
   }
+
+
+    private getNextLabel(): string {
+
+        let label: string = "ABCDEFGHIJKLMNOPQRSTUVW";
+        this.labelCounter ++;
+        if(this.labelCounter > 24){
+            this.labelCounter = -1;
+            return label.charAt(this.labelCounter ++) + this.labelCounter;
+        }
+
+        return label.charAt(this.labelCounter);
+    }
 
 
 
