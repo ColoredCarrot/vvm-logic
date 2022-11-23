@@ -224,7 +224,7 @@ export class CodeGenerator {
             `pushenv ${rhoBeforePred}\n` +
             result1.join("\n") + "\n" +
             `halt ${rhoBeforePred}\n` +
-            "A0:\n" +
+            "A:\n" +
             "no\n" +
             result2.join("\n");
   }
