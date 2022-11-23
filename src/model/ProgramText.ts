@@ -65,7 +65,7 @@ export class Text {
     get codeLineCount(): number {
         let res = 0;
         for (const line of this.lines) {
-            if (line instanceof CodeLine) {
+            if (line instanceof CodeLine || line instanceof CompositionLine) {
                 ++res;
             }
         }
@@ -74,13 +74,13 @@ export class Text {
 
     getCodeLine(num: number): CodeLine | null {
         return <CodeLine | null>(
-            this.lines.find(l => l instanceof CodeLine && l.num === num)
+            this.lines.find(l => (l instanceof CodeLine || l instanceof CompositionLine) && l.num === num)
             ?? null
         );
     }
 
     getNextCodeLine(programCounter: number): CodeLine | null {
-        let numToExec = programCounter + 1;
+        let numToExec = programCounter;
         while (numToExec < this.lines.length && this.getCodeLine(numToExec) === null) {
             ++numToExec;
         }

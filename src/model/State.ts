@@ -34,7 +34,7 @@ export class State implements StateVars {
             tryChain: TryChain.empty(),
             framePointer: -1,
             backtrackPointer: -1,
-            programCounter: -1,
+            programCounter: 0,
             activeDialog: null,
         });
     }
