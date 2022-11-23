@@ -80,7 +80,7 @@ export class InstructionParser {
         }
 
         const inputSplit: string[] = input.split(" ");
-        const instr: string = inputSplit.at(0)!;
+        const instr: string = inputSplit.at(0)!.trim();
 
         const params: string[] = inputSplit.slice(1);
 
@@ -104,9 +104,9 @@ export class InstructionParser {
             const line = inputLines.at(i)!;
             const lblSplit = line.split(":");
             if (lblSplit.length > 2) {
-                //TODO: Error?
+                continue;
             } else if (lblSplit.length > 1) {
-                const lblString = lblSplit.at(0)!;
+                const lblString = lblSplit.at(0)!.trim();
                 //Line has a label
                 let l: Label;
                 if (this.isValidSignLabel(lblString)) {
@@ -115,7 +115,7 @@ export class InstructionParser {
                     l = new Label(i, lblString);
                 } else {
                     //TODO: Error
-                    l = new Label(-1, "ERROR");
+                    continue;
                 }
 
                 labels.push(l);
@@ -377,7 +377,7 @@ export class InstructionParser {
     //<editor-fold> Validation Methods
 
     private static isValidLabel(label: string): boolean {
-        const regex = new RegExp(".+");
+        const regex = /^[^\s:]+$/;
         return regex.test(label);
     }
 
