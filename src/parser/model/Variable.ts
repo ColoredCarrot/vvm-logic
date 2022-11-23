@@ -1,7 +1,7 @@
-export class Variable{
+export class Variable {
 
     name: string;
-    kind: string = "Variable";
+    kind = "Variable";
 
     constructor(name: string) {
         this.name = name;

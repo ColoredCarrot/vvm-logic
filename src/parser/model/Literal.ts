@@ -1,10 +1,10 @@
 import {Term} from "./Term";
 
-export class Literal{
+export class Literal {
 
     name: string;
     terms: Term[];
-    kind: string = "Literal";
+    kind = "Literal";
 
     constructor(name: string, terms: Term[]) {
         this.name = name;

@@ -3,7 +3,7 @@ import {Goal} from "./Goal";
 import {types} from "sass";
 import List = types.List;
 
-export class Clause{
+export class Clause {
 
     head: Head;
     goals: Goal[];

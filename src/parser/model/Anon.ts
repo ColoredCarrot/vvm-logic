@@ -1,4 +1,4 @@
-export class Anon{
+export class Anon {
 
-    kind: string = "Anon";
+    kind = "Anon";
 }

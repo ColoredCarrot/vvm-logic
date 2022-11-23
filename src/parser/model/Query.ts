@@ -1,6 +1,6 @@
 import {Goal} from "./Goal";
 
-export class Query{
+export class Query {
 
     goals: Goal[];
 

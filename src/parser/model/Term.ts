@@ -3,7 +3,7 @@ import {Anon} from "./Anon";
 import {Variable} from "./Variable";
 import {Application} from "./Application";
 
-export class Term{
+export class Term {
 
     value: Atom | Anon | Variable | Application;
     //kind: string;

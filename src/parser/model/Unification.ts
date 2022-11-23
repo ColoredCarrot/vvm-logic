@@ -1,11 +1,11 @@
 import {Variable} from "./Variable";
 import {Term} from "./Term";
 
-export class Unification{
+export class Unification {
 
     variable: Variable;
     term: Term;
-    kind: string = "Unification";
+    kind = "Unification";
 
     constructor(variable: Variable, term: Term) {
         this.variable = variable;

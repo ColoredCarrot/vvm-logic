@@ -1,11 +1,11 @@
 import {Term} from "./Term";
 
-export class Application{
+export class Application {
 
     //FIXMEL:
     name: string; // f/n
     terms: Term[];
-    kind: string = "Application";
+    kind = "Application";
 
     constructor(name: string, terms: Term[]) {
         this.name = name;

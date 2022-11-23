@@ -12,7 +12,7 @@ import {Program} from "./model/Program";
 
 export class CodeGenerator {
 
-    private labelCounter: number = 0;
+    private labelCounter = 0;
 
 
     private code_A(term: Term, setArg: Set<string>, count: number,  rho: Map<string, number>): string {
@@ -21,30 +21,30 @@ export class CodeGenerator {
 
         case "Atom":
 
-            let atom = term.value as Atom;
+            const atom = term.value as Atom;
             return `putatom ${atom.value}`;
 
         case "Variable":
 
-            let variable = term.value as Variable;
+            const variable = term.value as Variable;
 
-            if (setArg.has(variable.name)){
+            if (setArg.has(variable.name)) {
 
-                if(!rho.has(variable.name)){
+                if (!rho.has(variable.name)) {
                     rho.set(variable.name, rho.size + 1);
                 }
                 return "putref " + rho.get(variable.name);
 
-            }else {
+            } else {
 
-                if(count > 0){
+                if (count > 0) {
                     return "putref " + rho.get(variable.name);
-                }else {
-                    if(rho.has(variable.name)){
+                } else {
+                    if (rho.has(variable.name)) {
                         return "putvar " + rho.get(variable.name);
-                    }else {
+                    } else {
                         const n = rho.size;
-                        rho.set(variable.name, n + 1)
+                        rho.set(variable.name, n + 1);
                         return "putvar " + rho.size;
                     }
                 }
@@ -56,14 +56,14 @@ export class CodeGenerator {
 
         case "Application":
 
-            let application = term.value as Application;
+            const application = term.value as Application;
 
-            let result: string[] = [];
-            for (let term of application.terms) {
+            const result: string[] = [];
+            for (const term of application.terms) {
                 result.push(this.code_A(term, setArg, count, rho));
             }
 
-            let k = application.terms.length
+            const k = application.terms.length;
 
             return result.join("\n") + "\n" + `putstruct ${application.name}/${k}`;
 
@@ -73,43 +73,42 @@ export class CodeGenerator {
     }
 
 
-
     private code_G(goal: Goal, setArg: Set<string>, count: number, rho: Map<string, number>): string {
 
         switch (goal.value.kind) {
 
         case "Literal":
 
-            let literal = goal.value as Literal;
+            const literal = goal.value as Literal;
 
-            let result: string[] = [];
-            for (let term of literal.terms) {
+            const result: string[] = [];
+            for (const term of literal.terms) {
                 result.push(this.code_A(term, setArg, count,  rho));
             }
 
-            let k = literal.terms.length;
-            let label = this.getNextLabel();
+            const k = literal.terms.length;
+            const label = this.getNextLabel();
 
-            if(result.length == 0){
+            if (result.length == 0) {
                 return "mark " + label + "\n" + `call ${literal.name}/${k}` + "\n" + label + ":";
-            }else{
+            } else {
                 return "mark " + label + "\n" + result.join("\n") + "\n" + `call ${literal.name}/${k}` + "\n" + label + ":";
             }
 
 
         case "Unification":
 
-            let unification = goal.value as Unification;
+            const unification = goal.value as Unification;
 
-            if (setArg.has(unification.variable.name) ) {
+            if (setArg.has(unification.variable.name)) {
 
-                if(!rho.has(unification.variable.name)){
+                if (!rho.has(unification.variable.name)) {
                     rho.set(unification.variable.name, rho.size + 1);
                 }
                 return "putref " + rho.get(unification.variable.name) + "\n" + this.code_A(unification.term, setArg, count, rho) + "\n"
                         + "unify";
 
-            }else {
+            } else {
 
                 if (count > 0) {
 
@@ -130,21 +129,20 @@ export class CodeGenerator {
     }
 
 
-
     private code_C(clause: Clause, rho: Map<string, number>): string {
 
-        let setArguments = new Set<string>;
-        for(let variable of clause.head.variables){
+        const setArguments = new Set<string>;
+        for (const variable of clause.head.variables) {
             setArguments.add(variable.name);
         }
 
-        let result: string[] = [];
-        let count: number = 0;
-        for (let goal of clause.goals) {
+        const result: string[] = [];
+        let count = 0;
+        for (const goal of clause.goals) {
             result.push(this.code_G(goal, setArguments, count++, rho));
         }
 
-        return `pushenv ` + rho.size + "\n" + result.join("\n") + "\n" + "popenv";
+        return "pushenv " + rho.size + "\n" + result.join("\n") + "\n" + "popenv";
 
     }
 
@@ -154,19 +152,19 @@ export class CodeGenerator {
             return `${label}:\n` + this.code_C(clauses[0], rho);
         } else {
 
-            let result1: string[] = [];
-            let result2: string[] = [];
-            let result3: string[] = [];
+            const result1: string[] = [];
+            const result2: string[] = [];
+            const result3: string[] = [];
 
-            for (let clause of clauses) {
-                let labelNew = this.getNextLabel();
+            for (const clause of clauses) {
+                const labelNew = this.getNextLabel();
                 result1.push("try " + labelNew);
                 result3.push(labelNew);
                 result2.push(labelNew + ":");
                 result2.push(this.code_C(clause, rho));
             }
 
-            let labelNew = result3.pop();
+            const labelNew = result3.pop();
 
             result1.pop();
 
@@ -187,24 +185,24 @@ export class CodeGenerator {
         //Rho Initialize:
 
 
-        let rho: Map<string, number> = new Map();
+        const rho: Map<string, number> = new Map();
 
         //Goals aufrufen
 
 
-            let result1: string[] = [];
-            for (let goal of program.query.goals) {
-                let count: number = 0;
-                console.log(result1.push(this.code_G(goal, new Set, count++, rho)));
-            }
+        const result1: string[] = [];
+        for (const goal of program.query.goals) {
+            let count = 0;
+            console.log(result1.push(this.code_G(goal, new Set, count++, rho)));
+        }
 
-        let rhoBeforePred = rho.size;
+        const rhoBeforePred = rho.size;
 
         const map: Map<string, Clause[]> = new Map();
-        for (let clause of program.clauses) {
-            let name = clause.head.name;
-            let k = clause.head.variables.length;
-            let label = `${name}/${k}`;
+        for (const clause of program.clauses) {
+            const name = clause.head.name;
+            const k = clause.head.variables.length;
+            const label = `${name}/${k}`;
 
             if (map.has(label)) {
                 // @ts-ignore
@@ -214,8 +212,8 @@ export class CodeGenerator {
             }
         }
 
-        let result2: string[] = [];
-        for (let keys of map.keys()){
+        const result2: string[] = [];
+        for (const keys of map.keys()) {
             result2.push(this.code_P(map.get(keys)!, keys, rho));
         }
 
@@ -227,21 +225,20 @@ export class CodeGenerator {
             "A:\n" +
             "no\n" +
             result2.join("\n");
-  }
+    }
 
 
     private getNextLabel(): string {
 
-        let label: string = "ABCDEFGHIJKLMNOPQRSTUVW";
-        this.labelCounter ++;
-        if(this.labelCounter > 24){
+        const label = "ABCDEFGHIJKLMNOPQRSTUVW";
+        this.labelCounter++;
+        if (this.labelCounter > 24) {
             this.labelCounter = -1;
-            return label.charAt(this.labelCounter ++) + this.labelCounter;
+            return label.charAt(this.labelCounter++) + this.labelCounter;
         }
 
         return label.charAt(this.labelCounter);
     }
-
 
 
     // Optimierung

@@ -1,6 +1,6 @@
 import {Clause} from "./Clause";
 
-export class Predicate{
+export class Predicate {
 
     name: string;
     param: number;

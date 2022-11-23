@@ -1,6 +1,6 @@
 import {Variable} from "./Variable";
 
-export class Head{
+export class Head {
 
     name: string;
     variables: Variable[];
