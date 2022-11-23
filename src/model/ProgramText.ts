@@ -32,6 +32,17 @@ export class LabelLine extends Line {
     }
 }
 
+export class CompositionLine extends CodeLine {
+    constructor(
+        num: number,
+        content: string,
+        raw: string,
+        instruction: Instruction,
+    ) {
+        super(num, content, raw, instruction);
+    }
+}
+
 /**
  * Encapsulates the raw and parsed program text at any given point of time.
  */
@@ -39,6 +50,7 @@ export class Text {
     constructor(
         readonly lines: readonly Line[],
     ) {
+        //console.log(lines);
         for (let i = 0; i < lines.length; ++i) {
             if (lines[i].num !== i) {
                 throw new Error("Line numbers are wrong");
@@ -85,12 +97,17 @@ export function parseProgramText(rawLines: readonly string[]): Text {
     return new Text(
         rawLines
             .map(line => line.trim().toLowerCase())
-            .map((line, num) =>
-                line.endsWith(":")
-                    ? new LabelLine(num, line, rawLines[num])
-                    : (line.length > 0
-                        ? new CodeLine(num, line, rawLines[num], InstructionParser.parseInstruction(line, labels))
-                        : new Line(num, line, rawLines[num])),
-            ),
+            .map((line, num) => {
+                if (labels.find(v => v.line == num)) {
+                    if (line.endsWith(":")) { //Nothing after Label, just Label
+                        return new LabelLine(num, line, rawLines[num]);
+                    } else { //Something after Label, try to parse as Instruction
+                        return new CompositionLine(num, line, rawLines[num], InstructionParser.parseInstruction(line, labels));
+                    }
+                } else {
+                    //Instruction
+                    return new CodeLine(num, line, rawLines[num], InstructionParser.parseInstruction(line, labels));
+                }
+            }),
     );
 }
