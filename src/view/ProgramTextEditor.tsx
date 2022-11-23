@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useState} from "react";
 import {ExecutionError} from "../exec/ExecutionError";
 import {InvalidInstruction} from "../exec/instructions/InvalidInstruction";
 import * as ProgramText from "../model/ProgramText";
-import {CodeLine, LabelLine} from "../model/ProgramText";
+import {CodeLine, CompositionLine, LabelLine} from "../model/ProgramText";
 import {State} from "../model/State";
 import {Caret, MovementMode, TextEditor} from "../model/text/TextEditor";
 import {AppStateContext, ProgramTextContext, ProgramTextFacade} from "./AppState";
@@ -117,7 +117,7 @@ function ProgramTextLine({text, line, caretsOnLine, setCaret, isActiveLine}: Pro
         }
     } else if (line instanceof CodeLine && line.instruction instanceof InvalidInstruction) {
         contentCssClass += " ProgramTextEditor__Line__Content--error";
-    } else if (line instanceof LabelLine) {
+    } else if (line instanceof LabelLine || line instanceof CompositionLine) {
         contentCssClass += " ProgramTextEditor__Line__Content--label";
     }
 
