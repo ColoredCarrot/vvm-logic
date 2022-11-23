@@ -4,17 +4,18 @@ import {ExecutionError} from "../../exec/ExecutionError";
 import {AppState} from "../AppState";
 import * as ProgramText from "../../model/ProgramText";
 
-export function step(codeLine: ProgramText.CodeLine, appState: AppState, setAppState: (_: AppState) => void): AppState {
-
-    const vmState = appState.vmState.last() ?? State.new();
-
-    let newState: State | null = null;
-    let newAppState: AppState;
+export function changeVmState(appState: AppState, f: (_: State) => State): AppState {
     try {
-        newState = computeStep(vmState.setProgramCounter(codeLine.num - 1), codeLine.instruction);
+        const origVmState = appState.vmState.last() ?? State.new();
+        const newVmState = f(origVmState);
+
+        // Might have been a NOP
+        if (origVmState.equals(newVmState)) {
+            return appState;
+        }
 
         for (const oldState of appState.vmState) {
-            if (oldState.equals(newState)) {
+            if (oldState.equals(newVmState)) {
                 throw new ExecutionError(
                     "Looks like you're stuck in an infinite loop. We stopped the execution for you.",
                     "Executing this instruction yields a state that has already been seen. "
@@ -22,9 +23,9 @@ export function step(codeLine: ProgramText.CodeLine, appState: AppState, setAppS
             }
         }
 
-        newAppState = {
+        return {
             ...appState,
-            vmState: appState.vmState.push(newState),
+            vmState: appState.vmState.push(newVmState),
             lastExecutionError: null,
         };
     } catch (ex) {
@@ -33,12 +34,23 @@ export function step(codeLine: ProgramText.CodeLine, appState: AppState, setAppS
         }
         const message = ex instanceof Error ? ex.message : JSON.stringify(ex);
 
-        newAppState = {
+        return {
             ...appState,
             lastExecutionError: (ex instanceof ExecutionError ? ex : message),
+            autoStepEnabled: false, // Stop auto-step when any error occurs
         };
     }
+}
 
+export function step(codeLine: ProgramText.CodeLine, appState: AppState, setAppState: (_: AppState) => void): AppState {
+    const newAppState = changeVmState(appState, vmState => {
+        if (vmState.activeDialog !== null) {
+            // Cannot step while there is a modal dialog
+            return vmState;
+        }
+
+        return computeStep(vmState.setProgramCounter(codeLine.num - 1), codeLine.instruction);
+    });
     setAppState(newAppState);
     return newAppState;
 }

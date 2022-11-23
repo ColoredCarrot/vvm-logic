@@ -57,14 +57,15 @@ export function ProgramTextEditor({vmState}: ProgramTextEditorProps) {
     const activeLine = programText.getNextCodeLine(vmState.programCounter);
 
     // Scroll active line into view, but only when it changes (not on every rerender)
+    const activeLineNum = activeLine?.num;
     useEffect(
         () => {
-            if (activeLine !== null) {
-                document.getElementById("program-text-line-" + activeLine.num)
+            if (activeLineNum !== null) {
+                document.getElementById("program-text-line-" + activeLineNum)
                     ?.scrollIntoView({behavior: "smooth", block: "nearest"});
             }
         },
-        [activeLine]
+        [activeLineNum]
     );
 
     return <div

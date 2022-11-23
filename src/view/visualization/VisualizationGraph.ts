@@ -8,6 +8,7 @@ import {UninitializedCell} from "../../model/UninitializedCell";
 import {ValueCell} from "../../model/ValueCell";
 import {VariableCell} from "../../model/VariableCell";
 import {ExecutionError} from "../../exec/ExecutionError";
+import {Heap} from "../../model/Heap";
 
 export const NodeTypes = [
     "heap-uninitialized",
@@ -193,19 +194,27 @@ export function createGraph(state: State): Graph {
         }
     }
 
+    // HEAP
     for (const i of state.heap.getKeySet()) {
-        if (!state.heap.get(i)) {
-            continue;
-        }
-
         const heapCell = state.heap.get(i);
+        const parent = isPartOfStruct(state.heap, i);
         if (heapCell instanceof UninitializedCell) {
             nodes.push({
-                data: {id: "H" + i, label: "H[" + i + "]", type: "heap-uninitialized"},
+                data: {
+                    id: "H" + i,
+                    label: "H[" + i + "]",
+                    type: "heap-uninitialized",
+                    parent: parent,
+                },
             });
         } else if (heapCell instanceof AtomCell) {
             nodes.push({
-                data: {id: "H" + i, label: "A: " + heapCell.value, type: "heap-atom"},
+                data: {
+                    id: "H" + i,
+                    label: "A: " + heapCell.value,
+                    type: "heap-atom",
+                    parent: parent,
+                },
             });
         } else if (heapCell instanceof VariableCell) {
             const isUnbounded = heapCell.value === i;
@@ -214,6 +223,7 @@ export function createGraph(state: State): Graph {
                     id: "H" + i,
                     label: heapCell.tag + ": " + heapCell.value,
                     type: isUnbounded ? "heap-unbounded-variable" : "heap-variable",
+                    parent: parent,
                 },
             });
             edges.push({
@@ -223,7 +233,12 @@ export function createGraph(state: State): Graph {
             });
         } else if (heapCell instanceof StructCell) {
             nodes.push({
-                data: {id: "H" + i, label: "S: " + heapCell.label, type: "heap-struct"},
+                data: {
+                    id: "H" + i,
+                    label: "S: " + heapCell.label,
+                    type: "heap-struct",
+                    parent: parent,
+                },
             });
             for (let j = 0; j < heapCell.size; j++) {
                 edges.push({
@@ -234,7 +249,12 @@ export function createGraph(state: State): Graph {
             }
         } else if (heapCell instanceof PointerToHeapCell) {
             nodes.push({
-                data: {id: "H" + i, label: "[" + heapCell.value + "]", type: "heap-pointerToHeap"},
+                data: {
+                    id: "H" + i,
+                    label: "[" + heapCell.value + "]",
+                    type: "heap-pointerToHeap",
+                    parent: parent,
+                },
             });
             edges.push({
                 from: {kind: "heap", address: i},
@@ -260,7 +280,7 @@ export function createGraph(state: State): Graph {
             .filter(e => nodeExists(e.from, state) && nodeExists(e.to, state))
             .map(e => ({
                 data: {
-                    // id: "E" + nodeIdToString(e.from) + nodeIdToString(e.to),
+                    id: "E_" + nodeIdToString(e.from) + "_" + nodeIdToString(e.to),
                     source: nodeIdToString(e.from),
                     target: nodeIdToString(e.to),
                     type: e.type,
@@ -269,4 +289,24 @@ export function createGraph(state: State): Graph {
                 pannable: true,
             })),
     };
+}
+
+export function isPartOfStruct(heap: Heap, addr: number): string | undefined {
+    let iter = addr - 1;
+    const minHeap = heap.getKeySet().min();
+    if (minHeap === undefined)
+        return undefined;
+
+    for (; iter >= minHeap; iter--) {
+        const heapCell = heap.get(iter);
+        if (heapCell instanceof StructCell) {
+            if ((iter + heapCell.size) >= addr) {
+                return "H" + iter;
+            } else {
+                return undefined;
+            }
+        }
+    }
+
+    return undefined;
 }

@@ -53,6 +53,7 @@
                 //border: 3px solid white;
                 cursor: pointer;
                 text-transform: capitalize;
+                user-select: none;
 
                 &:hover {
                     background-color: colors.$btn-primary-highlighted;

@@ -64,16 +64,17 @@ export function ControlPanel() {
         evt.preventDefault();
     });
 
+    const btnStepDisabled = endOfProgram || vmState.activeDialog !== null;
     const btnStep = <a
-        data-tip={"Step"}
-        className={"ControlPanel__button" + (endOfProgram && " ControlPanel__button--disabled" || "")}
+        data-tip={"Step (F8)"}
+        className={"ControlPanel__button" + (btnStepDisabled ? " ControlPanel__button--disabled" : "")}
         onClick={() => invokeStep()}
     >
         <img src="/icons/nextStep_dark.svg" alt="Step"/>
     </a>;
 
     const btnRun = <a
-        data-tip={"Run"}
+        data-tip={"Run (F9)"}
         className="ControlPanel__button"
         onClick={() => invokeRun()}
     >
@@ -92,7 +93,7 @@ export function ControlPanel() {
 
     const btnBackEnabled = !appState.vmState.isEmpty();
     const btnBack = <a
-        data-tip={"Step Back"}
+        data-tip={"Step Back (F7)"}
         className={"ControlPanel__button" + (!btnBackEnabled ? " ControlPanel__button--disabled" : "")}
         onClick={() => invokeBack()}>
         <img src="/icons/undo_dark.svg" alt="Undo"/>
@@ -122,6 +123,13 @@ export function ControlPanel() {
         </label>
     </a>;
 
+    const btnClear = <a
+        data-tip={"Clear Text"}
+        className="ControlPanel__button"
+        onClick={() => setEditor(TextEditor.create())}>
+        <img src="/icons/cwmTerminate_dark.svg" alt="Clear"/>
+    </a>;
+
     return <div className="ControlPanel">
         <ReactTooltip place={"bottom"} effect={"solid"} delayShow={500}/>
         {btnOpen}
@@ -129,5 +137,6 @@ export function ControlPanel() {
         {btnStep}
         {btnBack}
         {btnRestart}
+        {btnClear}
     </div>;
 }

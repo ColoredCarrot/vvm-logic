@@ -2,10 +2,11 @@ import cytoscape from "cytoscape";
 import {EdgeType, NodeType} from "./VisualizationGraph";
 
 export const NODE_WIDTH = 600;
+export const NODE_HEIGHT = 100;
 export const NODE_PADDING = 30;
 export const NODE_BORDER = 8;
-export const NODE_HEIGHT = 100;
 export const TOTAL_NODE_HEIGHT = NODE_HEIGHT + 2 * NODE_PADDING + NODE_BORDER; // border does NOT need to be doubled
+export const TOTAL_NODE_WIDTH = NODE_WIDTH + 2 * NODE_PADDING + NODE_BORDER;
 
 export const DEFAULT_EDGE_STYLE: cytoscape.Css.Edge = {
     width: 5,
@@ -32,15 +33,12 @@ export const EDGE_STYLES: { [T in EdgeType]: cytoscape.Css.Edge } = {
         "taxi-direction": "vertical",
     },
     loopInHeap: {
-        // FIXME
         "curve-style": "bezier",
         "loop-direction": "45deg",
-        "loop-sweep": "90deg",
-        // "curve-style": "unbundled-bezier",
-        // "control-point-distances": [300, 700, 1000],
-        // "control-point-weights": [0.25, 0.5, 0.75],
-        // "source-endpoint": "90deg",
-        // "target-endpoint": "180deg",
+        "loop-sweep": "10deg",
+        "source-endpoint": "100px " + (-TOTAL_NODE_HEIGHT / 2) + "px",
+        "target-endpoint": (TOTAL_NODE_WIDTH / 2) + "px " + (-TOTAL_NODE_HEIGHT / 2) + "px",
+        "control-point-step-size": 200,
     },
     inStack: {
         "curve-style": "unbundled-bezier",
@@ -84,7 +82,11 @@ export const NODE_STYLES: { [T in NodeType]: cytoscape.Css.Node } = {
         backgroundColor: "#3700b3",
         color: "white",
     },
-    "heap-struct": {},
+    "heap-struct": {
+        "background-opacity": 0.3,
+        "text-valign": "bottom",
+        color: "white",
+    },
     "heap-uninitialized": {
         backgroundColor: "#03dac6",
     },
