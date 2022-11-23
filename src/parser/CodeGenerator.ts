@@ -14,8 +14,12 @@ export class CodeGenerator {
 
     private labelCounter = 0;
 
+    //Codetranslations for Prolog - based on Instructions in "Translation of Virtual Machines", Helmut Seidl
+
 
     private code_A(term: Term, setArg: Set<string>, count: number,  rho: Map<string, number>): string {
+
+        //Term differentiation: Anon, Variable (Initialized/Uninitialized), Atom, Application
 
         switch (term.value.kind) {
 
@@ -75,6 +79,8 @@ export class CodeGenerator {
 
     private code_G(goal: Goal, setArg: Set<string>, count: number, rho: Map<string, number>): string {
 
+        // call Code_A on Unification or Literal
+
         switch (goal.value.kind) {
 
         case "Literal":
@@ -131,6 +137,8 @@ export class CodeGenerator {
 
     private code_C(clause: Clause, rho: Map<string, number>): string {
 
+        //call Code_G on the goals of one Clause
+
         const setArguments = new Set<string>;
         for (const variable of clause.head.variables) {
             setArguments.add(variable.name);
@@ -147,6 +155,8 @@ export class CodeGenerator {
     }
 
     private code_P(clauses: Clause[], label: string, rho: Map<string, number>): string {
+
+        //call code_C on clauses with the same predicate
 
         if (clauses.length == 1) {
             return `${label}:\n` + this.code_C(clauses[0], rho);
@@ -184,11 +194,9 @@ export class CodeGenerator {
 
         //Rho Initialize:
 
-
         const rho: Map<string, number> = new Map();
 
-        //Goals aufrufen
-
+        //call Code_G on Goals of the Program
 
         const result1: string[] = [];
         for (const goal of program.query.goals) {
@@ -197,6 +205,8 @@ export class CodeGenerator {
         }
 
         const rhoBeforePred = rho.size;
+
+        //Predicate Generation
 
         const map: Map<string, Clause[]> = new Map();
         for (const clause of program.clauses) {
@@ -216,7 +226,6 @@ export class CodeGenerator {
         for (const keys of map.keys()) {
             result2.push(this.code_P(map.get(keys)!, keys, rho));
         }
-
 
         return "init A\n" +
             `pushenv ${rhoBeforePred}\n` +
@@ -241,53 +250,5 @@ export class CodeGenerator {
     }
 
 
-    // Optimierung
-
-    /*
-    private code_U(term: Term, rho: Map<string, number>): string {
-
-        switch (term.value.kind) {
-
-        case "Atom":
-            let atom = term.value as Atom;
-            return `uatom ${atom.value}`;
-
-        case "Variable":
-            let variable = term.value as Variable;
-
-            //size = 0 abchecken?
-            if (!rho.has(variable.name)) {
-                return "uvar " + rho.get(variable.name);
-            }
-
-            if (rho.size == 1) {
-                rho.clear();
-                rho.set(variable.name, 1);
-                return "";
-            }
-
-            rho.set(variable.name, rho.size + 1);
-
-            return "uref " + rho.get(variable.name);
-
-        case "Anon":
-            let anon = term.value as Anon;
-            return "pop";
-
-        case "Application":
-            let application = term.value as Application;
-
-            let result: string[] = [];
-            for (let term of application.terms) {
-                result.push(this.code_U(term, rho));
-            }
-
-            let k = application.terms.length;
-
-            return "";
-
-        }
-    }
-
-     */
+    // Übersetzungsfunktion Code_U für optimierte Unifikationsbehandlung
 }
