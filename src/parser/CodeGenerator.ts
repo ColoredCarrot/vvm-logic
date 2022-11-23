@@ -10,12 +10,13 @@ import {Clause} from "./model/Clause";
 import {Query} from "./model/Query";
 import {Program} from "./model/Program";
 import {Predicate} from "./model/Predicate";
+import {set} from "immutable";
 
 
 export class CodeGenerator {
     private labelCounter = 0;
 
-    private code_A(term: Term, rho: Map<string, number>): string {
+    private code_A(term: Term, setArg: Set<string>, count: number,  rho: Map<string, number>): string {
 
 
         switch (term.value.kind) {
@@ -26,12 +27,29 @@ export class CodeGenerator {
         case "Variable":
             let variable = term.value as Variable;
 
-            if (!rho.has(variable.name)) {
-                const n = rho.size;
-                rho.set(variable.name, n + 1)
-                return "putvar " + rho.size;
-            }else{
+            if (setArg.has(variable.name)){
+
+                if(!rho.has(variable.name)){
+                    rho.set(variable.name, rho.size + 1);
+                }
+
                 return "putref " + rho.get(variable.name);
+
+            }else {
+
+                if(count > 0){
+                    return "putref " + rho.get(variable.name);
+
+                }else {
+
+                    if(rho.has(variable.name)){
+                        return "putvar " + rho.get(variable.name);
+                    }else {
+                        const n = rho.size;
+                        rho.set(variable.name, n + 1)
+                        return "putvar " + rho.size;
+                    }
+                }
             }
 
         case "Anon":
@@ -43,7 +61,7 @@ export class CodeGenerator {
 
             let result: string[] = [];
             for (let term of application.terms) {
-                result.push(this.code_A(term, rho));
+                result.push(this.code_A(term, setArg, count, rho));
             }
 
             let k = application.terms.length;
@@ -59,7 +77,7 @@ export class CodeGenerator {
     }
 
 
-    private code_G(goal: Goal, rho: Map<string, number>): string {
+    private code_G(goal: Goal, setArg: Set<string>, count: number, rho: Map<string, number>): string {
         switch (goal.value.kind) {
         case "Literal":
 
@@ -67,31 +85,44 @@ export class CodeGenerator {
 
             let result: string[] = [];
             for (let term of literal.terms) {
-                result.push(this.code_A(term, rho));
+                result.push(this.code_A(term, setArg, count,  rho));
             }
 
             let k = literal.terms.length;
             let label = this.getNextLabel();
 
-            return "mark " + label + "\n" + result.join("\n") + "\n" + `call ${literal.name}/${k}` + "\n" + label + ":";
+            if(result.length == 0){
+                return "mark " + label + "\n" + `call ${literal.name}/${k}` + "\n" + label + ":";
+            }else{
+                return "mark " + label + "\n" + result.join("\n") + "\n" + `call ${literal.name}/${k}` + "\n" + label + ":";
+            }
 
 
         case "Unification":
 
             let unification = goal.value as Unification;
 
-            //unification.variable.name undefined :====0
+            if (setArg.has(unification.variable.name) ) {
 
-            if(!rho.has(unification.variable.name)){
+                if(!rho.has(unification.variable.name)){
+                    rho.set(unification.variable.name, rho.size + 1);
+                }
+                return "putref " + rho.get(unification.variable.name) + "\n" + this.code_A(unification.term, setArg, count, rho) + "\n"
+                        + "unify";
 
-                rho.set(unification.variable.name, rho.size + 1);
+            }else {
 
-                return "putvar " + rho.get(unification.variable.name) + "\n" + this.code_A(unification.term, rho) + "\n"
-                    + "bind";
+                if (count > 0) {
 
-            }else{
-                return "putref " + rho.get(unification.variable.name) + "\n" + this.code_A(unification.term, rho) + "\n"
-                    + "unify";
+                    return "putref " + rho.get(unification.variable.name) + "\n" + this.code_A(unification.term, setArg, count, rho) + "\n"
+                        + "unify";
+
+                } else {
+
+                    rho.set(unification.variable.name, rho.size + 1);
+                    return "putvar " + rho.get(unification.variable.name) + "\n" + this.code_A(unification.term, setArg, count, rho) + "\n"
+                        + "bind";
+                }
             }
 
         default:
@@ -100,11 +131,18 @@ export class CodeGenerator {
     }
 
 
+
     private code_C(clause: Clause, rho: Map<string, number>): string {
 
+        let setArguments = new Set<string>;
+        for(let variable of clause.head.variables){
+            setArguments.add(variable.name);
+        }
+
         let result: string[] = [];
+        let count: number = 0;
         for (let goal of clause.goals) {
-            result.push(this.code_G(goal, rho));
+            result.push(this.code_G(goal, setArguments, count++, rho));
         }
 
         return `pushenv ` + rho.size + "\n" + result.join("\n") + "\n" + "popenv";
@@ -147,41 +185,15 @@ export class CodeGenerator {
 
         //Goals aufrufen
 
+
             let result1: string[] = [];
             for (let goal of program.query.goals) {
-                console.log(result1.push(this.code_G(goal, rho)));
+                let count: number = 0;
+                console.log(result1.push(this.code_G(goal, new Set, count++, rho)));
             }
 
 
-        //Erstellung von Predicates
 
-        /*
-        let name: string = program.clauses[0].head.name;
-        let number: string = program.clauses[0].head.variables.length.toString();
-        let s1: string = "(" + name + "/" + number + ")";
-
-        const mapClauses_: Map<string, Clause[]> = new Map([[s1, [program.clauses[0]]]]);
-
-        for (let i = 1; i < program.clauses.length; i++) {
-
-            name = program.clauses[i].head.name;
-            number = program.clauses[i].head.variables.length.toString();
-            let predicateNew: string = "(" + name + "/" + number + ")";
-
-            name = program.clauses[i - 1].head.name;
-            number = program.clauses[i - 1].head.variables.length.toString();
-            let predicateOld: string = "(" + name + "/" + number + ")";
-
-            if (predicateNew == predicateOld) {
-                let list: Clause[] = mapClauses_.get(predicateOld) as Clause[];
-                list.push(program.clauses[i]);
-                mapClauses_.set(predicateOld, list);
-
-            } else {
-                console.log(mapClauses_.set(predicateNew, [program.clauses[i]]));
-            }
-        }
-        */
 
         const map: Map<string, Clause[]> = new Map();
         for (let clause of program.clauses) {
