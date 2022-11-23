@@ -48,8 +48,8 @@ test("Parse labels with spaces", () => {
 
     const expectedLabel = new Label(0, "N");
 
-    expect(res.getNextCodeLine(0)).toBeInstanceOf(Init);
-    expect(res.getNextCodeLine(0)).toStrictEqual(new Init(expectedLabel));
+    expect(res.getNextCodeLine(0)?.instruction).toBeInstanceOf(Init);
+    expect(res.getNextCodeLine(0)?.instruction).toStrictEqual(new Init(expectedLabel));
 });
 
 const page140Example: string [] =

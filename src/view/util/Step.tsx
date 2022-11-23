@@ -49,7 +49,7 @@ export function step(codeLine: ProgramText.CodeLine, appState: AppState, setAppS
             return vmState;
         }
 
-        return computeStep(vmState.setProgramCounter(codeLine.num - 1), codeLine.instruction);
+        return computeStep(vmState.setProgramCounter(codeLine.num), codeLine.instruction);
     });
     setAppState(newAppState);
     return newAppState;
