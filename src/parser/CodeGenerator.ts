@@ -186,6 +186,7 @@ export class CodeGenerator {
 
         //Rho Initialize:
 
+
         let rho: Map<string, number> = new Map();
 
         //Goals aufrufen
@@ -197,8 +198,7 @@ export class CodeGenerator {
                 console.log(result1.push(this.code_G(goal, new Set, count++, rho)));
             }
 
-
-
+        let rhoBeforePred = rho.size;
 
         const map: Map<string, Clause[]> = new Map();
         for (let clause of program.clauses) {
@@ -221,9 +221,9 @@ export class CodeGenerator {
 
 
         return "init A\n" +
-            `pushenv ${rho.size}\n` +
+            `pushenv ${rhoBeforePred}\n` +
             result1.join("\n") + "\n" +
-            `halt ${rho.size}\n` +
+            `halt ${rhoBeforePred}\n` +
             "A0:\n" +
             "no\n" +
             result2.join("\n");
