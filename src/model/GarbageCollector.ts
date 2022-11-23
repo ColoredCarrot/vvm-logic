@@ -5,11 +5,11 @@ import {StructCell} from "./StructCell";
 import {PointerToHeapCell} from "./PointerToHeapCell";
 
 export class GarbageCollector {
-    private readonly GC_ENABLED = true;
+    private static readonly GC_ENABLED = true;
     
     
     run(state: State): State {
-        if (!this.GC_ENABLED)
+        if (!GarbageCollector.GC_ENABLED)
             return state;
         
         //Find Reachable Heap Elements
