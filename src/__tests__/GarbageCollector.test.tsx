@@ -1,4 +1,4 @@
-import {CodeLine, parseProgramText} from "../model/ProgramText";
+import {CodeLine, CompositionLine, parseProgramText} from "../model/ProgramText";
 import {State} from "../model/State";
 import {step} from "../exec/step";
 import {Heap} from "../model/Heap";
@@ -20,7 +20,7 @@ test("Run Garbage Collector Example", () => {
     let state = State.new();
     //Execute
     for (const i of parsedGarbage.lines) {
-        if (i instanceof CodeLine) { //TODO: Add CompositionLine
+        if (i instanceof CodeLine || i instanceof CompositionLine) {
             state = step(state, i.instruction);
         }
     }
