@@ -18,10 +18,10 @@ export class Init extends Instruction {
         return state
             .setFramePointer(5)
             .setBacktrackPointer(5)
-            .pushStack(new ValueCell(this.param.line))
+            .pushStack(new ValueCell(this.param.line, "PC"))
             .pushStack(new ValueCell(-1))
             .pushStack(new ValueCell(-1))
-            .pushStack(new ValueCell(state.heap.getHeapPointer()))
+            .pushStack(new ValueCell(state.heap.getHeapPointer(), "HP"))
             .pushStack(new UninitializedCell())
             .pushStack(new UninitializedCell());
 

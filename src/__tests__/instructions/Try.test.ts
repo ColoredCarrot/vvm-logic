@@ -15,7 +15,7 @@ test("Instruction: TRY", () => {
 
 
     const expectedState = State.new()
-        .setStack(Stack.of(new UninitializedCell(), new UninitializedCell(), new ValueCell(20), new UninitializedCell(),
+        .setStack(Stack.of(new UninitializedCell(), new UninitializedCell(), new ValueCell(20, "PC"), new UninitializedCell(),
             new UninitializedCell(), new UninitializedCell(), new UninitializedCell(), new UninitializedCell(),
             new UninitializedCell())).setFramePointer(7).setProgramCounter(4);
 

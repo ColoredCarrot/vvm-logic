@@ -1,38 +1,28 @@
-import React, {useContext, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {ExecutionError} from "../exec/ExecutionError";
 import {InvalidInstruction} from "../exec/instructions/InvalidInstruction";
 import * as ProgramText from "../model/ProgramText";
-import {CodeLine, LabelLine} from "../model/ProgramText";
+import {CodeLine, CompositionLine, LabelLine} from "../model/ProgramText";
 import {State} from "../model/State";
-import {AppStateContext} from "./AppState";
+import {Caret, MovementMode, TextEditor} from "../model/text/TextEditor";
+import {AppStateContext, ProgramTextContext, ProgramTextFacade} from "./AppState";
 import "./ProgramTextEditor.scss";
 import {useGlobalEvent} from "./util/UseGlobalEvent";
 
 interface ProgramTextEditorProps {
-
     vmState: State;
-
-    programText: ProgramText.Text;
-
-    setProgramText(rawLines: string[]): void;
 }
 
-type Cursor = readonly [number, number];
-
-export function ProgramTextEditor({vmState, programText, setProgramText}: ProgramTextEditorProps) {
-
-    const [cursor, setCursor] = useState([0, 0] as Cursor);
+export function ProgramTextEditor({vmState}: ProgramTextEditorProps) {
 
     const [isDraggingInto, setIsDraggingInto] = useState(false);
 
-    // Set up global listeners
-    useGlobalEvent("keydown", evt => handleKeyDown(evt, cursor, setCursor, programText, setProgramText));
-    useGlobalEvent("paste", evt => handlePaste(evt));
+    const programTextFacade = useContext(ProgramTextContext);
+    const {programText, editor, setEditor} = programTextFacade;
 
-    function setProgramTextFromExternalSource(text: string) {
-        setProgramText(text.split("\n").map(ln => ln.replaceAll(/[^0-9a-z/: ]/ig, "")));
-        setCursor([0, 0]);
-    }
+    // Set up global listeners
+    useGlobalEvent("keydown", evt => handleKeyDown(evt, programTextFacade));
+    useGlobalEvent("paste", evt => handlePaste(evt));
 
     function handlePaste(evt: ClipboardEvent): void {
         const toPaste = evt.clipboardData?.getData("text/plain");
@@ -40,8 +30,7 @@ export function ProgramTextEditor({vmState, programText, setProgramText}: Progra
             return;
         }
 
-        // TODO: Don't replace, but insert
-        setProgramTextFromExternalSource(toPaste);
+        setEditor(editor.insert(toPaste));
     }
 
     function handleDrop(evt: React.DragEvent): void {
@@ -55,7 +44,7 @@ export function ProgramTextEditor({vmState, programText, setProgramText}: Progra
 
         file.text().then(
             text => {
-                setProgramTextFromExternalSource(text);
+                setEditor(TextEditor.forText(text));
                 setIsDraggingInto(false);
             },
             err => {
@@ -65,21 +54,35 @@ export function ProgramTextEditor({vmState, programText, setProgramText}: Progra
         );
     }
 
+    const activeLine = programText.getNextCodeLine(vmState.programCounter);
+
+    // Scroll active line into view, but only when it changes (not on every rerender)
+    const activeLineNum = activeLine?.num;
+    useEffect(
+        () => {
+            if (activeLineNum !== null) {
+                document.getElementById("program-text-line-" + activeLineNum)
+                    ?.scrollIntoView({behavior: "smooth", block: "nearest"});
+            }
+        },
+        [activeLineNum]
+    );
+
     return <div
         className={"ProgramTextEditor" + (isDraggingInto ? " ProgramTextEditor--dragging-into" : "")}
         onDrop={evt => handleDrop(evt)}
         onDragOver={evt => evt.preventDefault()}
-        onDragEnter={evt => setIsDraggingInto(true)}
-        onDragLeave={evt => setIsDraggingInto(false)}
+        onDragEnter={_ => setIsDraggingInto(true)}
+        onDragLeave={_ => setIsDraggingInto(false)}
     >
         {programText.lines.map(line =>
             <ProgramTextLine
                 key={line.num}
                 text={programText}
                 line={line}
-                cursor={cursor}
-                setCursor={setCursor}
-                vmState={vmState}
+                caretsOnLine={editor.carets.filter(({row}) => row === line.num)}
+                setCaret={(caret, add) => setEditor(add ? editor.addCaret(caret) : editor.setCaret(caret))}
+                isActiveLine={line.num === activeLine?.num}
             />,
         )}
     </div>;
@@ -88,17 +91,16 @@ export function ProgramTextEditor({vmState, programText, setProgramText}: Progra
 interface ProgramTextLineProps {
     text: ProgramText.Text;
     line: ProgramText.Line;
-    cursor: Cursor;
-    setCursor(_: Cursor): void;
-    vmState: State;
+    caretsOnLine: readonly Caret[];
+    setCaret(_: Caret, add: boolean): void;
+    isActiveLine: boolean;
 }
 
-function ProgramTextLine({text, line, cursor, setCursor, vmState}: ProgramTextLineProps) {
+function ProgramTextLine({text, line, caretsOnLine, setCaret, isActiveLine}: ProgramTextLineProps) {
     const NON_BREAKING_SPACE = "\u00A0";
     const ZERO_WIDTH_SPACE = "\u200B";
 
     const raw = line.raw.replaceAll(" ", NON_BREAKING_SPACE) || ZERO_WIDTH_SPACE;
-    const isActiveLine = line instanceof CodeLine && line.num === text.getNextCodeLine(vmState.programCounter)?.num;
 
     const [appState, setAppState] = useContext(AppStateContext);
 
@@ -115,29 +117,30 @@ function ProgramTextLine({text, line, cursor, setCursor, vmState}: ProgramTextLi
         }
     } else if (line instanceof CodeLine && line.instruction instanceof InvalidInstruction) {
         contentCssClass += " ProgramTextEditor__Line__Content--error";
-    } else if (line instanceof LabelLine) {
+    } else if (line instanceof LabelLine || line instanceof CompositionLine) {
         contentCssClass += " ProgramTextEditor__Line__Content--label";
     }
 
     let innerCssClass = "ProgramTextEditor__Line__Inner";
-    if (cursor[0] === line.num) {
+    if (caretsOnLine.length > 0) {
         innerCssClass += " ProgramTextEditor__Line__Inner--caret";
     }
 
-    if (cursor[0] === line.num) {
-        // Caret is on our line
+    if (caretsOnLine.length > 0) {
         content = <span>
-            <span style={{zIndex: 10, position: "absolute"}}>
-                <span>{NON_BREAKING_SPACE.repeat(cursor[1])}</span>
-                <span className="ProgramTextEditor__Caret"></span>
-            </span>
+            {caretsOnLine.map(({col}) =>
+                <span key={col} style={{zIndex: 10, position: "absolute"}}>
+                    <span>{NON_BREAKING_SPACE.repeat(col)}</span>
+                    <span className="ProgramTextEditor__Caret"></span>
+                </span>,
+            )}
             <span>{raw}</span>
         </span>;
     } else {
         content = <span>{raw}</span>;
     }
 
-    const textLineElem = <div className={cssClass} data-label-line={(line instanceof LabelLine)}>
+    const textLineElem = <div className={cssClass} id={"program-text-line-" + line.num}>
         <div className={innerCssClass}>
             <span
                 className="ProgramTextEditor__Line__Num">{(line.num + 1).toString().padStart(3, NON_BREAKING_SPACE)}
@@ -148,7 +151,10 @@ function ProgramTextLine({text, line, cursor, setCursor, vmState}: ProgramTextLi
                 const charWidth = lineContentElemBounds.width / line.raw.length;
                 const clickedChar = Math.round(clickedX / charWidth);
 
-                setCursor([line.num, Math.max(0, Math.min(line.raw.length, clickedChar))]);
+                setCaret({
+                    row: line.num,
+                    col: Math.max(0, Math.min(line.raw.length, clickedChar)),
+                }, evt.altKey);
             }}>
                 {content}
             </span>
@@ -176,124 +182,64 @@ function ProgramTextLine({text, line, cursor, setCursor, vmState}: ProgramTextLi
 
 function handleKeyDown(
     evt: KeyboardEvent,
-    cursor: Cursor,
-    setCursor: (_: Cursor) => void,
-    programText: ProgramText.Text,
-    setProgramText: (rawLines: string[]) => void,
+    {editor, setEditor}: ProgramTextFacade,
 ) {
-    // We don't handle any keyboard commands (yet)
-    if (evt.altKey || evt.ctrlKey || evt.metaKey) {
+    if (evt.altKey || evt.metaKey) {
         return;
     }
 
-    const [row, col] = cursor;
-
-    // Collect some values that we'll likely use further down
-    const untouchedLinesBefore = programText.lines.slice(0, row).map(l => l.raw);
-    const untouchedLinesAfter = programText.lines.slice(row + 1).map(l => l.raw);
-    const touchedLine = programText.lines[row].raw;
+    const mvMode = evt.ctrlKey ? MovementMode.Word : MovementMode.One;
 
     switch (evt.key) {
     case "ArrowLeft":
-    case "ArrowRight":
-    case "ArrowUp":
-    case "ArrowDown": {
-        setCursor(moveCursor(cursor, evt.key, programText.rawLines));
+        setEditor(editor.move("left", mvMode));
         break;
-    }
+    case "ArrowRight":
+        setEditor(editor.move("right", mvMode));
+        break;
+    case "ArrowUp":
+        setEditor(editor.move("up", mvMode));
+        break;
+    case "ArrowDown":
+        setEditor(editor.move("down", mvMode));
+        break;
+    case "End":
+        setEditor(editor.moveTo("end"));
+        break;
+    case "Home":
+        setEditor(editor.moveTo("home"));
+        break;
 
     case "Enter": {
-        // No special cases; always split current line into two
-        const updatedLines = [
-            ...untouchedLinesBefore,
-            touchedLine.slice(0, col),
-            touchedLine.slice(col),
-            ...untouchedLinesAfter,
-        ];
-        setProgramText(updatedLines);
-        setCursor([row + 1, 0]);
-
+        if (!evt.ctrlKey) {
+            setEditor(editor.insert("\n"));
+        }
         break;
     }
 
     case "Backspace": {
-        // Special case: At the very beginning of the text, do nothing
-        if (row === 0 && col === 0) {
-            break;
-        }
-
-        // Special case: At the beginning of a line, merge that line into the previous one
-        if (col === 0) {
-            const updatedLines = [
-                ...programText.rawLines.slice(0, row - 1),
-                programText.rawLines[row - 1] + programText.rawLines[row],
-                ...programText.rawLines.slice(row + 1),
-            ];
-
-            setProgramText(updatedLines);
-            setCursor([row - 1, programText.rawLines[row - 1].length]);
-
-            break;
-        }
-
-        const updatedLine = touchedLine.slice(0, col - 1) + touchedLine.slice(col);
-        const updatedLines = untouchedLinesBefore.concat(updatedLine, untouchedLinesAfter);
-
-        setProgramText(updatedLines);
-        setCursor(moveCursor(cursor, "ArrowLeft", updatedLines));
-
+        setEditor(editor.backspace(mvMode));
         break;
     }
 
     case "Delete": {
-        // Special case: At the very end of the text, do nothing
-        if (row === programText.rawLines.length - 1 && col === programText.rawLines[row].length) {
-            break;
-        }
-
-        // Special case: At the end of a line, merge the next line into the current one
-        if (col === programText.rawLines[row].length) {
-            const updatedLines = [
-                ...programText.rawLines.slice(0, row),
-                programText.rawLines[row] + programText.rawLines[row + 1],
-                ...programText.rawLines.slice(row + 2),
-            ];
-
-            setProgramText(updatedLines);
-            // cursor isn't moved
-
-            break;
-        }
-
-        const updatedLine = touchedLine.slice(0, col) + touchedLine.slice(col + 1);
-        const updatedLines = untouchedLinesBefore.concat(updatedLine, untouchedLinesAfter);
-        setProgramText(updatedLines);
-        // cursor isn't moved
-
+        setEditor(editor.delete(mvMode));
         break;
     }
 
     default:
         // Handle simple directly-typable characters
-        if (evt.key.length === 1 && (
+        if (evt.key != undefined && !evt.ctrlKey && evt.key.length === 1 && (
             evt.key >= "a" && evt.key <= "z" ||
             evt.key >= "A" && evt.key <= "Z" ||
             evt.key >= "0" && evt.key <= "9" ||
-            [" ", ":", "/"].includes(evt.key)
+            [" ", ":", "/", "[", "]", "_", "|"].includes(evt.key)
         )) {
             const char = evt.key;
 
             // TODO: Maybe, if we're in the first word of the line, automatically write in uppercase
 
-            const touchedLineBefore = touchedLine.slice(0, col);
-            const touchedLineAfter = touchedLine.slice(col);
-            const updatedLine = touchedLineBefore + char + touchedLineAfter;
-
-            const updatedLines = untouchedLinesBefore.concat(updatedLine, untouchedLinesAfter);
-
-            setProgramText(updatedLines);
-            setCursor(moveCursor(cursor, "ArrowRight", updatedLines));
-
+            setEditor(editor.insert(char));
             break;
         }
 
@@ -304,38 +250,4 @@ function handleKeyDown(
     // At this point, it's certain that we've handled the event ourselves
     evt.preventDefault();
     evt.stopPropagation();
-}
-
-function moveCursor([row, col]: Cursor, direction: "ArrowLeft" | "ArrowRight" | "ArrowUp" | "ArrowDown", rawLines: readonly string[]): Cursor {
-    switch (direction) {
-    case "ArrowLeft":
-        if (col === 0) {
-            if (row === 0) {
-                return [row, col];
-            }
-            return [row - 1, rawLines[row - 1].length];
-        }
-        return [row, col - 1];
-
-    case "ArrowRight":
-        if (col === rawLines[row].length) {
-            if (row === rawLines.length - 1) {
-                return [row, col];
-            }
-            return [row + 1, 0];
-        }
-        return [row, col + 1];
-
-    case "ArrowUp":
-        if (row === 0) {
-            return [0, 0];
-        }
-        return [row - 1, Math.min(col, rawLines[row - 1].length)];
-
-    case "ArrowDown":
-        if (row === rawLines.length - 1) {
-            return [row, rawLines[row].length];
-        }
-        return [row + 1, Math.min(col, rawLines[row + 1].length)];
-    }
 }

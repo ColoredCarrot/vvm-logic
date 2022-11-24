@@ -5,6 +5,17 @@ import {State} from "../../model/State";
 import {Lastcall} from "../../exec/instructions/Lastcall";
 import {SignLabel} from "../../exec/SignLabel";
 import {PointerToHeapCell} from "../../model/PointerToHeapCell";
+import {InstructionParser} from "../../exec/InstructionParser";
+
+
+test("Parse Lastcall", () => {
+    const input = "LASTCALL beideLuegen/3 3";
+    const l = new SignLabel(4, "beideLuegen/3");
+
+    const instr = InstructionParser.parseInstruction(input, [l]);
+
+    expect(instr).toBeInstanceOf(Lastcall);
+});
 
 test("Instruction: LASTCALL", () => {
     const instr = new Lastcall(new SignLabel(2, "p/2"), 1);

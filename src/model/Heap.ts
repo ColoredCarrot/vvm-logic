@@ -10,7 +10,7 @@ type Address = number;
  * Invariants:
  * - Cells that point to another cell always point to cells with a smaller or equal address as itself.
  */
-export class Heap {
+export class Heap implements Iterable<[Address, Cell]> {
 
     private constructor(
         private readonly data: Immutable.Map<Address, Cell>,
@@ -28,6 +28,10 @@ export class Heap {
 
     static empty(): Heap {
         return new Heap(Immutable.Map(), 100);
+    }
+
+    getKeySet(): Immutable.Set<number> {
+        return this.data.map((value, key) => key).toSet();
     }
 
     static of(heapPointer: Address, ...elems: [Address, Cell][]): Heap {
@@ -60,5 +64,13 @@ export class Heap {
             new Heap(newData, this._heapPointer + cells.length),
             addr,
         ];
+    }
+
+    [Symbol.iterator](): Iterator<[Address, Cell]> {
+        return this.data[Symbol.iterator]();
+    }
+
+    all(): Immutable.Map<Address, Cell> {
+        return this.data;
     }
 }

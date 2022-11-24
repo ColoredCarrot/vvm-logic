@@ -1,35 +1,32 @@
-import React, {useMemo} from "react";
-import * as ProgText from "../model/ProgramText";
+import React from "react";
 import {State} from "../model/State";
 import {ControlPanel} from "./ControlPanel";
 import "./LeftColumn.scss";
 import {ProgramTextEditor} from "./ProgramTextEditor";
-import {useLocallyStoredState} from "./util/UseLocallyStoredState";
 
 interface LeftColumnProps {
     state: State;
 }
 
 export function LeftColumn({state}: LeftColumnProps) {
-    const [rawProgramText, setRawProgramText] = useLocallyStoredState([""], "program-text");
-
-    // Parsing the program text is expensive, so only do it when it is actually changed
-    const programText = useMemo(() => ProgText.parseProgramText(rawProgramText), [rawProgramText]);
-
     return <div className="LeftColumn">
-        <ProgramText state={state} programText={programText} setProgramText={setRawProgramText}/>
-        <ControlPanel programText={programText}/>
+        <ControlPanel/>
+        <ProgramText
+            state={state}
+        />
     </div>;
 }
 
 interface ProgramTextProps {
     state: State;
-    programText: ProgText.Text;
-    setProgramText(rawLines: string[]): void;
 }
 
-function ProgramText({state, programText, setProgramText}: ProgramTextProps) {
+function ProgramText({
+    state,
+}: ProgramTextProps) {
     return <div className="ProgramText">
-        <ProgramTextEditor vmState={state} programText={programText} setProgramText={setProgramText}/>
+        <ProgramTextEditor
+            vmState={state}
+        />
     </div>;
 }

@@ -1,6 +1,6 @@
 $background-darkest: #212121;
 $background-code: #353535; // 303030
-$background-visualization: whitesmoke;//#424242;
+$background-visualization: $background-darkest;//#424242;
 
 $primary: #03dac6;
 $error: #cf6679; // ff3f80
@@ -11,7 +11,14 @@ $text-highlight: #e7db52;
 $text-code: #ffffffde;
 $text-error: #cf6679;
 
-$btn: #03dac6;
+$btn-group: $background-code;
+
+$btn: $background-code;
+$btn-highlighted: #4f4f4f;
 $btn-text: white;
-$btn-disabled: #01695e;
+$btn-disabled: $btn;
 $btn-disabled-text: #ffffff26;
+$btn-primary: #bb86fc;//#03dac5;
+$btn-primary-highlighted: adjust-color($btn-primary, $whiteness: +15%);
+
+$modal-dialog-background: $background-code;

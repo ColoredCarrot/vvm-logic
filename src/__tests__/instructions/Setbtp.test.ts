@@ -21,7 +21,7 @@ test("Instruction: SETBTP", () => {
 
     const expectedState = State.new()
         .setStack(Stack.of(new UninitializedCell(), new UninitializedCell(), new UninitializedCell(), new UninitializedCell(),
-            new UninitializedCell(), new PointerToStackCell(1), new ValueCell(1), new ValueCell(33), new UninitializedCell(),
+            new UninitializedCell(), new PointerToStackCell(1), new ValueCell(1, "TP"), new ValueCell(33, "HP"), new UninitializedCell(),
             new UninitializedCell(), new UninitializedCell())).setFramePointer(9).setBacktrackPointer(9)
         .setTrail(Trail.of(12, 33, 44, 44).setTrailPointer(1))
         .setHeap(Heap.of(33));

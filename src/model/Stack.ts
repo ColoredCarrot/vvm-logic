@@ -51,4 +51,19 @@ export class Stack {
     get stackPointer(): number {
         return this.size - 1;
     }
+
+    /**
+     * Manually set the stack pointer to {@link sp}, popping excessive values.
+     * {@link sp} must not be greater than the current stack pointer.
+     */
+    setStackPointer(sp: number): Stack {
+        if (sp > this.stackPointer) {
+            throw new IllegalOperationError("Attempting to set stack pointer to higher value would lead to uninitialized memory");
+        }
+        return new Stack(this.values.slice(0, sp + 1));
+    }
+
+    toArray(): Cell[] {
+        return this.values.toArray();
+    }
 }

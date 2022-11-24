@@ -1,272 +1,178 @@
-import React, {useLayoutEffect, useRef} from "react";
-import {State} from "../../model/State";
 import Cytoscape from "cytoscape";
 import cytoscape from "cytoscape";
+import cytoscapeFcose from "cytoscape-fcose";
+import fcose, {FcoseLayoutOptions} from "cytoscape-fcose";
+import React, {useContext, useRef} from "react";
 import CytoscapeComponent from "react-cytoscapejs";
+import {State} from "../../model/State";
+import {STYLESHEET, TOTAL_NODE_HEIGHT} from "./NodeStyles";
 import "./Visualization.scss";
-import "springy/springy";
-import fcose from "cytoscape-fcose";
-import {UninitializedCell} from "../../model/UninitializedCell";
-import {ValueCell} from "../../model/ValueCell";
-import {PointerToStackCell} from "../../model/PointerToStackCell";
-import {PointerToHeapCell} from "../../model/PointerToHeapCell";
-import {stat} from "fs";
-import {Address} from "cluster";
-import {AtomCell} from "../../model/AtomCell";
-import {VariableCell} from "../../model/VariableCell";
+import {createGraph, Graph} from "./VisualizationGraph";
+import {Dialog} from "../../model/dialog/Dialog";
+import {AppState, AppStateContext} from "../AppState";
 import {StructCell} from "../../model/StructCell";
+import {Range} from "immutable";
+import {changeVmState} from "../util/Step";
 
 Cytoscape.use(fcose);
 
-interface VisualizationProps {
-    prevState: State;
-    state: State;
-}
-
-export function Visualization({prevState, state}: VisualizationProps) {
+export function Visualization() {
 
     /////////////
     // Don't display heap cells whose address is >= heap pointer
     /////////////
 
+    const [appState, setAppState] = useContext(AppStateContext);
+    const state = appState.vmState.last() ?? State.new();
+
     return <div className="Visualization">
         <h3>Visualization</h3>
 
-        <VisualizationGraph state={state} prevState={prevState}/>
+        <VisualizationGraph state={state}/>
+
+        <div className={"Visualization__Modal" + (state.activeDialog !== null ? " Visualization__Modal--shown" : "")}>
+            <div className="Visualization__Modal__Dialog">
+                <div className="Visualization__Modal__Dialog__Content">
+                    {state.activeDialog?.renderContent()}
+                </div>
+                <div className="Visualization__Modal__Dialog__Buttons">
+                    {(state.activeDialog?.choices ?? [])?.map(choice =>
+                        <ModalDialogButton
+                            key={choice}
+                            dialog={state.activeDialog!}
+                            choice={choice}
+                            appState={appState}
+                            setAppState={setAppState}
+                        />
+                    )}
+                </div>
+            </div>
+        </div>
     </div>;
 }
 
-function generateLayout(state: State, cy: React.MutableRefObject<Cytoscape.Core | undefined>): cytoscape.LayoutOptions {
-    //Try with cose
+interface ModalDialogButtonProps<C extends readonly string[]> {
+    dialog: Dialog<C>,
+    choice: C[number],
+    appState: AppState,
+    setAppState(_: AppState): void,
+}
+
+function ModalDialogButton<C extends readonly string[]>({
+    dialog,
+    choice,
+    appState,
+    setAppState,
+}: ModalDialogButtonProps<C>) {
+    return <a
+        className="Visualization__Modal__Dialog__Button"
+        onClick={_ => {
+            setAppState(changeVmState(appState, vmState => dialog.apply(choice, vmState.setActiveDialog(null))));
+        }}
+    >{choice}</a>;
+}
+
+function generateLayout(state: State, graph: Graph): FcoseLayoutOptions {
     cytoscape.use(fcose);
-    let stackVertAlignment = "";
-    let stackVertRelPlacement = "";
-    if (state.stack.size > 0) {
-        stackVertAlignment = "[";
-        for (let i = 0; i < state.stack.size; i++) {
-            if (i == state.stack.size - 1) {
-                //Last
-                stackVertAlignment = stackVertAlignment + "\"S" + i + "\"";
-            } else {
-                stackVertAlignment = stackVertAlignment + "\"S" + i + "\",";
-            }
-        }
-        stackVertAlignment = stackVertAlignment + "],";
 
-        for (let i = 1; i < state.stack.size; i++) {
-            stackVertRelPlacement +=
-                "{\"top\": \"S" + i + "\"," +
-                "\"bottom\": \"S" + (i - 1) + "\"," +
-                "\"gap\": 0}";
-            if (i < state.stack.size - 1)
-                stackVertRelPlacement += ",";
-        }
-    }
+    // The following is the display order of the registers:
+    const regs = ["SP", "PC", "FP", "BP", "HP"]
+        .filter(reg => graph.nodes.some(n => n.data.id === reg));
 
-    const relPlacementJson = JSON.parse("[" + stackVertRelPlacement + "]");
+    const addrsInStructs = state.heap.all().entrySeq()
+        // For each struct on the heap...
+        .filter(([_, cell]) => cell instanceof StructCell)
+        // ...generate [struct addr, struct addr + 1, ..., struct addr + struct size]
+        .map(([addr, cell]) =>
+            Range(0, (cell as StructCell).size + 1)
+                .map(off => addr + off)
+                .toArray()
+        )
+        .toArray();
 
-    const registerVertAlignment = "[\"PC\",\"FP\",\"BP\"]";
-    const alignmentConstraints = "{\"vertical\": [" + stackVertAlignment + registerVertAlignment + "]}";
-    const alignmentJson = JSON.parse(alignmentConstraints);
+    // All heap nodes are to the right of the stack
+    const relPlacementConstraints: cytoscapeFcose.FcoseRelativePlacementConstraint[] = [
+        ...state.heap.all().keySeq().toArray().map(address => ({
+            left: "S0",
+            right: "H" + address,
+            gap: 1000,
+        })),
+
+        // Within structs, cells should be ordered by address
+        ...addrsInStructs.flatMap(addrs =>
+            addrs.slice(2).map((addr, i) => ({
+                top: "H" + addrs[i + 1],
+                bottom: "H" + addr,
+                gap: TOTAL_NODE_HEIGHT,
+            }))
+        ),
+    ];
+
+    const alignConstraints: cytoscapeFcose.FcoseAlignmentConstraint = {
+        // @ts-expect-error: The type annotations for FcoseAlignmentConstraint are incorrect;
+        //                   we need vertical: string[][] instead of [string, string][]
+        vertical: [
+            ...addrsInStructs.map(addrs => addrs.map(addr => "H" + addr)),
+        ],
+        horizontal: [],
+    };
+
+    const fixedConstraints: cytoscapeFcose.FcoseFixedNodeConstraint[] = [
+        // Registers:
+        ...regs.map((reg, i) => ({
+            nodeId: reg,
+            position: {x: 0, y: -TOTAL_NODE_HEIGHT * i},
+        })),
+        // Stack:
+        ...state.stack.toArray().map((_, i) => ({
+            nodeId: "S" + i,
+            position: {x: 1400, y: -TOTAL_NODE_HEIGHT * i},
+        })),
+        // Stack Dummy:
+        {nodeId: "S0_DUMMY",
+            position: {x: 1400, y: -TOTAL_NODE_HEIGHT},
+        },
+    ];
 
     return {
         name: "fcose",
-        // @ts-ignore
         animate: true,
+        animationDuration: 800,
         randomize: false,
-        alignmentConstraint: alignmentJson,
-        relativePlacementConstraint: relPlacementJson,
+        quality: "proof",
+        alignmentConstraint: alignConstraints,
+        relativePlacementConstraint: relPlacementConstraints,
+        fixedNodeConstraint: fixedConstraints,
+        uniformNodeDimensions: true,
+        nodeRepulsion: 1_000_000,
+        //initialEnergyOnIncremental: 0.5,
+        // Gravity force (constant) (0.25)
+        gravity: 0.25,
+        // Gravity range (constant) for compounds (1.5)
+        gravityRangeCompound: 1.5,
+        // Gravity force (constant) for compounds (1.0)
+        gravityCompound: 1.0,
+        // Gravity range (constant)
+        gravityRange: 3.8,
     };
 }
 
-function VisualizationGraph({state}: VisualizationProps) {
+interface VisualizationGraphProps {
+    state: State,
+}
 
-    const cy = useRef<Cytoscape.Core>();
+function VisualizationGraph({state}: VisualizationGraphProps) {
 
-    useLayoutEffect(() => {
-        //cy.current!.$id("s3").positions({x: 300, y: 300}).lock();
-        cy.current!
-            .layout(generateLayout(state, cy)).run();
-    });
+    const cyRef = useRef<Cytoscape.Core>();
 
-    const nodes = [];
-    const edges = [];
-
-    // REGISTER
-    const programmCounter = state.programCounter;
-    nodes.push({
-        data: {id: "PC", label: programmCounter, type: "register-value"},
-        style: {label: programmCounter},
-    });
-    const framePointer = state.framePointer;
-    nodes.push({
-        data: {id: "FP", label: framePointer, type: "register-value"},
-        style: {label: framePointer},
-    });
-    if (framePointer != -1) {
-        edges.push({
-            data: {
-                id: "FP",
-                source: "FP",
-                target: "S" + framePointer,
-                type: "register-pointer",
-            },
-        });
-    }
-    const backtrackPointer = state.backtrackPointer;
-    nodes.push({
-        data: {id: "BP", label: backtrackPointer, type: "register-value"},
-        style: {label: backtrackPointer},
-    });
-    if (backtrackPointer != -1) {
-        edges.push({
-            data: {
-                id: "BP",
-                source: "BP",
-                target: "S" + backtrackPointer,
-                type: "register-pointer",
-            },
-        });
-    }
-
-    // STACK
-    for (let i = 0; i < state.stack.size; ++i) {
-        const stackCell = state.stack.get(i);
-
-        if (stackCell instanceof UninitializedCell) {
-            nodes.push({data: {id: "S" + i, label: "Stack[" + i + "]", type: "stack-uninitialized"}});
-        }
-        else if (stackCell instanceof ValueCell) {
-            nodes.push({
-                data: {id: "S" + i, label: "Stack[" + i + "]", type: "stack-value"},
-                style: {label: stackCell.value},
-            });
-        }
-        else if (stackCell instanceof PointerToStackCell) {
-            nodes.push({data: {id: "S" + i, label: "Stack[" + i + "]", type: "stack-pointerToStack"}});
-            edges.push({
-                data: {
-                    id: "SP" + i,
-                    source: "S" + i,
-                    target: "S" + stackCell.value,
-                    type: "stack-pointerToStack",
-                },
-            });
-        }
-        else if (stackCell instanceof PointerToHeapCell) {
-            nodes.push({data: {id: "S" + i, label: "Stack[" + i + "]", type: "stack-pointerToHeap"}});
-            edges.push({
-                data: {
-                    id: "SP" + i,
-                    source: "S" + i,
-                    target: "H" + stackCell.value,
-                    type: "stack-pointerToHeap",
-                },
-            });
-        }
-    }
-
-    // HEAP
-    // FIXME: keyset in heap, und nur darüber iterieren!
-    for (let i = 0; i < state.heap.getHeapPointer(); ++i) {
-
-        if (state.heap.get(i)) {
-
-            const heapCell = state.heap.get(i);
-
-            if (heapCell instanceof UninitializedCell) {
-                nodes.push({data: {id: "H" + i, label: "Heap[" + i + "]", type: "heap-uninitialized"}});
-            }
-            else if (heapCell instanceof AtomCell) {
-                nodes.push({
-                    data: {id: "H" + i, label: "Heap[" + i + "]", type: "heap-atom"},
-                    style: {label: "A " + heapCell.value},
-                });
-            }
-            else if (heapCell instanceof VariableCell) {
-                nodes.push({
-                    data: {id: "H" + i, label: "Heap[" + i + "]", type: "heap-variable"},
-                    style: {label: heapCell.tag + " " + heapCell.value},
-                });
-                edges.push({
-                    data: {
-                        id: "HP" + i,
-                        source: "H" + i,
-                        target: "H" + heapCell.value,
-                        type: "heap-pointerToHeap",
-                    },
-                });
-            }
-            else if (heapCell instanceof StructCell) {
-                nodes.push({
-                    data: {id: "H" + i, label: "Heap[" + i + "]", type: "heap-struct"},
-                    style: {label: "S " + heapCell.label},
-                });
-                edges.push({
-                    data: {
-                        id: "HP" + i,
-                        source: "H" + i,
-                        target: "H" + i + 1,
-                        type: "heap-pointerToHeap",
-                    },
-                });
-            }
-            else if (heapCell instanceof PointerToHeapCell) {
-                nodes.push({data: {id: "H" + i, label: "Heap[" + i + "]", type: "heap-pointerToHeap"}});
-                edges.push({
-                    data: {
-                        id: "HP" + i,
-                        source: "H" + i,
-                        target: "H" + heapCell.value,
-                        type: "heap-pointerToHeap",
-                    },
-                });
-            }
-        }
-    }
-
-    // TRAIL (if exists)
-    for (let i = 0; i < state.trail.trailPointer; ++i) {
-        nodes.push({
-            data: {id: "T" + i, label: "Trail[" + i + "]", type: "trail-value"},
-            style: {label: state.trail.get(i)},
-        });
-    }
-
+    const graph = createGraph(state);
 
     return <CytoscapeComponent
-        cy={theCy => {
-            cy.current = theCy;
-            //   cy.current.on("tapend", function(ev) {
-            //       cy.current!.layout(generateLayout(state, cy)).run();
-            //   });
-        }}
-        style={{width: "100%", height: "100%"}}
-        stylesheet={[
-            {
-                selector: "node",
-                style: {
-                    width: 5,
-                    height: 2,
-                    shape: "rectangle",
-                },
-            },
-            {
-                selector: "[type='register-value']",
-                style: {
-                    backgroundColor: "blue",
-                },
-            },
-            {
-                selector: "edge",
-                style: {
-                    width: 1,
-                },
-            },
-        ]}
-        elements={CytoscapeComponent.normalizeElements({
-            nodes: nodes,
-            edges: edges,
-        })}
+        cy={cy => cyRef.current = cy}
+        className="Visualization__Cytoscape"
+        stylesheet={STYLESHEET}
+        elements={CytoscapeComponent.normalizeElements(graph)}
+        layout={generateLayout(state, graph)}
+        wheelSensitivity={0.3}
     />;
 }

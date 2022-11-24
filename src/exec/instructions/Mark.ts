@@ -25,7 +25,7 @@ export class Mark extends Instruction {
 
         stack = stack
             .push(new PointerToStackCell(state.framePointer))
-            .push(new ValueCell(this.param.line));
+            .push(new ValueCell(this.param.line, "PC"));
 
         return state.setStack(stack);
     }
