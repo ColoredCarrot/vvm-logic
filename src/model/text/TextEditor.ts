@@ -49,6 +49,18 @@ export class TextEditor {
     private setPrimaryCaret(idx: number): TextEditor {
         return new TextEditor(this.lines, this.carets, idx);
     }
+    
+    moveTo(direction: "home" | "end"): TextEditor {
+        const carets = this.carets.map(({row}) => {
+            switch (direction) {
+            case "home":
+                return {row: row, col: 0};
+            case "end":
+                return {row: row, col: this.lines[row].length};
+            }
+        });
+        return new TextEditor(this.lines, carets, this.primaryCaretIdx);
+    }
 
     move(direction: "left" | "right" | "up" | "down", mode: MovementMode = MovementMode.One): TextEditor {
         const carets = this.carets.map(({row, col}) => {

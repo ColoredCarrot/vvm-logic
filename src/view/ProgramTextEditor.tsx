@@ -203,6 +203,12 @@ function handleKeyDown(
     case "ArrowDown":
         setEditor(editor.move("down", mvMode));
         break;
+    case "End":
+        setEditor(editor.moveTo("end"));
+        break;
+    case "Home":
+        setEditor(editor.moveTo("home"));
+        break;
 
     case "Enter": {
         if (!evt.ctrlKey) {
@@ -223,7 +229,7 @@ function handleKeyDown(
 
     default:
         // Handle simple directly-typable characters
-        if (!evt.ctrlKey && evt.key.length === 1 && (
+        if (evt.key != undefined && !evt.ctrlKey && evt.key.length === 1 && (
             evt.key >= "a" && evt.key <= "z" ||
             evt.key >= "A" && evt.key <= "Z" ||
             evt.key >= "0" && evt.key <= "9" ||
