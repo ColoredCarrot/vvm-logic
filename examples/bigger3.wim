@@ -1,8 +1,9 @@
 	<!-- Ein einfaches Kommentar -->	
 	JUMP _START
+_NO:
 	NO
 _START:
-	INIT
+	INIT _NO
 	PUSHENV 2
 	MARK _B
 	PUTVAR 1

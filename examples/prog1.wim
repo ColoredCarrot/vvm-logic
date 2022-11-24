@@ -1,7 +1,8 @@
 	JUMP _START
+_NO:
 	NO
 _START:
-	INIT
+	INIT _NO
 	PUSHENV 0
 	MARK _A
 	CALL _p/0
