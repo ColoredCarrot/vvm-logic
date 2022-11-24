@@ -23,12 +23,14 @@ export class CodeGenerator {
 
         switch (term.value.kind) {
 
-        case "Atom":
+        case "Atom": {
 
             const atom = term.value as Atom;
             return `putatom ${atom.value}`;
 
-        case "Variable":
+        }
+
+        case "Variable": {
 
             const variable = term.value as Variable;
 
@@ -53,12 +55,14 @@ export class CodeGenerator {
                     }
                 }
             }
+        }
 
-        case "Anon":
+        case "Anon": {
 
             return "putanon";
+        }
 
-        case "Application":
+        case "Application": {
 
             const application = term.value as Application;
 
@@ -71,8 +75,13 @@ export class CodeGenerator {
 
             return result.join("\n") + "\n" + `putstruct ${application.name}/${k}`;
 
-        default:
+        }
+
+        default: {
+
             throw `Error while parsing: Unknown term kind: ${term.value.kind}`;
+
+        }
         }
     }
 
@@ -83,13 +92,13 @@ export class CodeGenerator {
 
         switch (goal.value.kind) {
 
-        case "Literal":
+        case "Literal": {
 
             const literal = goal.value as Literal;
 
             const result: string[] = [];
             for (const term of literal.terms) {
-                result.push(this.code_A(term, setArg, count,  rho));
+                result.push(this.code_A(term, setArg, count, rho));
             }
 
             const k = literal.terms.length;
@@ -100,9 +109,10 @@ export class CodeGenerator {
             } else {
                 return "mark " + label + "\n" + result.join("\n") + "\n" + `call ${literal.name}/${k}` + "\n" + label + ":";
             }
+        }
 
 
-        case "Unification":
+        case "Unification": {
 
             const unification = goal.value as Unification;
 
@@ -112,7 +122,7 @@ export class CodeGenerator {
                     rho.set(unification.variable.name, rho.size + 1);
                 }
                 return "putref " + rho.get(unification.variable.name) + "\n" + this.code_A(unification.term, setArg, count, rho) + "\n"
-                        + "unify";
+                    + "unify";
 
             } else {
 
@@ -123,14 +133,22 @@ export class CodeGenerator {
 
                 } else {
 
+                    if (rho.has(unification.variable.name)) {
+                        return "putref " + rho.get(unification.variable.name) + "\n" + this.code_A(unification.term, setArg, count, rho) + "\n"
+                            + "unify";
+                    }
                     rho.set(unification.variable.name, rho.size + 1);
                     return "putvar " + rho.get(unification.variable.name) + "\n" + this.code_A(unification.term, setArg, count, rho) + "\n"
                         + "bind";
                 }
             }
+        }
 
-        default:
+        default: {
+
             throw `Error while parsing: Unknown goal kind: ${goal.value.kind}`;
+
+        }
         }
     }
 
@@ -190,7 +208,7 @@ export class CodeGenerator {
     }
 
 
-    public code_Program(program: Program) {
+    public code_Program(program: Program): string {
 
         //Rho Initialize:
 
@@ -250,5 +268,5 @@ export class CodeGenerator {
     }
 
 
-    // Übersetzungsfunktion Code_U für optimierte Unifikationsbehandlung
+    // Übersetzungsfunktion Code_U für optimierte Unifikationsbehandlung: uatom, uvar, pop, uref, ustruct, son, up, bind
 }

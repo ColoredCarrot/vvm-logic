@@ -6,10 +6,10 @@ test("parsing", () => {
     //let program = Parsing.parse("b(X) <= X = f(X,Y) <= X = f(a, b, _)");
     //const program = Parsing.parse("t(X) <= X = b q(X)   <= s(X) s(X) <= X = a p() <= q(X),t(X) s(X) <= t(X) <= p()");
 
-    const program = Parsing.parse("bigger(X,Y) <= X = e, Y = h bigger(X,Y) <= X = h, X = d bigger(X,Y) <= ")
+    const program = Parsing.parse("bigger(X,Y) <= X = elephant, Y = horse <= b(X,Y)");
+
     const code: CodeGenerator = new CodeGenerator();
     console.log(code.code_Program(program));
-
 
 
 });
