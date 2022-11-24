@@ -130,13 +130,36 @@ export function ControlPanel() {
         <img src="/icons/cwmTerminate_dark.svg" alt="Clear"/>
     </a>;
 
+    const popout = !appState.autoStepEnabled ? undefined : <div className="ControlPanel__Popout">
+        <div className="ControlPanel__Popout__Content">
+            <div className="ControlPanel__Popout__Content__Line">
+                <label htmlFor="auto-step-speed-input">Speed:</label>
+                <input
+                    id="auto-step-speed-input"
+                    type="range"
+                    className="ControlPanel__Popout__Content__slider"
+                    min={0} max={1} step="any"
+                    value={appState.autoStepSpeed}
+                    onChange={evt => setAppState({
+                        ...appState,
+                        autoStepSpeed: Math.max(0, Math.min(1, evt.target.valueAsNumber)),
+                    })}
+                />
+            </div>
+        </div>
+    </div>;
+
     return <div className="ControlPanel">
-        <ReactTooltip place={"bottom"} effect={"solid"} delayShow={500}/>
-        {btnOpen}
-        {btnRun}
-        {btnStep}
-        {btnBack}
-        {btnRestart}
-        {btnClear}
+        <div>
+            <ReactTooltip place={"bottom"} effect={"solid"} delayShow={500}/>
+            {btnOpen}
+            {btnRun}
+            {btnStep}
+            {btnBack}
+            {btnRestart}
+            {btnClear}
+        </div>
+
+        {popout}
     </div>;
 }

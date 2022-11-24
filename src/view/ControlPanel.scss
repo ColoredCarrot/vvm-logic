@@ -31,7 +31,6 @@
         font-family: "JetBrains Mono", source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
         font-weight: bold;
         font-size: 0.8rem;
-        user-select: none;
 
         cursor: pointer;
         * {
@@ -61,5 +60,46 @@
             vertical-align: middle;
             height: 100%;
         }
+    }
+
+    &__Popout {
+        animation: control-panel-popout-open 0.5s cubic-bezier(1, 0, 0, 1) 1;
+        overflow: hidden;
+        box-sizing: border-box;
+        height: 50px;
+
+        &__Content {
+            padding: 10px 15px;
+            box-sizing: border-box;
+            color: colors.$text-code;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+
+            &__Line {
+                flex: 1;
+
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+            }
+
+            &__slider {
+                flex: 1;
+                margin-left: 15px;
+                padding: 0;
+                //appearance: none;
+                //background: none;
+            }
+        }
+    }
+}
+
+@keyframes control-panel-popout-open {
+    from {
+        max-height: 0;
+    }
+    to {
+        max-height: 100vh;
     }
 }
