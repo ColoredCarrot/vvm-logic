@@ -14,7 +14,7 @@ import {Program} from "../parser/model/Program";
 export function ControlPanel() {
 
     const [appState, setAppState] = useContext(AppStateContext);
-    const {programText, setEditor} = useContext(ProgramTextContext);
+    const {programText, editor, setEditor} = useContext(ProgramTextContext);
 
     const vmState = appState.vmState.last() ?? State.new();
 
@@ -174,7 +174,10 @@ export function ControlPanel() {
                 >Compile…</label>
             </div>
             <div>
-                <a className="ControlPanel__button ControlPanel__button--stretch">Save As…</a>
+                <a
+                    className="ControlPanel__button ControlPanel__button--stretch"
+                    onClick={() => openSaveAsDialog(editor.text)}
+                >Save As…</a>
             </div>
         </div>
     </div>;
@@ -218,4 +221,14 @@ export function ControlPanel() {
 
         {popout}
     </div>;
+}
+
+function openSaveAsDialog(text: string, filename = "program.wim") {
+    const a = document.createElement("a");
+    a.setAttribute("style", "display: none");
+    document.body.appendChild(a);
+    a.href = "data:text/plain," + encodeURIComponent(text);
+    a.download = filename;
+    a.click();
+    a.remove();
 }
