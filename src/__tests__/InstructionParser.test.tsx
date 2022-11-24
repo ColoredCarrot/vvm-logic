@@ -1,9 +1,12 @@
-import {InstructionParser, ParseError} from "../exec/InstructionParser";
+import {InstructionParser} from "../exec/InstructionParser";
 import {SignLabel} from "../exec/SignLabel";
 import {Call} from "../exec/instructions/Call";
 import {InvalidInstruction} from "../exec/instructions/InvalidInstruction";
 import {Pop} from "../exec/instructions/Pop";
 import {Pushenv} from "../exec/instructions/Pushenv";
+import {Init} from "../exec/instructions/Init";
+import {Label} from "../exec/Label";
+import {parseProgramText} from "../model/ProgramText";
 
 test("parse pop", () => {
     const instr = InstructionParser.parseInstruction("POP", []);
@@ -36,6 +39,17 @@ test("parse pushenv", () => {
 
     const pushenv = instr as Pushenv;
     expect(pushenv.mVar).toStrictEqual(0);
+});
+
+test("Parse labels with spaces", () => {
+    const validInput = [" n :",
+        "init n"];
+    const res = parseProgramText(validInput);
+
+    const expectedLabel = new Label(0, "N");
+
+    expect(res.getNextCodeLine(0)?.instruction).toBeInstanceOf(Init);
+    expect(res.getNextCodeLine(0)?.instruction).toStrictEqual(new Init(expectedLabel));
 });
 
 const page140Example: string [] =

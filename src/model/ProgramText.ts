@@ -32,6 +32,17 @@ export class LabelLine extends Line {
     }
 }
 
+export class CompositionLine extends CodeLine {
+    constructor(
+        num: number,
+        content: string,
+        raw: string,
+        instruction: Instruction,
+    ) {
+        super(num, content, raw, instruction);
+    }
+}
+
 /**
  * Encapsulates the raw and parsed program text at any given point of time.
  */
@@ -53,7 +64,7 @@ export class Text {
     get codeLineCount(): number {
         let res = 0;
         for (const line of this.lines) {
-            if (line instanceof CodeLine) {
+            if (line instanceof CodeLine || line instanceof CompositionLine) {
                 ++res;
             }
         }
@@ -62,13 +73,13 @@ export class Text {
 
     getCodeLine(num: number): CodeLine | null {
         return <CodeLine | null>(
-            this.lines.find(l => l instanceof CodeLine && l.num === num)
+            this.lines.find(l => (l instanceof CodeLine || l instanceof CompositionLine) && l.num === num)
             ?? null
         );
     }
 
     getNextCodeLine(programCounter: number): CodeLine | null {
-        let numToExec = programCounter + 1;
+        let numToExec = programCounter;
         while (numToExec < this.lines.length && this.getCodeLine(numToExec) === null) {
             ++numToExec;
         }
@@ -85,12 +96,17 @@ export function parseProgramText(rawLines: readonly string[]): Text {
     return new Text(
         rawLines
             .map(line => line.trim().toLowerCase())
-            .map((line, num) =>
-                line.endsWith(":")
-                    ? new LabelLine(num, line, rawLines[num])
-                    : (line.length > 0
-                        ? new CodeLine(num, line, rawLines[num], InstructionParser.parseInstruction(line, labels))
-                        : new Line(num, line, rawLines[num])),
-            ),
+            .map((line, num) => {
+                if (labels.find(v => v.line == num)) {
+                    if (line.endsWith(":")) { //Nothing after Label, just Label
+                        return new LabelLine(num, line, rawLines[num]);
+                    } else { //Something after Label, try to parse as Instruction
+                        return new CompositionLine(num, line, rawLines[num], InstructionParser.parseInstruction(line, labels));
+                    }
+                } else {
+                    //Instruction
+                    return new CodeLine(num, line, rawLines[num], InstructionParser.parseInstruction(line, labels));
+                }
+            }),
     );
 }
