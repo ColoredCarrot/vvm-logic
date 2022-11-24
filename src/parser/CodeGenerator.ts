@@ -81,6 +81,58 @@ export class CodeGenerator {
         }
     }
 
+    private code_U(term: Term, setArg: Set<string>, rho: Map<string, number>): string {
+
+        //Unification term differentiation: Anon, Variable (Initialized/Uninitialized), Atom, Application
+
+        switch (term.value.kind) {
+
+        case "Atom": {
+
+            const atom = term.value as Atom;
+            return `uatom ${atom.value}`;
+
+        }
+
+        case "Variable": {
+
+            const variable = term.value as Variable;
+
+            if (rho.has(variable.name)) {
+                if (!setArg.has(variable.name)) {
+                    setArg.add(variable.name);
+                    return "uvar " + rho.get(variable.name);
+                }
+
+                return "uref " + rho.get(variable.name);
+            } else {
+                rho.set(variable.name, rho.size + 1);
+
+                if (setArg.has(variable.name)) {
+                    return "uref " + rho.get(variable.name);
+                }
+
+                setArg.add(variable.name);
+                return "uvar " + rho.get(variable.name);
+            }
+        }
+
+        case "Anon": {
+
+            return "pop";
+        }
+
+        case "Application": {
+            return this.code_A(term, setArg, rho) + "\n" + "unify";
+        }
+
+        default: {
+
+            throw `Error while parsing: Unknown term kind: ${term.value.kind}`;
+
+        }
+        }
+    }
 
     private code_G(goal: Goal, setArg: Set<string>, rho: Map<string, number>): string {
 
@@ -118,12 +170,12 @@ export class CodeGenerator {
                     return "putvar " + rho.get(unification.variable.name) + "\n" + this.code_A(unification.term, setArg, rho) + "\n" + "bind";
                 }
 
-                return "putref " + rho.get(unification.variable.name) + "\n" + this.code_A(unification.term, setArg, rho) + "\n" + "unify";
+                return "putref " + rho.get(unification.variable.name) + "\n" + this.code_U(unification.term, setArg, rho);
             } else {
                 rho.set(unification.variable.name, rho.size + 1);
 
                 if (setArg.has(unification.variable.name)) {
-                    return "putref " + rho.get(unification.variable.name) + "\n" + this.code_A(unification.term, setArg, rho) + "\n" + "unify";
+                    return "putref " + rho.get(unification.variable.name) + "\n" + this.code_U(unification.term, setArg, rho);
                 }
 
                 setArg.add(unification.variable.name);
@@ -158,9 +210,10 @@ export class CodeGenerator {
 
     }
 
-    private code_P(clauses: Clause[], label: string, rho: Map<string, number>): string {
+    private code_P(clauses: Clause[], label: string): string {
 
         //call code_C on clauses with the same predicate
+        const rho = new Map<string, number>();
 
         if (clauses.length == 1) {
             return `${label}:\n` + this.code_C(clauses[0], rho);
@@ -228,15 +281,17 @@ export class CodeGenerator {
 
         const result2: string[] = [];
         for (const keys of map.keys()) {
-            result2.push(this.code_P(map.get(keys)!, keys, rho));
+            result2.push(this.code_P(map.get(keys)!, keys));
         }
 
-        return "init A\n" +
+        return "jump START\n" +
+            "A:\n" +
+            "no\n" +
+            "START:\n" +
+            "init A\n" +
             `pushenv ${queryVariableCount}\n` +
             result1.join("\n") + "\n" +
             `halt ${queryVariableCount}\n` +
-            "A:\n" +
-            "no\n" +
             result2.join("\n");
     }
 
