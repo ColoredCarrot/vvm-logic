@@ -29,8 +29,8 @@ export const EDGE_STYLES: { [T in EdgeType]: cytoscape.Css.Edge } = {
         "taxi-turn": e => 500 - (0.8 * Math.abs(e.sourceEndpoint().y)),
         "source-endpoint": "90deg",
         "target-endpoint": "270deg",
-        "line-color": "#4A4A4A",
-        "target-arrow-color": "#4A4A4A",
+        "line-color": "#a3a3a3",
+        "target-arrow-color": "#a3a3a3",
     },
     inHeap: {
         "curve-style": "taxi",
