@@ -17,7 +17,7 @@ export class CodeGenerator {
     //Codetranslations for Prolog - based on Instructions in "Translation of Virtual Machines", Helmut Seidl
 
 
-    private code_A(term: Term, setArg: Set<string>, count: number,  rho: Map<string, number>): string {
+    private code_A(term: Term, setArg: Set<string>, rho: Map<string, number>): string {
 
         //Term differentiation: Anon, Variable (Initialized/Uninitialized), Atom, Application
 
@@ -34,26 +34,22 @@ export class CodeGenerator {
 
             const variable = term.value as Variable;
 
-            if (setArg.has(variable.name)) {
-
-                if (!rho.has(variable.name)) {
-                    rho.set(variable.name, rho.size + 1);
+            if (rho.has(variable.name)) {
+                if (!setArg.has(variable.name)) {
+                    setArg.add(variable.name);
+                    return "putvar " + rho.get(variable.name);
                 }
+
                 return "putref " + rho.get(variable.name);
-
             } else {
+                rho.set(variable.name, rho.size + 1);
 
-                if (count > 0) {
+                if (setArg.has(variable.name)) {
                     return "putref " + rho.get(variable.name);
-                } else {
-                    if (rho.has(variable.name)) {
-                        return "putvar " + rho.get(variable.name);
-                    } else {
-                        const n = rho.size;
-                        rho.set(variable.name, n + 1);
-                        return "putvar " + rho.size;
-                    }
                 }
+
+                setArg.add(variable.name);
+                return "putvar " + rho.get(variable.name);
             }
         }
 
@@ -68,7 +64,7 @@ export class CodeGenerator {
 
             const result: string[] = [];
             for (const term of application.terms) {
-                result.push(this.code_A(term, setArg, count, rho));
+                result.push(this.code_A(term, setArg, rho));
             }
 
             const k = application.terms.length;
@@ -86,7 +82,7 @@ export class CodeGenerator {
     }
 
 
-    private code_G(goal: Goal, setArg: Set<string>, count: number, rho: Map<string, number>): string {
+    private code_G(goal: Goal, setArg: Set<string>, rho: Map<string, number>): string {
 
         // call Code_A on Unification or Literal
 
@@ -98,7 +94,7 @@ export class CodeGenerator {
 
             const result: string[] = [];
             for (const term of literal.terms) {
-                result.push(this.code_A(term, setArg, count, rho));
+                result.push(this.code_A(term, setArg, rho));
             }
 
             const k = literal.terms.length;
@@ -116,31 +112,22 @@ export class CodeGenerator {
 
             const unification = goal.value as Unification;
 
-            if (setArg.has(unification.variable.name)) {
-
-                if (!rho.has(unification.variable.name)) {
-                    rho.set(unification.variable.name, rho.size + 1);
+            if (rho.has(unification.variable.name)) {
+                if (!setArg.has(unification.variable.name)) {
+                    setArg.add(unification.variable.name);
+                    return "putvar " + rho.get(unification.variable.name) + "\n" + this.code_A(unification.term, setArg, rho) + "\n" + "bind";
                 }
-                return "putref " + rho.get(unification.variable.name) + "\n" + this.code_A(unification.term, setArg, count, rho) + "\n"
-                    + "unify";
 
+                return "putref " + rho.get(unification.variable.name) + "\n" + this.code_A(unification.term, setArg, rho) + "\n" + "unify";
             } else {
+                rho.set(unification.variable.name, rho.size + 1);
 
-                if (count > 0) {
-
-                    return "putref " + rho.get(unification.variable.name) + "\n" + this.code_A(unification.term, setArg, count, rho) + "\n"
-                        + "unify";
-
-                } else {
-
-                    if (rho.has(unification.variable.name)) {
-                        return "putref " + rho.get(unification.variable.name) + "\n" + this.code_A(unification.term, setArg, count, rho) + "\n"
-                            + "unify";
-                    }
-                    rho.set(unification.variable.name, rho.size + 1);
-                    return "putvar " + rho.get(unification.variable.name) + "\n" + this.code_A(unification.term, setArg, count, rho) + "\n"
-                        + "bind";
+                if (setArg.has(unification.variable.name)) {
+                    return "putref " + rho.get(unification.variable.name) + "\n" + this.code_A(unification.term, setArg, rho) + "\n" + "unify";
                 }
+
+                setArg.add(unification.variable.name);
+                return "putvar " + rho.get(unification.variable.name) + "\n" + this.code_A(unification.term, setArg, rho) + "\n" + "bind";
             }
         }
 
@@ -163,9 +150,8 @@ export class CodeGenerator {
         }
 
         const result: string[] = [];
-        let count = 0;
         for (const goal of clause.goals) {
-            result.push(this.code_G(goal, setArguments, count++, rho));
+            result.push(this.code_G(goal, setArguments, rho));
         }
 
         return "pushenv " + rho.size + "\n" + result.join("\n") + "\n" + "popenv";
@@ -217,12 +203,12 @@ export class CodeGenerator {
         //call Code_G on Goals of the Program
 
         const result1: string[] = [];
+        const queryScope = new Set<string>;
         for (const goal of program.query.goals) {
-            let count = 0;
-            console.log(result1.push(this.code_G(goal, new Set, count++, rho)));
+            console.log(result1.push(this.code_G(goal, queryScope, rho)));
         }
 
-        const rhoBeforePred = rho.size;
+        const queryVariableCount = rho.size;
 
         //Predicate Generation
 
@@ -246,9 +232,9 @@ export class CodeGenerator {
         }
 
         return "init A\n" +
-            `pushenv ${rhoBeforePred}\n` +
+            `pushenv ${queryVariableCount}\n` +
             result1.join("\n") + "\n" +
-            `halt ${rhoBeforePred}\n` +
+            `halt ${queryVariableCount}\n` +
             "A:\n" +
             "no\n" +
             result2.join("\n");
