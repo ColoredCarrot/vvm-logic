@@ -92,11 +92,17 @@ c   : STR_CONSTANT '(' xr ')' IMPLICATION gr
         }
     ;
 
-xr  : VARIABLE
+x   : VARIABLE
         {
-            $$ = [new Variable($1)]
+            $$ = new Variable($1)
         }
-    | VARIABLE ',' xr
+    ;
+
+xr  : x
+        {
+            $$ = [$1]
+        }
+    | xr ',' x
         {
             $$ = $1.concat($3)
         }
