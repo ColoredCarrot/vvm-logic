@@ -7,11 +7,14 @@ import "./ControlPanel.scss";
 import {useGlobalEvent} from "./util/UseGlobalEvent";
 import Immutable from "immutable";
 import ReactTooltip from "react-tooltip";
+import {Parsing} from "../parser/Parsing";
+import {CodeGenerator} from "../parser/CodeGenerator";
+import {Program} from "../parser/model/Program";
 
 export function ControlPanel() {
 
     const [appState, setAppState] = useContext(AppStateContext);
-    const {programText, setEditor} = useContext(ProgramTextContext);
+    const {programText, editor, setEditor} = useContext(ProgramTextContext);
 
     const vmState = appState.vmState.last() ?? State.new();
 
@@ -99,29 +102,85 @@ export function ControlPanel() {
         <img src="/icons/undo_dark.svg" alt="Undo"/>
     </a>;
 
-    const btnOpen = <a className="ControlPanel__button" data-tip={"Open File"}>
-        <input
-            id="open-file-input"
-            type="file"
-            accept=".txt,.wim"
-            onChange={evt => {
-                evt.preventDefault();
-                evt.stopPropagation();
-                const file = evt.target.files?.[0];
-                if (file) {
-                    const fileReader = new FileReader();
-                    fileReader.onload = (loadEvt => {
-                        const src = loadEvt.target!.result as string;
-                        setEditor(TextEditor.forText(src));
-                    });
-                    fileReader.readAsText(file);
-                }
-            }}
-        />
-        <label htmlFor="open-file-input">
-            <img src="/icons/menu-open_dark.svg" alt="Open..."/>
-        </label>
-    </a>;
+    const btnOpen = <div className="ControlPanel__button ControlPanel__button--dropdown">
+        <a>
+            <input
+                id="open-file-input"
+                type="file"
+                accept=".txt,.wim"
+                onChange={evt => {
+                    evt.preventDefault();
+                    evt.stopPropagation();
+                    const file = evt.target.files?.[0];
+                    if (file) {
+                        const fileReader = new FileReader();
+                        fileReader.onload = (loadEvt => {
+                            const src = loadEvt.target!.result as string;
+                            setEditor(TextEditor.forText(src));
+                        });
+                        fileReader.readAsText(file);
+                    }
+                }}
+            />
+            <label htmlFor="open-file-input">
+                <img src="/icons/menu-open_dark.svg" alt="Open..."/>
+            </label>
+
+            <input
+                id="compile-file-input"
+                type="file"
+                onChange={evt => {
+                    evt.preventDefault();
+                    evt.stopPropagation();
+                    const file = evt.target.files?.[0];
+                    if (file) {
+                        const fileReader = new FileReader();
+                        fileReader.onload = (loadEvt => {
+                            const src = loadEvt.target!.result as string;
+                            let parseTree: Program;
+                            try {
+                                parseTree = Parsing.parse(src);
+                            } catch (ex) {
+                                console.error("Failed to parse program", ex);
+                                window.alert("Failed to parse program: " + ex);
+                                return;
+                            }
+                            let parsedText: string;
+                            try {
+                                parsedText = new CodeGenerator().code_Program(parseTree);
+                            } catch (ex) {
+                                console.error("Codegen failed", ex);
+                                window.alert("Codegen failed: " + ex);
+                                return;
+                            }
+                            setEditor(TextEditor.forText(parsedText));
+                        });
+                        fileReader.readAsText(file);
+                    }
+                }}
+            />
+        </a>
+        <div className="dropdown-menu">
+            <div>
+                <label
+                    htmlFor="open-file-input"
+                    className="ControlPanel__button ControlPanel__button--stretch"
+                >Open…</label>
+            </div>
+            <div>
+                <label
+                    htmlFor="compile-file-input"
+                    className="ControlPanel__button ControlPanel__button--stretch"
+                >Compile…</label>
+            </div>
+            <div>
+                <a
+                    className="ControlPanel__button ControlPanel__button--stretch"
+                    onClick={() => openSaveAsDialog(editor.text)}
+                >Save As…</a>
+            </div>
+        </div>
+    </div>;
 
     const btnClear = <a
         data-tip={"Clear Text"}
@@ -162,4 +221,14 @@ export function ControlPanel() {
 
         {popout}
     </div>;
+}
+
+function openSaveAsDialog(text: string, filename = "program.wim") {
+    const a = document.createElement("a");
+    a.setAttribute("style", "display: none");
+    document.body.appendChild(a);
+    a.href = "data:text/plain," + encodeURIComponent(text);
+    a.download = filename;
+    a.click();
+    a.remove();
 }
