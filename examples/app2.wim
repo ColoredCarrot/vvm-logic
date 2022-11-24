@@ -1,7 +1,8 @@
 	JUMP _L1
+no:
 	NO
 _L1:
-	INIT
+	INIT no
 	PUSHENV 2
 	MARK _L2
 	PUTATOM a

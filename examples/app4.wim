@@ -1,11 +1,12 @@
 	JUMP _L1
+no:
 	NO
 _L1:
 	ENTRY app/3 R _L8
 	ENTRY app/3 Default _L9
 	ENTRY app/3 [|]/2 _L3
 	ENTRY app/3 [] _L2
-	INIT
+	INIT no
 	PUSHENV 3
 	MARK _L10
 	PUTATOM a

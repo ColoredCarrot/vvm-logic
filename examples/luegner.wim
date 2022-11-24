@@ -1,4 +1,5 @@
 	JUMP _L1
+_NO:
 	NO
 _L1:
 	ENTRY istLuegner/2 R _L13
@@ -9,7 +10,7 @@ _L1:
 	ENTRY beideLuegen/3 Default _L10
 	ENTRY beideLuegen/3 luegt _L9
 	ENTRY beideLuegen/3 wahr _L4
-	INIT L1
+	INIT _NO
 	PUSHENV 3
 	MARK _L15
 	PUTVAR 1
