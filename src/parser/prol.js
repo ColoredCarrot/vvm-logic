@@ -84,9 +84,9 @@ import {Term} from "./model/Term";
 import {Unification} from "./model/Unification";
 import {Variable} from "./model/Variable";
 
-var prol = (function() {
-    var o = function(k, v, o, l) { for (o = o || {}, l = k.length; l--; o[k[l]] = v);return o; }, $V0 = [1, 5], $V1 = [9, 13], $V2 = [1, 13], $V3 = [1, 14], $V4 = [1, 17], $V5 = [1, 18], $V6 = [5, 9, 12, 13], $V7 = [1, 31], $V8 = [1, 29], $V9 = [1, 30], $Va = [1, 32], $Vb = [1, 38], $Vc = [12, 16], $Vd = [5, 9, 12, 13, 16];
-    var parser = {trace: function trace() { },
+
+    const o = function(k, v, o, l) { for (o = o || {}, l = k.length; l--; o[k[l]] = v);return o; }, $V0 = [1, 5], $V1 = [9, 13], $V2 = [1, 13], $V3 = [1, 14], $V4 = [1, 17], $V5 = [1, 18], $V6 = [5, 9, 12, 13], $V7 = [1, 31], $V8 = [1, 29], $V9 = [1, 30], $Va = [1, 32], $Vb = [1, 38], $Vc = [12, 16], $Vd = [5, 9, 12, 13, 16];
+    const parser = {trace: function trace() { },
         yy: {},
         symbols_: {"error": 2, "program": 3, "p": 4, "EOF": 5, "cr": 6, "a": 7, "c": 8, "IMPLICATION": 9, "gr": 10, "g": 11, ",": 12, "STR_CONSTANT": 13, "(": 14, "xr": 15, ")": 16, "VARIABLE": 17, "tr": 18, "=": 19, "t": 20, "at": 21, "_": 22, "INT_CONSTANT": 23, "$accept": 0, "$end": 1},
         terminals_: {2: "error", 5: "EOF", 9: "IMPLICATION", 12: ",", 13: "STR_CONSTANT", 14: "(", 16: ")", 17: "VARIABLE", 19: "=", 22: "_", 23: "INT_CONSTANT"},
@@ -704,23 +704,14 @@ var prol = (function() {
         this.yy = {};
     }
     Parser.prototype = parser; parser.Parser = Parser;
-    return new Parser;
-})();
+    export const PARSER = new Parser;
 
-
-if (typeof require !== "undefined" && typeof exports !== "undefined") {
-    exports.parser = prol;
-    exports.Parser = prol.Parser;
-    exports.parse = function() { return prol.parse.apply(prol, arguments); };
-    exports.main = function commonjsMain(args) {
-        if (!args[1]) {
-            console.log("Usage: " + args[0] + " FILE");
-            process.exit(1);
-        }
-        var source = require("fs").readFileSync(require("path").normalize(args[1]), "utf8");
-        return exports.parser.parse(source);
-    };
-    if (typeof module !== "undefined" && require.main === module) {
-        exports.main(process.argv.slice(1));
-    }
-}
+// export function parse() {
+//     return PARSER.parse(arguments);
+// }
+//
+// if (typeof require !== "undefined" && typeof exports !== "undefined") {
+//     exports.parser = prol;
+//     exports.Parser = prol.Parser;
+//     exports.parse = function() { return prol.parse.apply(prol, arguments); };
+// }
