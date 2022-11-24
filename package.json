@@ -14,6 +14,8 @@
     "cytoscape": "^3.23.0",
     "cytoscape-fcose": "^2.1.0",
     "immutable": "^4.1.0",
+    "jison": "^0.4.18",
+    "jointjs": "^3.6.2",
     "parser-generator": "^0.2.0",
     "prismjs": "^1.29.0",
     "react": "^18.2.0",
