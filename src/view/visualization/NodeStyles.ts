@@ -102,8 +102,9 @@ export const NODE_STYLES: { [T in NodeType]: cytoscape.Css.Node } = {
     },
     "stack-pointerToStack": {},
     "stack-uninitialized": {
-        backgroundColor: "#5c5c5c",
+        backgroundColor: "#a3a3a3",
         color: "white",
+        label: "",
     },
     "stack-value": {
         backgroundColor: "#e7ab79",
