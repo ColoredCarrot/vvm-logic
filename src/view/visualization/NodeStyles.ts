@@ -1,4 +1,5 @@
 import cytoscape from "cytoscape";
+import {getRainbowHexColor} from "./Rainbow";
 import {EdgeType, NodeType} from "./VisualizationGraph";
 
 export const NODE_WIDTH = 600;
@@ -8,14 +9,17 @@ export const NODE_BORDER = 8;
 export const TOTAL_NODE_HEIGHT = NODE_HEIGHT + 2 * NODE_PADDING + NODE_BORDER; // border does NOT need to be doubled
 export const TOTAL_NODE_WIDTH = NODE_WIDTH + 2 * NODE_PADDING + NODE_BORDER;
 
+const rainbowEdges = true; // TODO make configurable/a setting
+
 export const DEFAULT_EDGE_STYLE: cytoscape.Css.Edge = {
     width: 5,
     "curve-style": "bezier",
     "target-arrow-shape": "triangle",
     "target-arrow-fill": "filled",
     "arrow-scale": 4,
-    "line-color": "#ACACAC",
-    "target-arrow-color": "#ACACAC",
+    // Base rainbow edges on edge target node, so edges pointing to the same node will have the same color
+    "line-color": e => rainbowEdges ? getRainbowHexColor(e.data("target")) : "#ACACAC",
+    "target-arrow-color": e => rainbowEdges ? getRainbowHexColor(e.data("target")) : "#ACACAC",
 };
 
 export const EDGE_STYLES: { [T in EdgeType]: cytoscape.Css.Edge } = {
@@ -49,8 +53,8 @@ export const EDGE_STYLES: { [T in EdgeType]: cytoscape.Css.Edge } = {
         "control-point-weights": [0.5],
         "source-endpoint": "270deg",
         "target-endpoint": "270deg",
-        "line-color": "#828282",
-        "target-arrow-color": "#828282",
+        "line-color": rainbowEdges ? undefined : "#828282",
+        "target-arrow-color": rainbowEdges ? undefined : "#828282",
     },
     stackToHeap: {
         "curve-style": "taxi",

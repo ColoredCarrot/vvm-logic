@@ -46,6 +46,16 @@ export class Heap implements Iterable<[Address, Cell]> {
         return new Heap(this.data.set(address, value), this._heapPointer);
     }
 
+    dealloc(addr: number[]): Heap {
+        const newData: Immutable.Map<Address, Cell> = this.data.removeAll(addr);
+        const maxHeap: Address | undefined = newData.keySeq().max((valueA, valueB) => valueA - valueB);
+        if (maxHeap === undefined) {
+            return Heap.empty();
+        } else {
+            return new Heap(newData, maxHeap + 1);
+        }
+    }
+
     /**
      * Allocates the given cells contiguously on the heap.
      *
