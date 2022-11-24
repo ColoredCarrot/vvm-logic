@@ -4,5 +4,4 @@ bigger(X,Y) <= X = donkey, Y = dog
 bigger(X,Y) <= X = donkey, Y = monkey
 isBigger(X,Y) <= bigger(X,Y)
 isBigger(X,Y) <= bigger(X,Z), isBigger(Z,Y)
-
-?-isBigger(elephant, X)
+<= isBigger(elephant, X)

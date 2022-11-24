@@ -1,6 +1,6 @@
-% bigger1.wim : ?-isBigger(elephant, monkey)
-% bigger2.wim : ?-isBigger(elephant, X)
-% bigger3.wim : ?-isBigger(X,Y)
+% bigger1.wim : <= isBigger(elephant, monkey)
+% bigger2.wim : <= isBigger(elephant, X)
+% bigger3.wim : <= isBigger(X,Y)
 
 bigger(X,Y) <= X = elephant, Y = horse
 bigger(X,Y) <= X = horse, Y = donkey
