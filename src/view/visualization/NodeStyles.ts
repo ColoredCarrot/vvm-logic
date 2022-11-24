@@ -66,7 +66,7 @@ export const EDGE_STYLES: { [T in EdgeType]: cytoscape.Css.Edge } = {
 export const DEFAULT_NODE_STYLE = {
     width: NODE_WIDTH,
     height: NODE_HEIGHT,
-    backgroundColor: "#bb86fc",
+    backgroundColor: "#c388ff",
     color: "black",
 
     shape: "roundrectangle",
@@ -101,11 +101,14 @@ export const NODE_STYLES: { [T in NodeType]: cytoscape.Css.Node } = {
         backgroundColor: "#1E5128",
         color: "white",
     },
-    "register-value": {},
+    "register-value": {
+        backgroundColor: "#9cecec",
+    },
     "stack-pointerToStack": {},
     "stack-uninitialized": {
-        backgroundColor: "#5c5c5c",
+        backgroundColor: "#a3a3a3",
         color: "white",
+        label: "",
     },
     "stack-value": {
         backgroundColor: "#e7ab79",

@@ -27,7 +27,7 @@ export function Visualization() {
     const state = appState.vmState.last() ?? State.new();
 
     return <div className="Visualization">
-        <h3>Visualization</h3>
+        <h3>Virtual Machine for Prolog </h3>
 
         <VisualizationGraph state={state} appState={appState}/>
 
