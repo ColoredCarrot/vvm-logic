@@ -36,7 +36,7 @@ export class GarbageCollector {
             visited.add(current);
             const currentCell: Cell = state.heap.get(current);
             if (currentCell instanceof VariableCell) {
-                return this.findReachableRecursive(state, visited, current);
+                return this.findReachableRecursive(state, visited, currentCell.value);
             }
             if (currentCell instanceof StructCell) {
                 for (let i = current + 1; i < current + 1 + currentCell.size; i++) {
