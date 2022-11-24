@@ -5,7 +5,7 @@ import {StructCell} from "./StructCell";
 import {PointerToHeapCell} from "./PointerToHeapCell";
 
 export class GarbageCollector {
-    private static readonly GC_ENABLED = true;
+    private static readonly GC_ENABLED = false;
     
     
     run(state: State): State {
