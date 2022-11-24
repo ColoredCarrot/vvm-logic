@@ -18,6 +18,7 @@ export interface AppState {
     readonly lastExecutionError: ExecutionError | string | null;
 
     readonly autoStepEnabled: boolean;
+    readonly autoStepSpeed: number;
 }
 
 type AppStateAndSetter = [AppState, (_: AppState) => void];
@@ -26,6 +27,7 @@ export const AppStateContext = React.createContext<AppStateAndSetter>([{
     vmState: Immutable.List(),
     lastExecutionError: null,
     autoStepEnabled: false,
+    autoStepSpeed: 0.5,
 }, _ => {
     /* Do nothing */
 }]);

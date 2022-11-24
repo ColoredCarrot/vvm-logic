@@ -5,6 +5,7 @@ import fcose, {FcoseLayoutOptions} from "cytoscape-fcose";
 import React, {useContext, useRef} from "react";
 import CytoscapeComponent from "react-cytoscapejs";
 import {State} from "../../model/State";
+import {calculateInterval} from "../App";
 import {STYLESHEET, TOTAL_NODE_HEIGHT} from "./NodeStyles";
 import "./Visualization.scss";
 import {createGraph, Graph} from "./VisualizationGraph";
@@ -28,7 +29,7 @@ export function Visualization() {
     return <div className="Visualization">
         <h3>Visualization</h3>
 
-        <VisualizationGraph state={state}/>
+        <VisualizationGraph state={state} appState={appState}/>
 
         <div className={"Visualization__Modal" + (state.activeDialog !== null ? " Visualization__Modal--shown" : "")}>
             <div className="Visualization__Modal__Dialog">
@@ -129,7 +130,8 @@ function generateLayout(state: State, graph: Graph): FcoseLayoutOptions {
             position: {x: 1400, y: -TOTAL_NODE_HEIGHT * i},
         })),
         // Stack Dummy:
-        {nodeId: "S0_DUMMY",
+        {
+            nodeId: "S0_DUMMY",
             position: {x: 1400, y: -TOTAL_NODE_HEIGHT},
         },
     ];
@@ -159,20 +161,27 @@ function generateLayout(state: State, graph: Graph): FcoseLayoutOptions {
 
 interface VisualizationGraphProps {
     state: State,
+    appState: AppState,
 }
 
-function VisualizationGraph({state}: VisualizationGraphProps) {
+function VisualizationGraph({state, appState}: VisualizationGraphProps) {
 
     const cyRef = useRef<Cytoscape.Core>();
 
     const graph = createGraph(state);
+
+    const layout = generateLayout(state, graph);
+    if (appState.autoStepEnabled) {
+        // Only use non-default animation speed if currently auto-stepping
+        layout.animationDuration = calculateInterval(10, 2000, appState.autoStepSpeed);
+    }
 
     return <CytoscapeComponent
         cy={cy => cyRef.current = cy}
         className="Visualization__Cytoscape"
         stylesheet={STYLESHEET}
         elements={CytoscapeComponent.normalizeElements(graph)}
-        layout={generateLayout(state, graph)}
+        layout={layout}
         wheelSensitivity={0.3}
     />;
 }

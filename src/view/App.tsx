@@ -16,6 +16,7 @@ function App() {
         vmState: Immutable.List(),
         lastExecutionError: null,
         autoStepEnabled: false,
+        autoStepSpeed: 0.5,
     });
 
     const [programTextEditor, setProgramTextEditor] = useLocallyStoredState(
@@ -32,7 +33,7 @@ function App() {
 
     const vmState = appState.vmState.last() ?? State.new();
 
-    const [autoStepInterval, setAutoStepInterval] = useState(1500);//TODO move to AppState
+    const autoStepInterval = calculateInterval(100, 3000, appState.autoStepSpeed);
 
     useInterval(
         () => {
@@ -66,6 +67,11 @@ function App() {
             </ProgramTextContext.Provider>
         </AppStateContext.Provider>
     </>;
+}
+
+export function calculateInterval(min: number, max: number, mod: number): number {
+    console.assert(mod >= 0 && mod <= 1);
+    return min + (1 - mod) * (max - min);
 }
 
 export default App;
