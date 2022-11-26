@@ -52,7 +52,7 @@
     "@typescript-eslint/parser": "^5.44.0",
     "eslint": "^8.28.0",
     "eslint-plugin-flowtype": "^8.0.3",
-    "eslint-plugin-react": "^7.31.10",
+    "eslint-plugin-react": "^7.31.11",
     "sass": "^1.56.1"
   }
 }
