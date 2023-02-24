@@ -110,8 +110,6 @@ function generateLayout(state: State, graph: Graph): FcoseLayoutOptions {
     ];
 
     const alignConstraints: cytoscapeFcose.FcoseAlignmentConstraint = {
-        // @ts-expect-error: The type annotations for FcoseAlignmentConstraint are incorrect;
-        //                   we need vertical: string[][] instead of [string, string][]
         vertical: [
             ...addrsInStructs.map(addrs => addrs.map(addr => "H" + addr)),
         ],
