@@ -13,7 +13,7 @@
     "@types/react-dom": "^18.0.11",
     "cytoscape": "^3.23.0",
     "cytoscape-fcose": "^2.2.0",
-    "immutable": "^4.2.4",
+    "immutable": "^4.3.0",
     "jison": "^0.4.18",
     "parser-generator": "^0.2.0",
     "react": "^18.2.0",
