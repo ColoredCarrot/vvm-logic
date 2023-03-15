@@ -33,3 +33,25 @@ jobs:
         run: npm run lint
       - name: Test
         run: npm test
+
+      - name: Upload Build Artifacts
+        if: ${{ github.event_name == 'push' }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: build/
+
+  deploy:
+    if: ${{ github.event_name == 'push' }}
+    needs: [ build ]
+    concurrency: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: dist
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: build
