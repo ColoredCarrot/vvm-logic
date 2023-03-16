@@ -10,6 +10,13 @@ import ReactTooltip from "react-tooltip";
 import {Parsing} from "../parser/Parsing";
 import {CodeGenerator} from "../parser/CodeGenerator";
 import {Program} from "../parser/model/Program";
+import iconCwmTerminateDark from "./icons/cwmTerminate_dark.svg";
+import iconExecuteDark from "./icons/execute_dark.svg";
+import iconMenuOpenDark from "./icons/menu-open_dark.svg";
+import iconNextStepDark from "./icons/nextStep_dark.svg";
+import iconPauseDark from "./icons/pause_dark.svg";
+import iconRestartDark from "./icons/restart_dark.svg";
+import iconUndoDark from "./icons/undo_dark.svg";
 
 export function ControlPanel() {
 
@@ -73,7 +80,7 @@ export function ControlPanel() {
         className={"ControlPanel__button" + (btnStepDisabled ? " ControlPanel__button--disabled" : "")}
         onClick={() => invokeStep()}
     >
-        <img src="/icons/nextStep_dark.svg" alt="Step"/>
+        <img src={iconNextStepDark} alt="Step"/>
     </a>;
 
     const btnRun = <a
@@ -81,7 +88,7 @@ export function ControlPanel() {
         className="ControlPanel__button"
         onClick={() => invokeRun()}
     >
-        {appState.autoStepEnabled ? <img src="/icons/pause_dark.svg" alt="Stop"/> : <img src="/icons/execute_dark.svg" alt="Run"/>}
+        {appState.autoStepEnabled ? <img src={iconPauseDark} alt="Stop"/> : <img src={iconExecuteDark} alt="Run"/>}
     </a>;
 
     const btnRestart = <a className="ControlPanel__button" data-tip={"Restart"} onClick={() => {
@@ -91,7 +98,7 @@ export function ControlPanel() {
             lastExecutionError: null,
         });
     }}>
-        <img src="/icons/restart_dark.svg" alt="Restart"/>
+        <img src={iconRestartDark} alt="Restart"/>
     </a>;
 
     const btnBackEnabled = !appState.vmState.isEmpty();
@@ -99,7 +106,7 @@ export function ControlPanel() {
         data-tip={"Step Back (F7)"}
         className={"ControlPanel__button" + (!btnBackEnabled ? " ControlPanel__button--disabled" : "")}
         onClick={() => invokeBack()}>
-        <img src="/icons/undo_dark.svg" alt="Undo"/>
+        <img src={iconUndoDark} alt="Undo"/>
     </a>;
 
     const btnOpen = <div className="ControlPanel__button ControlPanel__button--dropdown">
@@ -123,7 +130,7 @@ export function ControlPanel() {
                 }}
             />
             <label htmlFor="open-file-input">
-                <img src="/icons/menu-open_dark.svg" alt="Open..."/>
+                <img src={iconMenuOpenDark} alt="Open..."/>
             </label>
 
             <input
@@ -186,7 +193,7 @@ export function ControlPanel() {
         data-tip={"Clear Text"}
         className="ControlPanel__button"
         onClick={() => setEditor(TextEditor.create())}>
-        <img src="/icons/cwmTerminate_dark.svg" alt="Clear"/>
+        <img src={iconCwmTerminateDark} alt="Clear"/>
     </a>;
 
     const popout = !appState.autoStepEnabled ? undefined : <div className="ControlPanel__Popout">
