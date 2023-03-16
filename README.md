@@ -1,6 +1,10 @@
 # VVM Logic
 
+[![Build](https://github.com/ColoredCarrot/vvm-logic/actions/workflows/build.yml/badge.svg)](https://github.com/ColoredCarrot/vvm-logic/actions/workflows/build.yml)
+
 Visualization of a virtual machine for the logic programing language Prolog.
+
+**[Live Preview](https://coloredcarrot.github.io/vvm-logic/)**
 
 ![Preview](doc/assets/capture.gif)
 
