@@ -10,7 +10,7 @@
     "@testing-library/user-event": "^14.4.3",
     "@types/jest": "^29.5.0",
     "@types/node": "^18.15.11",
-    "@types/react": "^18.0.34",
+    "@types/react": "^18.0.37",
     "@types/react-dom": "^18.0.11",
     "cytoscape": "^3.23.0",
     "cytoscape-fcose": "^2.2.0",
