@@ -4,14 +4,18 @@
   "description": "Visualization of Virtual Machines for Logical Languages",
   "private": true,
   "homepage": ".",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build --outDir build",
+    "build:gh": "tsc && vite build --outDir build --base /vvm-logic/",
+    "serve": "vite preview --outDir build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:cov": "vitest run --coverage",
+    "lint": "eslint src",
+    "lint:fix": "npm run lint -- --fix"
+  },
   "dependencies": {
-    "@testing-library/jest-dom": "^5.16.5",
-    "@testing-library/react": "^14.0.0",
-    "@testing-library/user-event": "^14.4.3",
-    "@types/jest": "^29.5.1",
-    "@types/node": "^18.16.1",
-    "@types/react": "^18.2.0",
-    "@types/react-dom": "^18.2.1",
     "cytoscape": "^3.23.0",
     "cytoscape-fcose": "^2.2.0",
     "immutable": "^4.3.0",
@@ -20,19 +24,32 @@
     "react": "^18.2.0",
     "react-cytoscapejs": "^2.0.0",
     "react-dom": "^18.2.0",
-    "react-scripts": "5.0.1",
     "react-tooltip": "^4.5.1",
     "typescript": "^4.9.5",
     "usehooks-ts": "^2.9.1",
     "web-vitals": "^3.3.1"
   },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test --watchAll=false",
-    "lint": "eslint src",
-    "lint:fix": "npm run lint -- --fix",
-    "eject": "react-scripts eject"
+  "devDependencies": {
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^14.0.0",
+    "@testing-library/user-event": "^14.4.3",
+    "@types/cytoscape-fcose": "^2.2.0",
+    "@types/node": "^18.16.1",
+    "@types/react": "^18.2.0",
+    "@types/react-cytoscapejs": "^1.2.2",
+    "@types/react-dom": "^18.2.1",
+    "@typescript-eslint/eslint-plugin": "^5.59.1",
+    "@typescript-eslint/parser": "^5.59.1",
+    "@vitejs/plugin-react": "^4.0.0",
+    "@vitest/coverage-c8": "^0.30.1",
+    "eslint": "^8.39.0",
+    "eslint-plugin-flowtype": "^8.0.3",
+    "eslint-plugin-react": "^7.32.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "jsdom": "^21.1.1",
+    "sass": "^1.62.1",
+    "vite": "^4.3.3",
+    "vitest": "^0.30.1"
   },
   "browserslist": {
     "production": [
@@ -45,15 +62,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "@types/cytoscape-fcose": "^2.2.0",
-    "@types/react-cytoscapejs": "^1.2.2",
-    "@typescript-eslint/eslint-plugin": "^5.59.1",
-    "@typescript-eslint/parser": "^5.59.1",
-    "eslint": "^8.39.0",
-    "eslint-plugin-flowtype": "^8.0.3",
-    "eslint-plugin-react": "^7.32.2",
-    "sass": "^1.62.1"
   }
 }
