@@ -41,7 +41,7 @@
     "@typescript-eslint/eslint-plugin": "^5.60.0",
     "@typescript-eslint/parser": "^5.60.0",
     "@vitejs/plugin-react": "^4.0.1",
-    "@vitest/coverage-c8": "^0.32.2",
+    "@vitest/coverage-c8": "^0.32.3",
     "eslint": "^8.43.0",
     "eslint-plugin-flowtype": "^8.0.3",
     "eslint-plugin-react": "^7.32.2",
