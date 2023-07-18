@@ -58,8 +58,8 @@ export abstract class Instruction {
             && heapAtV.label === heapAtU.label) {
             const n = heapAtU.size;
             for (let i = 1; i <= n; i++) {
-                const heapAtUpI = (<PointerToHeapCell>state.heap.get(u + i)).value;
-                const heapAtVpI = (<PointerToHeapCell>state.heap.get(v + i)).value;
+                const heapAtUpI = (state.heap.get(u + i) as PointerToHeapCell).value;
+                const heapAtVpI = (state.heap.get(v + i) as PointerToHeapCell).value;
 
                 const [newState, result] = this.unify(state, this.deref(state, heapAtUpI), this.deref(state, heapAtVpI));
                 state = newState;
@@ -87,13 +87,13 @@ export abstract class Instruction {
         state = state.setHeap(state.heap.setHeapPointer(oldHeapPointer.value));
 
         //Reset Trail Pointer and reset()
-        const oldTrailPointer = <ValueCell> state.stack.get(state.framePointer - 3);
+        const oldTrailPointer = state.stack.get(state.framePointer - 3) as ValueCell;
         state = this.reset(state, oldTrailPointer.value, state.trail.trailPointer);
 
         state = state.setTrail(state.trail.setTrailPointer(oldTrailPointer.value));
 
         //Set PC to negative Continuation address
-        const negativeCont = <PointerToStackCell>state.stack.get(state.framePointer - 5);
+        const negativeCont = state.stack.get(state.framePointer - 5) as PointerToStackCell;
         state = state.setProgramCounter(negativeCont.value);
 
         return state;

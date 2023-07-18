@@ -38,7 +38,7 @@ export interface ProgramTextFacade {
 
     readonly editor: TextEditor;
 
-    setEditor(editor: TextEditor): void;
+    readonly setEditor: (editor: TextEditor) => void;
 
 }
 

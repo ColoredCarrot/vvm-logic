@@ -6,7 +6,7 @@ import "./view/fonts.css";
 import App from "./view/App";
 
 const root = ReactDOM.createRoot(
-  document.getElementById("root") as HTMLElement
+  document.getElementById("root")!
 );
 root.render(
     <React.StrictMode>

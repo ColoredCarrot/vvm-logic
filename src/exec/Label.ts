@@ -15,4 +15,8 @@ export class Label {
     get text(): string {
         return this._text;
     }
+
+    toString(): string {
+        return this.text;
+    }
 }

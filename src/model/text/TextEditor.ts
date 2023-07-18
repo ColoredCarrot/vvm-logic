@@ -1,4 +1,4 @@
-export type Caret = { readonly row: number, readonly col: number };
+export interface Caret { readonly row: number, readonly col: number }
 
 export enum MovementMode {
     One,

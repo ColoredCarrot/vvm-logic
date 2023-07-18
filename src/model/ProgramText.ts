@@ -72,10 +72,10 @@ export class Text {
     }
 
     getCodeLine(num: number): CodeLine | null {
-        return <CodeLine | null>(
+        return (
             this.lines.find(l => (l instanceof CodeLine || l instanceof CompositionLine) && l.num === num)
             ?? null
-        );
+        ) as CodeLine | null;
     }
 
     getNextCodeLine(programCounter: number): CodeLine | null {

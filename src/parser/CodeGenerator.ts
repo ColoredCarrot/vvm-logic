@@ -251,7 +251,7 @@ export class CodeGenerator {
 
         //Rho Initialize:
 
-        const rho: Map<string, number> = new Map();
+        const rho = new Map<string, number>();
 
         //call Code_G on Goals of the Program
 
@@ -265,7 +265,7 @@ export class CodeGenerator {
 
         //Predicate Generation
 
-        const map: Map<string, Clause[]> = new Map();
+        const map = new Map<string, Clause[]>();
         for (const clause of program.clauses) {
             const name = clause.head.name;
             const k = clause.head.variables.length;
