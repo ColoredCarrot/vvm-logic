@@ -21,7 +21,7 @@ export class Putstruct extends Instruction {
         const size = this.param.size;
         const newStackPointer = state.stack.stackPointer - size + 1;
 
-        const cells: Cell[] = new Array(size + 1);
+        const cells: Cell[] = new Array<Cell>(size + 1);
         const [newHeap, address] = state.heap.alloc(cells);
 
         let heap = newHeap;

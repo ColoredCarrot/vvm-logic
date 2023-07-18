@@ -28,6 +28,6 @@ export class Popenv extends Instruction {
         return state
             .setProgramCounter(pcCell.value)
             .setFramePointer(fpCell.value)
-            .modify(state.garbageCollector.run);
+            .modify(s => state.garbageCollector.run(s));
     }
 }

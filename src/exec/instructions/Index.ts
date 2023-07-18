@@ -27,7 +27,7 @@ export class Index extends Instruction {
         } else if (topOfStack instanceof StructCell) {
             newPC = state.tryChain.get(this.pred, topOfStack.label);
         } else {
-            throw new ExecutionError("" + topOfStack.toJSON() + " is not a valid Cell at top of stack for" +
+            throw new ExecutionError("" + topOfStack + " is not a valid Cell at top of stack for" +
                 " instruction " + super.instruction);
         }
 

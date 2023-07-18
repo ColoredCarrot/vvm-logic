@@ -30,14 +30,14 @@ export function useLocallyStoredState<T extends readonly LocallyStorable[] | Loc
     },
 ): [T, React.Dispatch<React.SetStateAction<T>>] {
 
-    const [value, setValue] = useState(() => {
+    const [value, setValue] = useState((): T => {
         const storedJson = localStorage.getItem(key);
         
         if (storedJson === null) {
-            return typeof defaultValue === "function" ? defaultValue() : defaultValue;
+            return typeof defaultValue === "function" ? (defaultValue as () => T)() : defaultValue;
         }
         
-        return deserializer !== undefined ? deserializer(storedJson) : JSON.parse(storedJson);
+        return deserializer !== undefined ? deserializer(storedJson) : JSON.parse(storedJson) as T;
     });
 
     const debouncedValue = useDebounced(value, delay ?? 500);

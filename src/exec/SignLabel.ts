@@ -12,4 +12,8 @@ export class SignLabel extends Label {
     get size(): number {
         return this._size;
     }
+
+    toString(): string {
+        return this.text + "/" + this.size;
+    }
 }

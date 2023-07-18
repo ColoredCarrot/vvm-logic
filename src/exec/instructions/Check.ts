@@ -12,8 +12,8 @@ export class Check extends Instruction {
     }
 
     step(state: State): State {
-        const topOfStack: number = (<PointerToHeapCell>state.stack.get(state.stack.stackPointer)).value;
-        const ref: number = (<PointerToHeapCell>state.stack.get(state.framePointer + this.i)).value;
+        const topOfStack: number = (state.stack.get(state.stack.stackPointer) as PointerToHeapCell).value;
+        const ref: number = (state.stack.get(state.framePointer + this.i) as PointerToHeapCell).value;
 
         if (!Instruction.check(state, topOfStack,
             Instruction.deref(state, ref))) {

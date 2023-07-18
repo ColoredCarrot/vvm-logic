@@ -73,9 +73,9 @@ export type NodeDefinition = cytoscape.NodeDefinition & {
     data: NodeDataDefinition,
 };
 
-type Edge = { from: NodeId, to: NodeId, type: EdgeType };
+interface Edge { from: NodeId, to: NodeId, type: EdgeType }
 
-export type Graph = { nodes: NodeDefinition[], edges: EdgeDefinition[] };
+export interface Graph { nodes: NodeDefinition[], edges: EdgeDefinition[] }
 
 export function createGraph(state: State): Graph {
     const nodes: (NodeDefinition & { pannable?: boolean })[] = [];

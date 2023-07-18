@@ -138,7 +138,7 @@ export class InstructionParser {
                 //ERROR
                 returnInstruction = new InvalidInstruction(instr + " " + p0);
             } else {
-                returnInstruction = this.parseSignParamInstruction(instr, <SignLabel>signLabel);
+                returnInstruction = this.parseSignParamInstruction(instr, signLabel as SignLabel);
             }
         }
         if (returnInstruction instanceof InvalidInstruction && this.isValidLabel(p0)) {
@@ -167,16 +167,16 @@ export class InstructionParser {
         const input = instr + " " + p0 + " " + p1;
         let returnInstruction: Instruction = new InvalidInstruction(input);
         if (this.isValidSignLabel(p0) && this.isValidLabel(p1)) {
-            const l0 = <SignLabel>labels.find(v => {
+            const l0 = labels.find(v => {
                 return v.text === p0 && v instanceof SignLabel;
-            });
+            }) as SignLabel;
             const l1 = labels.find(v => {
                 return v.text === p1;
             });
             if (!l0 || !l1) {
                 returnInstruction = new InvalidInstruction(input);
             } else {
-                returnInstruction = this.parseSignAndLabelParamInstruction(instr, l0!, l1!);
+                returnInstruction = this.parseSignAndLabelParamInstruction(instr, l0, l1);
             }
         }
         if (this.isValidListConstr(p0) && this.isValidLabel(p1)) {
@@ -188,9 +188,9 @@ export class InstructionParser {
             }
         }
         if (returnInstruction instanceof InvalidInstruction && this.isValidSignLabel(p0) && this.isValidNumber(p1)) {
-            const l0 = <SignLabel>labels.find(v => {
+            const l0 = labels.find(v => {
                 return v.text === p0 && v instanceof SignLabel;
-            });
+            }) as SignLabel;
             if (!l0) {
                 returnInstruction = new InvalidInstruction(input);
             } else {
