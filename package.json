@@ -16,7 +16,7 @@
     "lint:fix": "npm run lint -- --fix"
   },
   "dependencies": {
-    "cytoscape": "^3.26.0",
+    "cytoscape": "^3.27.0",
     "cytoscape-fcose": "^2.2.0",
     "immutable": "^4.3.4",
     "jison": "^0.4.18",
