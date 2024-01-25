@@ -27,7 +27,7 @@
     "react-tooltip": "^4.5.1",
     "typescript": "^5.3.3",
     "usehooks-ts": "^2.9.2",
-    "web-vitals": "^3.5.0"
+    "web-vitals": "^3.5.1"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.2.0",
