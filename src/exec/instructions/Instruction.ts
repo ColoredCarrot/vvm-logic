@@ -120,7 +120,7 @@ export abstract class Instruction {
     public static reset(state: State, x: number, y: number): State {
         let heap = state.heap;
         for (let u = y; x < u; u--) {
-            const resetCell: number = state.trail.get(u)!;
+            const resetCell: number = state.trail.get(u);
             const resetTo: Cell = new VariableCell(resetCell);
 
             heap = heap.set(resetCell, resetTo);
@@ -150,7 +150,7 @@ export abstract class Instruction {
     }
 
     public static deref(state: State, v: number): number {
-        const other: Cell = state.heap.get(v)!;
+        const other: Cell = state.heap.get(v);
 
         if (other instanceof VariableCell && other.value != v) {
             return this.deref(state, other.value);
